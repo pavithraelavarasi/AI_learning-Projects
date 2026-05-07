@@ -35,6 +35,7 @@ body {
   color: var(--ink);
   min-height: 100vh;
   display: flex;
+  justify-content: center;
 }
 
 /* ─── SIDEBAR ─────────────────────────────── */
@@ -129,9 +130,12 @@ body {
 #main {
   margin-left: 220px;
   flex: 1;
+  width: calc(100% - 220px);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  padding: 0 24px;
 }
 
 /* ─── TOPBAR ───────────────────────────────── */
@@ -142,6 +146,7 @@ body {
   border-bottom: 1px solid var(--border);
   height: 52px;
   display: flex; align-items: center;
+  width: min(100%, 836px);
   padding: 0 32px; gap: 12px;
 }
 .tb-tag {
@@ -158,8 +163,9 @@ body {
 .lesson {
   display: none;
   flex: 1;
+  width: min(100%, 836px);
   padding: 48px 48px 80px;
-  max-width: 740px;
+  margin: 0 auto;
   animation: pageIn 0.4s ease both;
 }
 .lesson.active { display: block; }
@@ -437,8 +443,16 @@ body {
 @media (max-width: 700px) {
   #sidebar { transform: translateX(-220px); }
   #sidebar.open { transform: translateX(0); }
-  #main { margin-left: 0; }
-  .lesson { padding: 32px 20px 60px; }
+  #main {
+    margin-left: 0;
+    width: 100%;
+    padding: 0;
+  }
+  #topbar { width: 100%; }
+  .lesson {
+    width: 100%;
+    padding: 32px 20px 60px;
+  }
   .key-points { grid-template-columns: 1fr; }
   #hamburger { display: flex !important; }
 }
