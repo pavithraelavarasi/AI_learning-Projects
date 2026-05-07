@@ -35,7 +35,6 @@ body {
   color: var(--ink);
   min-height: 100vh;
   display: flex;
-  justify-content: center;
 }
 
 /* ─── SIDEBAR ─────────────────────────────── */
@@ -130,12 +129,9 @@ body {
 #main {
   margin-left: 220px;
   flex: 1;
-  width: calc(100% - 220px);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 0 24px;
 }
 
 /* ─── TOPBAR ───────────────────────────────── */
@@ -146,8 +142,9 @@ body {
   border-bottom: 1px solid var(--border);
   height: 52px;
   display: flex; align-items: center;
-  width: min(100%, 836px);
   padding: 0 32px; gap: 12px;
+  width: min(100%, 836px);
+  margin: 0 auto;
 }
 .tb-tag {
   font-family: 'JetBrains Mono', monospace;
@@ -163,8 +160,9 @@ body {
 .lesson {
   display: none;
   flex: 1;
-  width: min(100%, 836px);
   padding: 48px 48px 80px;
+  max-width: 740px;
+  width: 100%;
   margin: 0 auto;
   animation: pageIn 0.4s ease both;
 }
@@ -301,6 +299,59 @@ body {
 .kp-icon { font-size: 20px; margin-bottom: 8px; }
 .kp-label { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
 .kp-text  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* reflection block */
+.reflect-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 22px 18px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow);
+}
+.reflect-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.reflect-kicker {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.reflect-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.reflect-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.reflect-list {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+.reflect-list li {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.reflect-list strong {
+  color: var(--amber);
+  font-weight: 600;
+}
 
 /* interactive demo */
 .interactive { margin-bottom: 28px; }
@@ -443,16 +494,9 @@ body {
 @media (max-width: 700px) {
   #sidebar { transform: translateX(-220px); }
   #sidebar.open { transform: translateX(0); }
-  #main {
-    margin-left: 0;
-    width: 100%;
-    padding: 0;
-  }
+  #main { margin-left: 0; }
   #topbar { width: 100%; }
-  .lesson {
-    width: 100%;
-    padding: 32px 20px 60px;
-  }
+  .lesson { padding: 32px 20px 60px; }
   .key-points { grid-template-columns: 1fr; }
   #hamburger { display: flex !important; }
 }
@@ -584,6 +628,21 @@ body {
       <div class="kp"><div class="kp-icon">🗂️</div><div class="kp-label">Attributes</div><div class="kp-text">Extra info inside a tag: <code>&lt;img src="…"&gt;</code></div></div>
     </div>
 
+    <div class="reflect-block">
+      <div class="reflect-head">
+        <div>
+          <div class="reflect-kicker">Reflect &amp; Discuss</div>
+          <div class="reflect-title">Check your tag instincts</div>
+        </div>
+      </div>
+      <p class="reflect-text">Use these prompts to pause and make sure the structure of the page feels clear before moving on.</p>
+      <ul class="reflect-list">
+        <li><strong>Reflection:</strong> Which tag on a profile card gives meaning to content, and which one mostly acts as a container?</li>
+        <li><strong>Discussion:</strong> Why might you choose a heading tag for a name instead of styling a plain paragraph to look large?</li>
+        <li><strong>Apply it:</strong> If you were building your own card, which three tags would you place first and why?</li>
+      </ul>
+    </div>
+
     <div class="l-nav">
       <span></span>
       <button class="nav-btn next" onclick="go(1)">Images →</button>
@@ -660,6 +719,21 @@ body {
       <div class="kp"><div class="kp-icon">🎨</div><div class="kp-label">class</div><div class="kp-text">Connects your image to a CSS style you define.</div></div>
     </div>
 
+    <div class="reflect-block">
+      <div class="reflect-head">
+        <div>
+          <div class="reflect-kicker">Reflect &amp; Discuss</div>
+          <div class="reflect-title">Think beyond just showing a picture</div>
+        </div>
+      </div>
+      <p class="reflect-text">These questions help connect the image tag to accessibility and real layout choices.</p>
+      <ul class="reflect-list">
+        <li><strong>Reflection:</strong> What job does the <code>alt</code> attribute do, and who benefits from it?</li>
+        <li><strong>Discussion:</strong> When would you control image size with HTML attributes versus CSS classes?</li>
+        <li><strong>Apply it:</strong> Write the kind of <code>alt</code> text you would use for your own avatar on a profile card.</li>
+      </ul>
+    </div>
+
     <div class="l-nav">
       <button class="nav-btn" onclick="go(0)">← Tags</button>
       <button class="nav-btn next" onclick="go(2)">Padding →</button>
@@ -732,6 +806,21 @@ body {
       <div class="kp"><div class="kp-icon">🎨</div><div class="kp-label">Background fills it</div><div class="kp-text">The element's background colour covers the padding area too.</div></div>
       <div class="kp"><div class="kp-icon">📐</div><div class="kp-label">Units</div><div class="kp-text">Use <code>px</code> for fixed, <code>rem</code> for scalable, or <code>%</code> for relative.</div></div>
       <div class="kp"><div class="kp-icon">✍️</div><div class="kp-label">Shorthand</div><div class="kp-text"><code>padding: 16px 24px</code> = top-bottom 16, left-right 24.</div></div>
+    </div>
+
+    <div class="reflect-block">
+      <div class="reflect-head">
+        <div>
+          <div class="reflect-kicker">Reflect &amp; Discuss</div>
+          <div class="reflect-title">Notice how spacing changes comfort</div>
+        </div>
+      </div>
+      <p class="reflect-text">Padding is one of those ideas that clicks when you compare how cramped and comfortable versions feel.</p>
+      <ul class="reflect-list">
+        <li><strong>Reflection:</strong> How did the card feel different when the padding changed from small to large?</li>
+        <li><strong>Discussion:</strong> Why does adding padding usually improve readability, even when the content itself stays the same?</li>
+        <li><strong>Apply it:</strong> For a short profile card, would you choose tighter or roomier padding, and what feeling are you aiming for?</li>
+      </ul>
     </div>
 
     <div class="l-nav">
@@ -832,6 +921,21 @@ body {
     <div class="callout callout-rose">
       <span class="callout-icon">🎯</span>
       <span><strong>Quick rule:</strong> Use <strong>padding</strong> to add space inside a box. Use <strong>margin</strong> to add space between boxes.</span>
+    </div>
+
+    <div class="reflect-block">
+      <div class="reflect-head">
+        <div>
+          <div class="reflect-kicker">Reflect &amp; Discuss</div>
+          <div class="reflect-title">Separate inside space from outside space</div>
+        </div>
+      </div>
+      <p class="reflect-text">This is the key layout distinction learners need before they start building cards on their own.</p>
+      <ul class="reflect-list">
+        <li><strong>Reflection:</strong> In your own words, how is margin different from padding?</li>
+        <li><strong>Discussion:</strong> If two cards on a page feel too close together, would you adjust padding, margin, or both?</li>
+        <li><strong>Apply it:</strong> What part of a profile card would you likely center with <code>margin: 0 auto</code>, and why?</li>
+      </ul>
     </div>
 
     <div class="l-nav">
