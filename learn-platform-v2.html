@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn · HTML & CSS Playground</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #f7f5f2;
+  --surface:  #ffffff;
+  --border:   #e5e0d8;
+  --border2:  #ede9e3;
+  --ink:      #1a1814;
+  --muted:    #8c8479;
+  --dim:      #c4beb6;
+  --amber:    #d97706;
+  --amber-l:  rgba(217,119,6,0.1);
+  --green:    #059669;
+  --green-l:  rgba(5,150,105,0.1);
+  --blue:     #2563eb;
+  --blue-l:   rgba(37,99,235,0.08);
+  --rose:     #e11d48;
+  --rose-l:   rgba(225,29,72,0.08);
+  --editor-bg:#16141200;
+  --sh:       0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
+  --sh-lg:    0 4px 12px rgba(0,0,0,.08), 0 12px 32px rgba(0,0,0,.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ─── SIDEBAR ──────────────────────────────────── */
+#sidebar {
+  width: 210px; flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 60;
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+}
+.sb-brand { padding: 22px 18px 16px; border-bottom: 1px solid var(--border2); }
+.sb-eyebrow { font-size: 9px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; }
+.sb-title { font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--ink); line-height: 1.3; }
+
+.sb-progress { padding: 12px 18px; border-bottom: 1px solid var(--border2); }
+.sb-prog-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 7px; }
+.prog-track { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--amber), #f59e0b); border-radius: 99px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+
+.sb-nav { flex: 1; padding: 10px 0; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 18px; cursor: pointer;
+  border-left: 2px solid transparent;
+  color: var(--muted); font-size: 12.5px;
+  transition: all .18s;
+}
+.nav-item:hover { color: var(--ink); background: rgba(217,119,6,.04); }
+.nav-item.active { color: var(--ink); font-weight: 500; border-left-color: var(--amber); background: var(--amber-l); }
+.nav-item.done { color: var(--green); }
+.nav-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: all .2s; }
+.nav-item.active .nav-dot { background: var(--amber); box-shadow: 0 0 0 3px var(--amber-l); }
+.nav-item.done .nav-dot  { background: var(--green); }
+.nav-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dim); margin-left: auto; }
+
+/* playground nav item */
+.nav-item.pg { border-top: 1px solid var(--border2); margin-top: 8px; padding-top: 12px; }
+.nav-item.pg .nav-dot { background: var(--blue); }
+.nav-item.pg.active { border-left-color: var(--blue); background: var(--blue-l); }
+
+.sb-footer { padding: 14px 18px; border-top: 1px solid var(--border2); font-size: 11px; color: var(--dim); line-height: 1.5; }
+
+/* ─── MAIN ─────────────────────────────────────── */
+#main { margin-left: 210px; flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ─── TOPBAR ───────────────────────────────────── */
+#topbar {
+  background: rgba(247,245,242,.94); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  height: 50px; display: flex; align-items: center;
+  padding: 0 24px; gap: 10px; flex-shrink: 0; z-index: 30;
+}
+.tb-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 3px 9px; border-radius: 4px; }
+.tb-sep { color: var(--dim); }
+.tb-lesson { font-size: 13px; font-weight: 500; color: var(--ink); }
+.tb-mode {
+  margin-left: auto; display: flex; gap: 2px;
+  background: var(--border2); border-radius: 8px; padding: 3px;
+}
+.mode-btn {
+  font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 6px;
+  border: none; background: transparent; color: var(--muted);
+  cursor: pointer; transition: all .18s;
+}
+.mode-btn.on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+/* ─── CONTENT AREA ─────────────────────────────── */
+#content-area { flex: 1; overflow: hidden; display: flex; }
+
+/* ─── LESSON PANEL ─────────────────────────────── */
+#lesson-panel {
+  flex: 1; overflow-y: auto;
+  padding: 40px 40px 80px;
+  transition: all .3s;
+}
+#lesson-panel.split { max-width: 50%; border-right: 1px solid var(--border); }
+
+/* ─── PLAYGROUND PANEL ─────────────────────────── */
+#playground-panel {
+  display: none; flex-direction: column;
+  background: #1a1814;
+  transition: all .3s;
+}
+#playground-panel.visible { display: flex; flex: 1; }
+#lesson-panel.split + #playground-panel.visible { max-width: 50%; }
+
+.pg-topbar {
+  display: flex; align-items: center; gap: 0;
+  border-bottom: 1px solid #2e2a26;
+  flex-shrink: 0;
+}
+.pg-tab {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; padding: 10px 18px;
+  color: #666; cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all .18s; display: flex; align-items: center; gap: 6px;
+}
+.pg-tab.on { color: #e8e0d4; border-bottom-color: var(--amber); }
+.pg-tab:hover { color: #aaa; }
+.pg-tab .dot { width: 6px; height: 6px; border-radius: 50%; }
+.dot-html { background: #e36049; }
+.dot-css  { background: #2965f1; }
+
+.pg-editors { flex: 1; display: flex; overflow: hidden; }
+.pg-editor-wrap { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #2e2a26; overflow: hidden; }
+.pg-editor-wrap:last-child { border-right: none; }
+.pg-editor-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  color: #555; padding: 6px 14px; background: #16141200;
+  letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid #2e2a26; flex-shrink: 0;
+}
+
+/* ─── CODE EDITOR ──────────────────────────────── */
+.code-editor {
+  flex: 1; resize: none; border: none; outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px; line-height: 1.8;
+  background: #1a1814; color: #d4cfca;
+  padding: 16px; tab-size: 2; overflow-y: auto;
+  caret-color: var(--amber);
+}
+.code-editor::selection { background: rgba(217,119,6,.25); }
+.code-editor:focus { outline: none; }
+
+/* ─── PREVIEW AREA ─────────────────────────────── */
+.pg-preview-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.pg-preview-bar {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  color: #555; padding: 6px 14px; background: #16141200;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  border-bottom: 1px solid #2e2a26; flex-shrink: 0;
+  display: flex; align-items: center; gap: 10px;
+}
+.run-btn {
+  margin-left: auto; font-family: 'DM Sans', sans-serif;
+  font-size: 11px; font-weight: 600;
+  padding: 4px 14px; border-radius: 6px;
+  background: var(--amber); color: #fff; border: none;
+  cursor: pointer; transition: all .18s; letter-spacing: .3px;
+}
+.run-btn:hover { background: #b45309; }
+.run-btn:active { transform: scale(.97); }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+#preview-frame {
+  flex: 1; border: none; background: #fff;
+}
+
+/* ─── HINT STRIP ───────────────────────────────── */
+.hint-strip {
+  background: #211f1c; border-top: 1px solid #2e2a26;
+  padding: 8px 16px; font-size: 11px; color: #666;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0; display: flex; align-items: center; gap: 8px;
+}
+.hint-strip span { color: var(--amber); }
+
+/* ─── STANDALONE PLAYGROUND VIEW ──────────────── */
+#standalone-pg { display: none; flex: 1; flex-direction: column; }
+#standalone-pg.visible { display: flex; }
+
+.spg-header { padding: 28px 32px 0; flex-shrink: 0; }
+.spg-title { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--ink); margin-bottom: 6px; }
+.spg-sub { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+
+.spg-challenges { display: flex; gap: 8px; padding: 0 32px; flex-wrap: wrap; flex-shrink: 0; margin-bottom: 0; }
+.challenge-btn {
+  font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+  cursor: pointer; transition: all .18s;
+}
+.challenge-btn:hover { border-color: var(--amber); color: var(--amber); }
+.challenge-btn.on { background: var(--amber); border-color: var(--amber); color: #fff; }
+
+.spg-workspace {
+  flex: 1; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden;
+  margin: 16px 0 0; background: #1a1814; border-top: 1px solid #2e2a26;
+}
+.spg-col { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid #2e2a26; }
+.spg-col:last-child { border-right: none; }
+.spg-col-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-bottom: 1px solid #2e2a26;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #555;
+  letter-spacing: 1px; flex-shrink: 0;
+}
+.spg-col-head .clr { width: 8px; height: 8px; border-radius: 50%; }
+.spg-run { margin-left: auto; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; padding: 4px 14px; border-radius: 5px; background: var(--amber); color: #fff; border: none; cursor: pointer; transition: all .18s; }
+.spg-run:hover { background: #b45309; }
+
+.spg-editor {
+  flex: 1; resize: none; border: none; outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px; line-height: 1.8;
+  background: #1a1814; color: #d4cfca;
+  padding: 16px; tab-size: 2;
+  caret-color: var(--amber);
+}
+.spg-preview { flex: 1; border: none; background: #fff; }
+
+.spg-hints { display: flex; gap: 0; border-top: 1px solid #2e2a26; flex-shrink: 0; }
+.spg-hint {
+  flex: 1; padding: 8px 16px; font-size: 11px; color: #555;
+  font-family: 'JetBrains Mono', monospace; border-right: 1px solid #2e2a26;
+}
+.spg-hint:last-child { border-right: none; }
+.spg-hint span { color: var(--amber); }
+
+/* ─── LESSON STYLES ────────────────────────────── */
+.lesson { display: none; }
+.lesson.active { display: block; }
+@keyframes pageIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.lesson.active { animation: pageIn .35s ease both; }
+
+.l-header { margin-bottom: 32px; }
+.l-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--amber); letter-spacing: 1px; margin-bottom: 10px; }
+.l-title { font-family: 'DM Serif Display', serif; font-size: clamp(26px,3.5vw,38px); line-height: 1.15; color: var(--ink); margin-bottom: 12px; }
+.l-title em { font-style: italic; color: var(--amber); }
+.l-subtitle { font-size: 14px; color: var(--muted); line-height: 1.7; font-weight: 300; max-width: 480px; }
+
+.s-head { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.s-head::after { content:''; flex:1; height:1px; background:var(--border2); }
+.l-text { font-size: 14px; line-height: 1.8; color: var(--ink); font-weight: 300; margin-bottom: 20px; }
+.l-text strong { font-weight: 600; }
+.l-text code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--border2); padding: 2px 6px; border-radius: 4px; color: var(--amber); }
+
+.code-block { background: #1e1c1a; border-radius: 10px; overflow: hidden; margin-bottom: 20px; box-shadow: var(--sh); }
+.code-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid #2e2c28; }
+.code-dot { width: 9px; height: 9px; border-radius: 50%; }
+.cd-r{background:#ff5f57}.cd-y{background:#febc2e}.cd-g{background:#28c840}
+.code-lang { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #555; margin-left: auto; letter-spacing: 1px; }
+.code-body { padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.8; color: #d4d0c8; overflow-x: auto; white-space: pre; }
+.ct{color:#9cdcfe}.ca{color:#ce9178}.cv{color:#98c379}.cc{color:#7ec8e3}.cn{color:#d19a66}.cm{color:#636d83;font-style:italic}
+
+.callout { border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; line-height: 1.7; display: flex; gap: 10px; }
+.callout-amber { background: var(--amber-l); border-left: 3px solid var(--amber); color: #92400e; }
+.callout-green  { background: var(--green-l);  border-left: 3px solid var(--green);  color: #065f46; }
+.callout-blue   { background: var(--blue-l);   border-left: 3px solid var(--blue);   color: #1e3a8a; }
+.callout-rose   { background: var(--rose-l);   border-left: 3px solid var(--rose);   color: #9f1239; }
+.callout-icon { font-size: 16px; flex-shrink: 0; line-height: 1.5; }
+
+.key-points { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.kp { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; transition: all .2s; }
+.kp:hover { border-color: var(--amber); box-shadow: var(--sh-lg); transform: translateY(-1px); }
+.kp-icon { font-size: 18px; margin-bottom: 6px; }
+.kp-label { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+.kp-text  { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* try it block inside lesson */
+.try-it {
+  background: linear-gradient(135deg, #1e1c1a, #221f1c);
+  border: 1px solid #2e2a26;
+  border-radius: 12px; overflow: hidden;
+  margin-bottom: 24px;
+}
+.try-it-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-bottom: 1px solid #2e2a26;
+  background: #16141200;
+}
+.try-it-badge {
+  font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--amber);
+  background: var(--amber-l); padding: 3px 9px; border-radius: 4px;
+}
+.try-it-hint { font-size: 11px; color: #666; font-family: 'JetBrains Mono', monospace; }
+.try-run { margin-left: auto; font-size: 11px; font-weight: 600; padding: 4px 14px; border-radius: 5px; background: var(--amber); color: #fff; border: none; cursor: pointer; transition: all .18s; }
+.try-run:hover { background: #b45309; }
+
+.try-body { display: grid; grid-template-columns: 1fr 1fr; }
+.try-code-area {
+  resize: none; border: none; outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.75;
+  background: #1a1814; color: #d4cfca;
+  padding: 14px; min-height: 140px; tab-size: 2;
+  caret-color: var(--amber);
+  border-right: 1px solid #2e2a26;
+}
+.try-preview { background: #fff; min-height: 140px; }
+
+.l-nav { display: flex; align-items: center; justify-content: space-between; padding-top: 28px; border-top: 1px solid var(--border2); margin-top: 8px; }
+.nav-btn { font-size: 13px; font-weight: 500; padding: 9px 22px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: all .2s; }
+.nav-btn:hover { border-color: var(--ink); color: var(--ink); }
+.nav-btn.next { background: var(--ink); color: #fff; border-color: var(--ink); }
+.nav-btn.next:hover { background: #2d2a26; }
+.nav-btn.pg-btn { background: var(--blue); color: #fff; border-color: var(--blue); }
+.nav-btn.finish { background: var(--green); color: #fff; border-color: var(--green); }
+
+/* tag table */
+.tag-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: var(--surface); border-radius: 10px; overflow: hidden; border: 1px solid var(--border); font-size: 13px; }
+.tag-table th { text-align: left; padding: 10px 14px; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); background: var(--bg); border-bottom: 1px solid var(--border); }
+.tag-table td { padding: 10px 14px; border-bottom: 1px solid var(--border2); vertical-align: middle; }
+.tag-table tr:last-child td { border-bottom: none; }
+.tag-table tr:hover td { background: rgba(217,119,6,.03); }
+.t-code { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--blue); background: var(--blue-l); padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+.t-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+.tb-layout { background: rgba(217,119,6,.1); color: var(--amber); }
+.tb-text   { background: rgba(37,99,235,.08); color: var(--blue); }
+.tb-media  { background: rgba(5,150,105,.1);  color: var(--green); }
+
+/* box model viz */
+.box-model-viz {
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  padding: 20px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 20px;
+}
+.bm-layer {
+  width: 100%; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  position: relative; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+}
+.bm-margin  { background: #fef3c7; color: #92400e; border: 2px dashed #f59e0b; }
+.bm-border  { background: #fff7ed; color: #c2410c; border: 2px solid #fb923c; margin: 10px; }
+.bm-padding { background: #ecfdf5; color: #065f46; border: 2px dashed #34d399; margin: 10px; }
+.bm-content { background: #eff6ff; color: #1e40af; border: 2px solid #60a5fa; margin: 10px; padding: 12px 24px; white-space: nowrap; }
+
+/* responsive */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-210px); }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  #lesson-panel.split { max-width: 100%; border-right: none; }
+  #lesson-panel.split + #playground-panel.visible { display: none; }
+  .key-points { grid-template-columns: 1fr; }
+  .try-body { grid-template-columns: 1fr; }
+  .try-preview { min-height: 100px; }
+  .spg-workspace { grid-template-columns: 1fr; }
+  #hamburger { display: flex !important; }
+}
+
+#hamburger { display: none; width: 34px; height: 34px; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
+#hamburger span { display: block; width: 14px; height: 1.5px; background: var(--ink); border-radius: 2px; }
+#overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.2); z-index: 55; }
+#overlay.on { display: block; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ─── SIDEBAR ──────────────────────────────────── -->
+<nav id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-eyebrow">Profile Card · Course</div>
+    <div class="sb-title">HTML & CSS Basics</div>
+  </div>
+  <div class="sb-progress">
+    <div class="sb-prog-row"><span>Progress</span><span id="pct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="progfill"></div></div>
+  </div>
+  <div class="sb-nav" id="sb-nav"></div>
+  <div class="sb-footer">4 lessons · 1 playground · ~20 min</div>
+</nav>
+
+<!-- ─── MAIN ──────────────────────────────────────── -->
+<div id="main">
+
+  <!-- Topbar -->
+  <div id="topbar">
+    <div id="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
+    <span class="tb-tag" id="tb-tag">01</span>
+    <span class="tb-sep">›</span>
+    <span class="tb-lesson" id="tb-lesson">HTML Tags</span>
+    <div class="tb-mode" id="tb-mode" style="display:none">
+      <button class="mode-btn on" id="mode-learn" onclick="setMode('learn')">Learn</button>
+      <button class="mode-btn"    id="mode-split" onclick="setMode('split')">Split</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div id="content-area">
+
+    <!-- ── LESSON PANEL ── -->
+    <div id="lesson-panel">
+
+      <!-- ════════════════════════════ LESSON 1 — TAGS -->
+      <div class="lesson active" id="l-0">
+        <div class="l-header">
+          <div class="l-num">Lesson 01 / 04</div>
+          <div class="l-title">HTML <em>Tags</em></div>
+          <div class="l-subtitle">Tags are the building blocks of every web page. They tell the browser what kind of content to show.</div>
+        </div>
+
+        <div class="s-head">What is a tag?</div>
+        <p class="l-text">An HTML tag is a keyword in angle brackets: <code>&lt;tagname&gt;</code>. Most come in pairs — an opening and closing tag. The content sits between them. Tags don't make things <em>look good</em> — they give content <strong>meaning</strong>.</p>
+
+        <div class="code-block">
+          <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">HTML</span></div>
+          <div class="code-body"><span class="ct">&lt;h1&gt;</span>Your Name<span class="ct">&lt;/h1&gt;</span>           <span class="cm">← big heading</span>
+<span class="ct">&lt;p&gt;</span>Short bio note here.<span class="ct">&lt;/p&gt;</span>    <span class="cm">← paragraph</span>
+<span class="ct">&lt;img</span> <span class="ca">src=</span><span class="cv">"photo.jpg"</span><span class="ct">&gt;</span>          <span class="cm">← self-closing, no /</span>
+<span class="ct">&lt;div&gt;</span>
+  <span class="ct">&lt;p&gt;</span>I wrap other tags.<span class="ct">&lt;/p&gt;</span>     <span class="cm">← nesting</span>
+<span class="ct">&lt;/div&gt;</span></div>
+        </div>
+
+        <div class="s-head">Tags for a profile card</div>
+        <table class="tag-table">
+          <tr><th>Tag</th><th>Purpose</th><th>Type</th></tr>
+          <tr><td><span class="t-code">&lt;div&gt;</span></td><td>Box / container that groups elements</td><td><span class="t-badge tb-layout">Layout</span></td></tr>
+          <tr><td><span class="t-code">&lt;h1&gt; – &lt;h3&gt;</span></td><td>Your name, your title</td><td><span class="t-badge tb-text">Text</span></td></tr>
+          <tr><td><span class="t-code">&lt;p&gt;</span></td><td>Your short bio note</td><td><span class="t-badge tb-text">Text</span></td></tr>
+          <tr><td><span class="t-code">&lt;img&gt;</span></td><td>Your photo or avatar</td><td><span class="t-badge tb-media">Media</span></td></tr>
+          <tr><td><span class="t-code">&lt;span&gt;</span></td><td>Inline text styled differently</td><td><span class="t-badge tb-text">Text</span></td></tr>
+        </table>
+
+        <div class="s-head">Try it — edit the card structure</div>
+        <div class="try-it">
+          <div class="try-it-head">
+            <span class="try-it-badge">▶ Try It</span>
+            <span class="try-it-hint">Edit the HTML on the left → see it live on the right</span>
+            <button class="try-run" onclick="runTry('try-0')">Run ▶</button>
+          </div>
+          <div class="try-body">
+            <textarea class="try-code-area" id="try-0-code" spellcheck="false">&lt;div style="font-family:sans-serif; padding:20px"&gt;
+
+  &lt;h2&gt;Your Name Here&lt;/h2&gt;
+  &lt;p&gt;Product Designer&lt;/p&gt;
+  &lt;p&gt;I build things that feel simple.&lt;/p&gt;
+
+&lt;/div&gt;</textarea>
+            <iframe class="try-preview" id="try-0-preview"></iframe>
+          </div>
+        </div>
+
+        <div class="callout callout-amber">
+          <span class="callout-icon">💡</span>
+          <span>Tags only define <strong>structure</strong>. The visual styling (colours, fonts, spacing) comes from CSS in lessons 3 & 4.</span>
+        </div>
+
+        <div class="l-nav">
+          <span></span>
+          <button class="nav-btn next" onclick="go(1)">Images →</button>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════ LESSON 2 — IMAGES -->
+      <div class="lesson" id="l-1">
+        <div class="l-header">
+          <div class="l-num">Lesson 02 / 04</div>
+          <div class="l-title">HTML <em>Images</em></div>
+          <div class="l-subtitle">The <code>&lt;img&gt;</code> tag displays your photo or avatar. It's self-closing and controlled via attributes.</div>
+        </div>
+
+        <div class="s-head">The img tag</div>
+        <p class="l-text"><code>&lt;img&gt;</code> has no closing tag — it's <strong>self-closing</strong>. You describe the image through <strong>attributes</strong>. The two essential ones are <code>src</code> (where the image is) and <code>alt</code> (a text description for accessibility).</p>
+
+        <div class="code-block">
+          <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">HTML</span></div>
+          <div class="code-body"><span class="cm">/* Minimum required */</span>
+<span class="ct">&lt;img</span> <span class="ca">src=</span><span class="cv">"photo.jpg"</span> <span class="ca">alt=</span><span class="cv">"My photo"</span><span class="ct">&gt;</span>
+
+<span class="cm">/* With size */</span>
+<span class="ct">&lt;img</span> <span class="ca">src=</span><span class="cv">"photo.jpg"</span>
+     <span class="ca">alt=</span><span class="cv">"My photo"</span>
+     <span class="ca">width=</span><span class="cv">"80"</span> <span class="ca">height=</span><span class="cv">"80"</span><span class="ct">&gt;</span>
+
+<span class="cm">/* Circular avatar with CSS */</span>
+<span class="ct">&lt;img</span> <span class="ca">src=</span><span class="cv">"photo.jpg"</span> <span class="ca">alt=</span><span class="cv">"Avatar"</span>
+     <span class="ca">style=</span><span class="cv">"width:80px; height:80px;
+            border-radius:50%;
+            object-fit:cover"</span><span class="ct">&gt;</span></div>
+        </div>
+
+        <div class="key-points">
+          <div class="kp"><div class="kp-icon">🔗</div><div class="kp-label">src</div><div class="kp-text">URL or file path. Can be a link from the web too.</div></div>
+          <div class="kp"><div class="kp-icon">🏷️</div><div class="kp-label">alt</div><div class="kp-text">Text shown if image fails. Always include it.</div></div>
+          <div class="kp"><div class="kp-icon">📐</div><div class="kp-label">width / height</div><div class="kp-text">Size in pixels. Or use CSS for more control.</div></div>
+          <div class="kp"><div class="kp-icon">⭕</div><div class="kp-label">border-radius: 50%</div><div class="kp-text">Makes any image a perfect circle in CSS.</div></div>
+        </div>
+
+        <div class="s-head">Try it — make a circular avatar</div>
+        <div class="try-it">
+          <div class="try-it-head">
+            <span class="try-it-badge">▶ Try It</span>
+            <span class="try-it-hint">Change the border-radius value and see the shape change</span>
+            <button class="try-run" onclick="runTry('try-1')">Run ▶</button>
+          </div>
+          <div class="try-body">
+            <textarea class="try-code-area" id="try-1-code" spellcheck="false">&lt;div style="padding:20px; font-family:sans-serif"&gt;
+
+  &lt;img
+    src="https://i.pravatar.cc/120"
+    alt="Avatar"
+    style="
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+    "
+  &gt;
+
+  &lt;p style="margin-top:12px"&gt;
+    Try changing border-radius to 0 or 10px!
+  &lt;/p&gt;
+
+&lt;/div&gt;</textarea>
+            <iframe class="try-preview" id="try-1-preview"></iframe>
+          </div>
+        </div>
+
+        <div class="callout callout-blue">
+          <span class="callout-icon">🔵</span>
+          <span>You can use any image URL from the web as the <code>src</code>. Try replacing the URL with a different one!</span>
+        </div>
+
+        <div class="l-nav">
+          <button class="nav-btn" onclick="go(0)">← Tags</button>
+          <button class="nav-btn next" onclick="go(2)">Padding →</button>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════ LESSON 3 — PADDING -->
+      <div class="lesson" id="l-2">
+        <div class="l-header">
+          <div class="l-num">Lesson 03 / 04</div>
+          <div class="l-title">CSS <em>Padding</em></div>
+          <div class="l-subtitle">Padding is the space <em>inside</em> an element — between the content and the element's edges.</div>
+        </div>
+
+        <div class="s-head">The cushion inside</div>
+        <p class="l-text">Imagine a profile card with no padding. The text would be jammed against the edges. Padding is the <strong>breathing room inside the box</strong>. The element's background colour fills the padding area too.</p>
+
+        <div class="code-block">
+          <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">CSS</span></div>
+          <div class="code-body"><span class="cc">.card</span> { <span class="cc">padding</span>: <span class="cn">24px</span>; }          <span class="cm">/* all 4 sides */</span>
+<span class="cc">.card</span> { <span class="cc">padding</span>: <span class="cn">16px 24px</span>; }     <span class="cm">/* top/bottom  left/right */</span>
+<span class="cc">.card</span> { <span class="cc">padding-top</span>: <span class="cn">20px</span>;
+         <span class="cc">padding-right</span>: <span class="cn">24px</span>;
+         <span class="cc">padding-bottom</span>: <span class="cn">20px</span>;
+         <span class="cc">padding-left</span>: <span class="cn">24px</span>; }  <span class="cm">/* individual */</span></div>
+        </div>
+
+        <div class="s-head">Try it — adjust the padding</div>
+        <div class="try-it">
+          <div class="try-it-head">
+            <span class="try-it-badge">▶ Try It</span>
+            <span class="try-it-hint">Change the padding value and watch the card breathe</span>
+            <button class="try-run" onclick="runTry('try-2')">Run ▶</button>
+          </div>
+          <div class="try-body">
+            <textarea class="try-code-area" id="try-2-code" spellcheck="false">&lt;style&gt;
+  .card {
+    background: #fff;
+    border: 2px solid #e5e0d8;
+    border-radius: 12px;
+    padding: 32px;        /* ← change me! */
+    font-family: sans-serif;
+    max-width: 280px;
+    margin: 16px;
+  }
+  h3 { margin: 0 0 4px; }
+  p  { margin: 0; color: #888; font-size: 14px; }
+&lt;/style&gt;
+
+&lt;div class="card"&gt;
+  &lt;h3&gt;Arjun K&lt;/h3&gt;
+  &lt;p&gt;Product Designer&lt;/p&gt;
+&lt;/div&gt;</textarea>
+            <iframe class="try-preview" id="try-2-preview"></iframe>
+          </div>
+        </div>
+
+        <div class="callout callout-amber">
+          <span class="callout-icon">💡</span>
+          <span>Try <code>padding: 4px</code> vs <code>padding: 40px</code>. Notice how larger padding makes the card feel more <strong>open and premium</strong>.</span>
+        </div>
+
+        <div class="l-nav">
+          <button class="nav-btn" onclick="go(1)">← Images</button>
+          <button class="nav-btn next" onclick="go(3)">Margin →</button>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════ LESSON 4 — MARGIN -->
+      <div class="lesson" id="l-3">
+        <div class="l-header">
+          <div class="l-num">Lesson 04 / 04</div>
+          <div class="l-title">CSS <em>Margin</em></div>
+          <div class="l-subtitle">Margin is the space <em>outside</em> an element — the gap between it and its neighbours.</div>
+        </div>
+
+        <div class="s-head">Space outside the box</div>
+        <p class="l-text">If padding is the cushion <strong>inside</strong> the box, margin is the <strong>empty space around the outside</strong>. It pushes other elements away. The background colour does NOT fill margin — it's completely transparent space.</p>
+
+        <div class="box-model-viz">
+          <div class="bm-layer bm-margin">MARGIN — outside space
+            <div class="bm-layer bm-border">BORDER
+              <div class="bm-layer bm-padding">PADDING — inside space
+                <div class="bm-layer bm-content">Content</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">CSS</span></div>
+          <div class="code-body"><span class="cc">.card</span> { <span class="cc">margin</span>: <span class="cn">32px</span>; }        <span class="cm">/* all sides */</span>
+<span class="cc">.card</span> { <span class="cc">margin</span>: <span class="cn">0 auto</span>; }      <span class="cm">/* centre horizontally ← very useful! */</span>
+<span class="cc">.name</span> { <span class="cc">margin-bottom</span>: <span class="cn">8px</span>; }  <span class="cm">/* space below the name */</span>
+<span class="cc">.bio</span>  { <span class="cc">margin-top</span>: <span class="cn">12px</span>; }   <span class="cm">/* space above bio */</span></div>
+        </div>
+
+        <div class="s-head">Try it — space between elements</div>
+        <div class="try-it">
+          <div class="try-it-head">
+            <span class="try-it-badge">▶ Try It</span>
+            <span class="try-it-hint">Change margin values — try 0, 8px, 32px</span>
+            <button class="try-run" onclick="runTry('try-3')">Run ▶</button>
+          </div>
+          <div class="try-body">
+            <textarea class="try-code-area" id="try-3-code" spellcheck="false">&lt;style&gt;
+  body { background: #f0ede8; }
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    font-family: sans-serif;
+    max-width: 260px;
+    margin: 24px auto;  /* ← change me! */
+    border: 1px solid #e5e0d8;
+  }
+  h3 { margin: 0 0 8px; }   /* ← and me! */
+  p  { margin: 0; color: #888; font-size: 14px; }
+  .role {
+    color: #d97706;
+    font-size: 12px;
+    margin-bottom: 10px; /* ← and me! */
+  }
+&lt;/style&gt;
+
+&lt;div class="card"&gt;
+  &lt;h3&gt;Arjun K&lt;/h3&gt;
+  &lt;p class="role"&gt;Product Designer&lt;/p&gt;
+  &lt;p&gt;I build things that feel simple.&lt;/p&gt;
+&lt;/div&gt;</textarea>
+            <iframe class="try-preview" id="try-3-preview"></iframe>
+          </div>
+        </div>
+
+        <div class="callout callout-rose">
+          <span class="callout-icon">🎯</span>
+          <span><strong>The rule:</strong> <code>padding</code> = space <em>inside</em> the box. <code>margin</code> = space <em>outside</em> between boxes.</span>
+        </div>
+
+        <div class="l-nav">
+          <button class="nav-btn" onclick="go(2)">← Padding</button>
+          <button class="nav-btn pg-btn" onclick="go(4)">Playground →</button>
+        </div>
+      </div>
+
+    </div><!-- end lesson-panel -->
+
+    <!-- ── PLAYGROUND PANEL (split mode) ── -->
+    <div id="playground-panel">
+      <div class="pg-topbar">
+        <div class="pg-tab on" id="pgt-html" onclick="switchPgTab('html')"><span class="dot dot-html"></span>HTML</div>
+        <div class="pg-tab"    id="pgt-css"  onclick="switchPgTab('css')"><span class="dot dot-css"></span>CSS</div>
+      </div>
+      <div class="pg-editors">
+        <div class="pg-editor-wrap" id="pge-html">
+          <div class="pg-editor-label">index.html</div>
+          <textarea class="code-editor" id="split-html" spellcheck="false"></textarea>
+        </div>
+        <div class="pg-editor-wrap" id="pge-css" style="display:none">
+          <div class="pg-editor-label">style.css</div>
+          <textarea class="code-editor" id="split-css" spellcheck="false"></textarea>
+        </div>
+        <div class="pg-preview-wrap">
+          <div class="pg-preview-bar">
+            <span class="live-dot"></span> Preview
+            <button class="run-btn" onclick="runSplit()">Run ▶</button>
+          </div>
+          <iframe id="split-frame"></iframe>
+        </div>
+      </div>
+      <div class="hint-strip">⌨ <span>Tip:</span> Edit code → click Run to refresh preview</div>
+    </div>
+
+    <!-- ══ STANDALONE PLAYGROUND ═════════════════════ -->
+    <div id="standalone-pg">
+      <div class="spg-header">
+        <div class="spg-title">🧪 Playground</div>
+        <div class="spg-sub">Write real HTML & CSS. Build your profile card from scratch.</div>
+        <div class="spg-challenges">
+          <button class="challenge-btn on" id="ch-0" onclick="loadChallenge(0)">Blank</button>
+          <button class="challenge-btn"    id="ch-1" onclick="loadChallenge(1)">Starter Card</button>
+          <button class="challenge-btn"    id="ch-2" onclick="loadChallenge(2)">Add an Avatar</button>
+          <button class="challenge-btn"    id="ch-3" onclick="loadChallenge(3)">Style with CSS</button>
+          <button class="challenge-btn"    id="ch-4" onclick="loadChallenge(4)">Full Card</button>
+        </div>
+      </div>
+      <div class="spg-workspace">
+        <div class="spg-col">
+          <div class="spg-col-head">
+            <span class="clr" style="background:#e36049"></span> HTML
+            <span style="margin-left:12px;color:#444">style.css embedded via &lt;style&gt;</span>
+            <button class="spg-run" onclick="runPlayground()">Run ▶</button>
+          </div>
+          <textarea class="spg-editor" id="pg-editor" spellcheck="false"></textarea>
+        </div>
+        <div class="spg-col">
+          <div class="spg-col-head"><span class="clr" style="background:#28c840"></span> Live Preview</div>
+          <iframe class="spg-preview" id="pg-preview"></iframe>
+        </div>
+      </div>
+      <div class="spg-hints">
+        <div class="spg-hint"><span>Tags:</span> &lt;div&gt; &lt;h1&gt; &lt;p&gt; &lt;img&gt;</div>
+        <div class="spg-hint"><span>Spacing:</span> padding · margin</div>
+        <div class="spg-hint"><span>Avatar:</span> border-radius: 50%</div>
+        <div class="spg-hint"><span>Tip:</span> Click Run after editing</div>
+      </div>
+    </div>
+
+  </div><!-- end content-area -->
+</div><!-- end #main -->
+
+<script>
+/* ─── DATA ─────────────────────────────────────── */
+const lessons = [
+  { title: "HTML Tags",    short: "Tags",    pg: false },
+  { title: "HTML Images",  short: "Images",  pg: false },
+  { title: "CSS Padding",  short: "Padding", pg: false },
+  { title: "CSS Margin",   short: "Margin",  pg: false },
+  { title: "Playground",   short: "Play",    pg: true  },
+];
+
+const challenges = [
+  {
+    label: "Blank",
+    code: `<!-- Start from scratch! -->
+<!-- Try typing an h1, p, and div -->`
+  },
+  {
+    label: "Starter Card",
+    code: `<div style="
+  font-family: sans-serif;
+  background: white;
+  border: 1px solid #e5e0d8;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 300px;
+  margin: 20px;
+">
+
+  <h2>Your Name</h2>
+  <p>Your Role</p>
+  <p>A short note about you.</p>
+
+</div>`
+  },
+  {
+    label: "Add Avatar",
+    code: `<div style="
+  font-family: sans-serif;
+  background: white;
+  border: 1px solid #e5e0d8;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 300px;
+  margin: 20px;
+">
+
+  <img
+    src="https://i.pravatar.cc/100"
+    alt="My photo"
+    style="
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+    "
+  >
+
+  <h2 style="margin: 14px 0 4px">Your Name</h2>
+  <p style="color: #d97706; margin: 0 0 10px">Your Role</p>
+  <p style="color: #888; margin: 0; font-size: 14px">
+    A short note about you.
+  </p>
+
+</div>`
+  },
+  {
+    label: "Style with CSS",
+    code: `<style>
+  .card {
+    font-family: sans-serif;
+    background: white;
+    border: 1px solid #e5e0d8;
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 300px;
+    margin: 20px auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+  .avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .name {
+    font-size: 22px;
+    margin: 14px 0 4px;
+  }
+  .role {
+    color: #d97706;
+    font-size: 13px;
+    margin: 0 0 12px;
+  }
+  .bio {
+    color: #888;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+  }
+</style>
+
+<div class="card">
+  <img class="avatar"
+    src="https://i.pravatar.cc/100"
+    alt="Avatar">
+  <h2 class="name">Your Name</h2>
+  <p class="role">Your Role</p>
+  <p class="bio">A short note about who you are and what you love doing.</p>
+</div>`
+  },
+  {
+    label: "Full Card",
+    code: `<style>
+  body { background: #f7f5f2; }
+  .card {
+    font-family: 'Segoe UI', sans-serif;
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 320px;
+    margin: 32px auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    border-top: 4px solid #d97706;
+  }
+  .top { display: flex; align-items: center; gap: 16px; }
+  .avatar {
+    width: 68px; height: 68px;
+    border-radius: 50%; object-fit: cover;
+    border: 3px solid #fef3c7;
+  }
+  .name { font-size: 20px; font-weight: 700; margin: 0 0 3px; }
+  .role {
+    font-size: 12px; color: #d97706;
+    font-weight: 600; letter-spacing: 0.5px; margin: 0;
+  }
+  .divider {
+    height: 1px; background: #f0ece6;
+    margin: 20px 0;
+  }
+  .bio {
+    font-size: 14px; color: #6b6560;
+    line-height: 1.7; margin: 0 0 16px;
+  }
+  .tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tag {
+    font-size: 11px; font-weight: 500;
+    padding: 4px 12px; border-radius: 99px;
+    background: #fef3c7; color: #92400e;
+  }
+</style>
+
+<div class="card">
+  <div class="top">
+    <img class="avatar"
+      src="https://i.pravatar.cc/120?img=12"
+      alt="Photo">
+    <div>
+      <p class="name">Arjun Kumar</p>
+      <p class="role">Product Designer</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <p class="bio">
+    I build tools that make complex
+    ideas feel simple. Currently
+    exploring what good onboarding
+    looks like.
+  </p>
+  <div class="tags">
+    <span class="tag">UX Design</span>
+    <span class="tag">EdTech</span>
+    <span class="tag">Chennai</span>
+  </div>
+</div>`
+  }
+];
+
+/* ─── STATE ────────────────────────────────────── */
+let current = 0;
+let done = new Set();
+let pgMode = 'learn'; // learn | split
+
+/* ─── BUILD SIDEBAR ────────────────────────────── */
+const navEl = document.getElementById('sb-nav');
+lessons.forEach((l, i) => {
+  const el = document.createElement('div');
+  el.className = 'nav-item' + (i === 0 ? ' active' : '') + (l.pg ? ' pg' : '');
+  el.id = 'ni-' + i;
+  el.innerHTML = `<div class="nav-dot"></div><span>${l.title}</span><span class="nav-num">0${i+1}</span>`;
+  el.onclick = () => go(i);
+  navEl.appendChild(el);
+});
+
+/* ─── NAVIGATION ───────────────────────────────── */
+function go(idx) {
+  done.add(current);
+
+  // hide current
+  if (current < 4) { document.getElementById('l-' + current).classList.remove('active'); }
+  else { document.getElementById('standalone-pg').classList.remove('visible'); }
+
+  // deactivate split if switching away from lesson
+  if (idx === 4) {
+    document.getElementById('lesson-panel').style.display = 'none';
+    document.getElementById('playground-panel').style.display = 'none';
+    document.getElementById('standalone-pg').classList.add('visible');
+    document.getElementById('tb-mode').style.display = 'none';
+    loadChallenge(0);
+  } else {
+    document.getElementById('standalone-pg').classList.remove('visible');
+    document.getElementById('lesson-panel').style.display = '';
+    document.getElementById('l-' + idx).classList.add('active');
+    document.getElementById('tb-mode').style.display = '';
+
+    if (pgMode === 'split') {
+      document.getElementById('lesson-panel').classList.add('split');
+      document.getElementById('playground-panel').classList.add('visible');
+      document.getElementById('playground-panel').style.display = '';
+      syncSplitFromLesson(idx);
+    } else {
+      document.getElementById('playground-panel').style.display = 'none';
+      document.getElementById('playground-panel').classList.remove('visible');
+      document.getElementById('lesson-panel').classList.remove('split');
+    }
+  }
+
+  // update nav
+  document.querySelectorAll('.nav-item').forEach((el, i) => {
+    el.classList.remove('active', 'done');
+    if (i === idx) el.classList.add('active');
+    else if (done.has(i)) el.classList.add('done');
+  });
+
+  current = idx;
+  document.getElementById('tb-tag').textContent = '0' + (idx + 1);
+  document.getElementById('tb-lesson').textContent = lessons[idx].title;
+
+  const pct = Math.round((done.size / lessons.length) * 100);
+  document.getElementById('progfill').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('lesson-panel').scrollTop = 0;
+  closeSidebar();
+
+  // auto-run try-it for lesson
+  setTimeout(() => {
+    if (idx < 4) runTry('try-' + idx);
+  }, 100);
+}
+
+/* ─── TRY-IT RUNNER ────────────────────────────── */
+function runTry(id) {
+  const code = document.getElementById(id + '-code').value;
+  const frame = document.getElementById(id + '-preview');
+  const doc = frame.contentDocument || frame.contentWindow.document;
+  doc.open(); doc.write(code); doc.close();
+}
+
+// auto-run all try-its on load
+window.addEventListener('load', () => {
+  runTry('try-0');
+  runTry('try-1');
+  runTry('try-2');
+  runTry('try-3');
+});
+
+// run on Ctrl+Enter
+document.querySelectorAll('.try-code-area').forEach((ta, i) => {
+  ta.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault(); runTry('try-' + i);
+    }
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ta.selectionStart, end = ta.selectionEnd;
+      ta.value = ta.value.substring(0, s) + '  ' + ta.value.substring(end);
+      ta.selectionStart = ta.selectionEnd = s + 2;
+    }
+  });
+});
+
+/* ─── SPLIT MODE ───────────────────────────────── */
+const splitHTMLDefaults = [
+  `<h2>Your Name</h2>\n<p>Product Designer</p>\n<p>I build things that feel simple.</p>`,
+  `<img src="https://i.pravatar.cc/100" alt="Avatar" class="avatar">\n<h2>Your Name</h2>\n<p class="role">Product Designer</p>`,
+  `<div class="card">\n  <h2>Your Name</h2>\n  <p class="role">Designer</p>\n  <p>A short bio here.</p>\n</div>`,
+  `<div class="card">\n  <h2>Your Name</h2>\n  <p class="role">Designer</p>\n  <p>Bio note here.</p>\n</div>`,
+];
+const splitCSSDefaults = [
+  `body { font-family: sans-serif; padding: 16px; }`,
+  `body { font-family: sans-serif; padding: 16px; }\n.avatar { width:80px; height:80px; border-radius:50%; object-fit:cover; }\n.role { color:#d97706; }`,
+  `body { font-family: sans-serif; background:#f7f5f2; }\n.card {\n  background: white;\n  border-radius: 12px;\n  padding: 24px;     /* ← padding! */\n  border: 1px solid #e5e0d8;\n  max-width: 280px;\n  margin: 20px;\n}`,
+  `body { font-family: sans-serif; background:#f7f5f2; }\n.card {\n  background: white;\n  border-radius: 12px;\n  padding: 24px;\n  border: 1px solid #e5e0d8;\n  max-width: 280px;\n  margin: 24px auto;  /* ← margin! */\n}\n.role { color:#d97706; font-size:13px; margin-bottom:10px; }`,
+];
+
+function syncSplitFromLesson(idx) {
+  if (idx >= 4) return;
+  const tryCode = document.getElementById('try-' + idx + '-code').value;
+  document.getElementById('split-html').value = tryCode;
+  document.getElementById('split-css').value = '';
+  runSplit();
+}
+
+function setMode(m) {
+  pgMode = m;
+  document.getElementById('mode-learn').classList.toggle('on', m === 'learn');
+  document.getElementById('mode-split').classList.toggle('on', m === 'split');
+
+  if (m === 'split') {
+    document.getElementById('lesson-panel').classList.add('split');
+    document.getElementById('playground-panel').classList.add('visible');
+    document.getElementById('playground-panel').style.display = '';
+    syncSplitFromLesson(current);
+  } else {
+    document.getElementById('lesson-panel').classList.remove('split');
+    document.getElementById('playground-panel').style.display = 'none';
+    document.getElementById('playground-panel').classList.remove('visible');
+  }
+}
+
+function runSplit() {
+  const html = document.getElementById('split-html').value;
+  const css  = document.getElementById('split-css').value;
+  const full = `<style>${css}</style>${html}`;
+  const frame = document.getElementById('split-frame');
+  const doc = frame.contentDocument || frame.contentWindow.document;
+  doc.open(); doc.write(full); doc.close();
+}
+
+function switchPgTab(tab) {
+  document.getElementById('pge-html').style.display = tab === 'html' ? '' : 'none';
+  document.getElementById('pge-css').style.display  = tab === 'css'  ? '' : 'none';
+  document.getElementById('pgt-html').classList.toggle('on', tab === 'html');
+  document.getElementById('pgt-css').classList.toggle('on', tab === 'css');
+}
+
+document.getElementById('split-html').addEventListener('keydown', tabHandler);
+document.getElementById('split-css').addEventListener('keydown', tabHandler);
+document.getElementById('split-html').addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runSplit();} });
+document.getElementById('split-css').addEventListener('keydown',  e => { if ((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runSplit();} });
+
+/* ─── STANDALONE PLAYGROUND ────────────────────── */
+function loadChallenge(idx) {
+  document.querySelectorAll('.challenge-btn').forEach((b,i) => b.classList.toggle('on', i===idx));
+  document.getElementById('pg-editor').value = challenges[idx].code;
+  runPlayground();
+}
+
+function runPlayground() {
+  const code = document.getElementById('pg-editor').value;
+  const frame = document.getElementById('pg-preview');
+  const doc = frame.contentDocument || frame.contentWindow.document;
+  doc.open(); doc.write(code); doc.close();
+}
+
+document.getElementById('pg-editor').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runPlayground(); }
+  tabHandler(e);
+});
+
+function tabHandler(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const ta = e.target, s = ta.selectionStart, end = ta.selectionEnd;
+    ta.value = ta.value.substring(0, s) + '  ' + ta.value.substring(end);
+    ta.selectionStart = ta.selectionEnd = s + 2;
+  }
+}
+
+/* ─── SIDEBAR ───────────────────────────────────── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('on');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('on');
+}
+</script>
+</body>
+</html>
