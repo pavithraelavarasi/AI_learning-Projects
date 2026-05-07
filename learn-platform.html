@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn · HTML & CSS Basics</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #f7f5f2;
+  --surface: #ffffff;
+  --border:  #e5e0d8;
+  --border2: #ede9e3;
+  --ink:     #1a1814;
+  --muted:   #8c8479;
+  --dim:     #c4beb6;
+  --amber:   #d97706;
+  --amber-l: rgba(217,119,6,0.1);
+  --green:   #059669;
+  --green-l: rgba(5,150,105,0.1);
+  --blue:    #2563eb;
+  --blue-l:  rgba(37,99,235,0.08);
+  --rose:    #e11d48;
+  --rose-l:  rgba(225,29,72,0.08);
+  --shadow:  0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ─── SIDEBAR ─────────────────────────────── */
+#sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 50;
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+}
+
+.sb-brand {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border2);
+}
+.sb-eyebrow {
+  font-size: 9px; font-weight: 600; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--amber);
+  margin-bottom: 6px;
+}
+.sb-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px; color: var(--ink); line-height: 1.3;
+}
+
+.sb-progress {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border2);
+}
+.sb-prog-row {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--muted); margin-bottom: 8px;
+}
+.prog-track {
+  height: 3px; background: var(--border);
+  border-radius: 99px; overflow: hidden;
+}
+.prog-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--amber), #f59e0b);
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+}
+
+.sb-nav { flex: 1; padding: 12px 0; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 20px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  color: var(--muted); font-size: 13px; font-weight: 400;
+  transition: all 0.18s;
+  position: relative;
+}
+.nav-item:hover { color: var(--ink); background: rgba(217,119,6,0.04); }
+.nav-item.active {
+  color: var(--ink); font-weight: 500;
+  border-left-color: var(--amber);
+  background: var(--amber-l);
+}
+.nav-item.done { color: var(--green); }
+.nav-item.done .nav-dot { background: var(--green); }
+
+.nav-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border); flex-shrink: 0;
+  transition: all 0.2s;
+}
+.nav-item.active .nav-dot { background: var(--amber); box-shadow: 0 0 0 3px var(--amber-l); }
+.nav-item.done  .nav-dot { background: var(--green); }
+
+.nav-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--dim);
+  margin-left: auto;
+}
+
+.sb-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border2);
+  font-size: 11px; color: var(--dim);
+  line-height: 1.5;
+}
+
+/* ─── MAIN ─────────────────────────────────── */
+#main {
+  margin-left: 220px;
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── TOPBAR ───────────────────────────────── */
+#topbar {
+  position: sticky; top: 0; z-index: 40;
+  background: rgba(247,245,242,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  height: 52px;
+  display: flex; align-items: center;
+  padding: 0 32px; gap: 12px;
+}
+.tb-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 3px 10px; border-radius: 4px;
+}
+.tb-sep { color: var(--dim); font-size: 12px; }
+.tb-lesson { font-size: 13px; font-weight: 500; color: var(--ink); }
+
+/* ─── LESSON PAGES ─────────────────────────── */
+.lesson {
+  display: none;
+  flex: 1;
+  padding: 48px 48px 80px;
+  max-width: 740px;
+  animation: pageIn 0.4s ease both;
+}
+.lesson.active { display: block; }
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* lesson header */
+.l-header { margin-bottom: 36px; }
+.l-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--amber); letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.l-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.15; color: var(--ink);
+  margin-bottom: 14px;
+}
+.l-title em { font-style: italic; color: var(--amber); }
+.l-subtitle {
+  font-size: 15px; color: var(--muted);
+  line-height: 1.7; font-weight: 300;
+  max-width: 520px;
+}
+
+/* divider */
+.l-divider {
+  height: 1px; background: var(--border2);
+  margin: 32px 0;
+}
+
+/* section heading */
+.s-head {
+  font-size: 11px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.s-head::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+
+/* explanation text */
+.l-text {
+  font-size: 15px; line-height: 1.8; color: var(--ink);
+  font-weight: 300; margin-bottom: 24px;
+}
+.l-text strong { font-weight: 600; color: var(--ink); }
+.l-text code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; background: var(--border2);
+  padding: 2px 6px; border-radius: 4px; color: var(--amber);
+}
+
+/* code block */
+.code-block {
+  background: #1e1c1a;
+  border-radius: 12px; overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+.code-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px; border-bottom: 1px solid #2e2c28;
+}
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.cd-r { background: #ff5f57; }
+.cd-y { background: #febc2e; }
+.cd-g { background: #28c840; }
+.code-lang {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: #666; margin-left: auto; letter-spacing: 1px;
+}
+.code-body {
+  padding: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; line-height: 1.8;
+  color: #d4d0c8; overflow-x: auto;
+  white-space: pre;
+}
+.ct { color: #9cdcfe; }   /* tag */
+.ca { color: #ce9178; }   /* attr */
+.cv { color: #98c379; }   /* value / string */
+.cc { color: #7ec8e3; }   /* css prop */
+.cn { color: #d19a66; }   /* number */
+.cm { color: #636d83; font-style: italic; } /* comment */
+
+/* demo box */
+.demo-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+.demo-bar {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  font-size: 11px; font-weight: 500; color: var(--muted);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.demo-body { padding: 28px 24px; }
+
+/* callout */
+.callout {
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 24px;
+  font-size: 14px; line-height: 1.7;
+  display: flex; gap: 12px;
+}
+.callout-amber { background: var(--amber-l); border-left: 3px solid var(--amber); color: #92400e; }
+.callout-green  { background: var(--green-l);  border-left: 3px solid var(--green);  color: #065f46; }
+.callout-blue   { background: var(--blue-l);   border-left: 3px solid var(--blue);   color: #1e3a8a; }
+.callout-rose   { background: var(--rose-l);   border-left: 3px solid var(--rose);   color: #9f1239; }
+.callout-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+
+/* key points */
+.key-points {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 24px;
+}
+.kp {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px;
+  transition: all 0.2s;
+}
+.kp:hover { border-color: var(--amber); box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+.kp-icon { font-size: 20px; margin-bottom: 8px; }
+.kp-label { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.kp-text  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* interactive demo */
+.interactive { margin-bottom: 28px; }
+.int-controls {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
+}
+.int-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500;
+  padding: 7px 16px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--muted);
+  cursor: pointer; transition: all 0.18s;
+}
+.int-btn:hover { border-color: var(--amber); color: var(--amber); }
+.int-btn.on { background: var(--amber); border-color: var(--amber); color: #fff; }
+
+/* nav bar at bottom */
+.l-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 36px; border-top: 1px solid var(--border2);
+  margin-top: 12px;
+}
+.nav-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  padding: 10px 24px; border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--muted);
+  cursor: pointer; transition: all 0.2s;
+}
+.nav-btn:hover { border-color: var(--ink); color: var(--ink); }
+.nav-btn.next { background: var(--ink); color: #fff; border-color: var(--ink); }
+.nav-btn.next:hover { background: #2d2a26; }
+.nav-btn.finish { background: var(--green); color: #fff; border-color: var(--green); }
+
+/* ─── SPECIFIC DEMOS ─────────────────────────── */
+
+/* tags demo */
+.tag-demo-list {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.tag-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.tag-row:hover { background: var(--border2); }
+.tag-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--blue);
+  background: var(--blue-l);
+  padding: 3px 10px; border-radius: 4px;
+  min-width: 120px; text-align: center;
+  flex-shrink: 0;
+}
+.tag-arrow { color: var(--dim); font-size: 14px; }
+.tag-result { font-size: 14px; color: var(--ink); }
+.tag-note { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+/* image demo */
+.img-demo {
+  display: flex; gap: 16px; flex-wrap: wrap;
+}
+.img-card {
+  flex: 1; min-width: 140px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+}
+.img-placeholder {
+  aspect-ratio: 4/3;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+}
+.ip-nature { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+.ip-city   { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+.ip-food   { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+.img-caption {
+  padding: 10px 12px;
+  font-size: 11px; color: var(--muted); font-weight: 500;
+}
+
+/* padding demo */
+.pad-demo {
+  position: relative;
+}
+.pad-box-outer {
+  background: #fef3c7;
+  border: 2px dashed #f59e0b;
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  transition: padding 0.4s cubic-bezier(.4,0,.2,1);
+}
+.pad-box-inner {
+  background: var(--surface);
+  border: 2px solid #f59e0b;
+  border-radius: 6px;
+  padding: 20px;
+  font-size: 14px; font-weight: 500; color: var(--ink);
+  transition: all 0.3s;
+}
+.pad-label {
+  position: absolute; top: 6px; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--amber);
+  background: #fef3c7; padding: 2px 8px; border-radius: 4px;
+}
+
+/* margin demo */
+.mar-demo {
+  overflow: hidden;
+}
+.mar-box {
+  background: #dbeafe;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 13px; font-weight: 500; color: #1e40af;
+  text-align: center;
+  margin: 16px;
+  transition: margin 0.4s cubic-bezier(.4,0,.2,1);
+  position: relative;
+}
+.mar-box::before {
+  content: 'margin';
+  position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--blue);
+}
+.mar-stage {
+  background: var(--bg); border: 2px dashed var(--border);
+  border-radius: 10px; overflow: hidden;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────── */
+@media (max-width: 700px) {
+  #sidebar { transform: translateX(-220px); }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  .lesson { padding: 32px 20px 60px; }
+  .key-points { grid-template-columns: 1fr; }
+  #hamburger { display: flex !important; }
+}
+
+#hamburger {
+  display: none;
+  width: 36px; height: 36px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; cursor: pointer; margin-right: 8px;
+}
+#hamburger span { display: block; width: 14px; height: 1.5px; background: var(--ink); border-radius: 2px; }
+
+#overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.2); z-index: 49;
+}
+#overlay.on { display: block; }
+</style>
+</head>
+<body>
+
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ─── SIDEBAR ─────────────────────── -->
+<nav id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-eyebrow">HTML · CSS Basics</div>
+    <div class="sb-title">Building a Profile Card</div>
+  </div>
+  <div class="sb-progress">
+    <div class="sb-prog-row"><span>Progress</span><span id="pct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="progfill"></div></div>
+  </div>
+  <div class="sb-nav" id="sb-nav"></div>
+  <div class="sb-footer">4 topics · ~15 min</div>
+</nav>
+
+<!-- ─── MAIN ─────────────────────────── -->
+<div id="main">
+
+  <!-- Topbar -->
+  <div id="topbar">
+    <div id="hamburger" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </div>
+    <span class="tb-tag" id="tb-tag">01</span>
+    <span class="tb-sep">›</span>
+    <span class="tb-lesson" id="tb-lesson">HTML Tags</span>
+  </div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- LESSON 1 — TAGS                   -->
+  <!-- ══════════════════════════════════ -->
+  <div class="lesson active" id="l-0">
+    <div class="l-header">
+      <div class="l-num">Lesson 01 of 04</div>
+      <div class="l-title">HTML <em>Tags</em></div>
+      <div class="l-subtitle">Tags are the building blocks of every webpage. They tell the browser what kind of content to display — a heading, a paragraph, an image, and more.</div>
+    </div>
+
+    <div class="s-head">What is a tag?</div>
+    <p class="l-text">
+      An HTML tag is a keyword wrapped in angle brackets: <code>&lt;tagname&gt;</code>. Most tags come in pairs — an <strong>opening tag</strong> and a <strong>closing tag</strong> with a slash. Everything between them is the content.
+    </p>
+
+    <div class="code-block">
+      <div class="code-bar">
+        <div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>
+        <span class="code-lang">HTML</span>
+      </div>
+      <div class="code-body"><span class="ct">&lt;h1&gt;</span>My Name<span class="ct">&lt;/h1&gt;</span>           <span class="cm">← heading</span>
+<span class="ct">&lt;p&gt;</span>I love building things.<span class="ct">&lt;/p&gt;</span>  <span class="cm">← paragraph</span>
+<span class="ct">&lt;img</span> <span class="ca">src=</span><span class="cv">"photo.jpg"</span><span class="ct">&gt;</span>          <span class="cm">← image (no closing tag)</span>
+<span class="ct">&lt;div&gt;</span>
+  <span class="ct">&lt;p&gt;</span>I can wrap other tags.<span class="ct">&lt;/p&gt;</span>
+<span class="ct">&lt;/div&gt;</span>                           <span class="cm">← container</span></div>
+    </div>
+
+    <div class="s-head">Tags you'll use for a profile card</div>
+
+    <div class="demo-box">
+      <div class="demo-bar">Live Reference</div>
+      <div class="demo-body">
+        <div class="tag-demo-list">
+          <div class="tag-row">
+            <span class="tag-code">&lt;div&gt;</span>
+            <span class="tag-arrow">→</span>
+            <span class="tag-result">A box / container that groups things</span>
+            <span class="tag-note">Layout</span>
+          </div>
+          <div class="tag-row">
+            <span class="tag-code">&lt;h1&gt; – &lt;h3&gt;</span>
+            <span class="tag-arrow">→</span>
+            <span class="tag-result"><strong>Your name, title</strong></span>
+            <span class="tag-note">Headings</span>
+          </div>
+          <div class="tag-row">
+            <span class="tag-code">&lt;p&gt;</span>
+            <span class="tag-arrow">→</span>
+            <span class="tag-result">A paragraph of text — your bio note</span>
+            <span class="tag-note">Text</span>
+          </div>
+          <div class="tag-row">
+            <span class="tag-code">&lt;img&gt;</span>
+            <span class="tag-arrow">→</span>
+            <span class="tag-result">Your photo / avatar</span>
+            <span class="tag-note">Media</span>
+          </div>
+          <div class="tag-row">
+            <span class="tag-code">&lt;span&gt;</span>
+            <span class="tag-arrow">→</span>
+            <span class="tag-result">Inline text you want to style differently</span>
+            <span class="tag-note">Inline</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-amber">
+      <span class="callout-icon">💡</span>
+      <span>Tags don't make things look good — they just give the browser <strong>meaning</strong>. CSS (which you'll learn in lessons 3 &amp; 4) is what makes them look great.</span>
+    </div>
+
+    <div class="key-points">
+      <div class="kp"><div class="kp-icon">🔤</div><div class="kp-label">Opening + Closing</div><div class="kp-text">Most tags need both. <code>&lt;p&gt;</code>text<code>&lt;/p&gt;</code></div></div>
+      <div class="kp"><div class="kp-icon">📦</div><div class="kp-label">Nesting</div><div class="kp-text">Tags can live inside other tags to build structure.</div></div>
+      <div class="kp"><div class="kp-icon">🖼️</div><div class="kp-label">Self-closing</div><div class="kp-text"><code>&lt;img&gt;</code> and <code>&lt;br&gt;</code> don't need a closing tag.</div></div>
+      <div class="kp"><div class="kp-icon">🗂️</div><div class="kp-label">Attributes</div><div class="kp-text">Extra info inside a tag: <code>&lt;img src="…"&gt;</code></div></div>
+    </div>
+
+    <div class="l-nav">
+      <span></span>
+      <button class="nav-btn next" onclick="go(1)">Images →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- LESSON 2 — IMAGES                 -->
+  <!-- ══════════════════════════════════ -->
+  <div class="lesson" id="l-1">
+    <div class="l-header">
+      <div class="l-num">Lesson 02 of 04</div>
+      <div class="l-title">HTML <em>Images</em></div>
+      <div class="l-subtitle">The <code>&lt;img&gt;</code> tag lets you display a photo, avatar, icon, or any picture on your page.</div>
+    </div>
+
+    <div class="s-head">The img tag</div>
+    <p class="l-text">
+      Unlike most tags, <code>&lt;img&gt;</code> is <strong>self-closing</strong> — it has no content between tags. Instead, you describe the image through <strong>attributes</strong>. The two essential ones are <code>src</code> (where the image lives) and <code>alt</code> (a text description).
+    </p>
+
+    <div class="code-block">
+      <div class="code-bar">
+        <div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>
+        <span class="code-lang">HTML</span>
+      </div>
+      <div class="code-body"><span class="cm">/* Basic */</span>
+<span class="ct">&lt;img</span> <span class="ca">src=</span><span class="cv">"photo.jpg"</span> <span class="ca">alt=</span><span class="cv">"My photo"</span><span class="ct">&gt;</span>
+
+<span class="cm">/* With size control */</span>
+<span class="ct">&lt;img</span> <span class="ca">src=</span><span class="cv">"photo.jpg"</span>
+     <span class="ca">alt=</span><span class="cv">"My photo"</span>
+     <span class="ca">width=</span><span class="cv">"80"</span>
+     <span class="ca">height=</span><span class="cv">"80"</span><span class="ct">&gt;</span>
+
+<span class="cm">/* For a profile card: circular with CSS */</span>
+<span class="ct">&lt;img</span> <span class="ca">src=</span><span class="cv">"avatar.jpg"</span>
+     <span class="ca">alt=</span><span class="cv">"Arjun K"</span>
+     <span class="ca">class=</span><span class="cv">"avatar"</span><span class="ct">&gt;</span></div>
+    </div>
+
+    <div class="s-head">What images look like in a card</div>
+
+    <div class="demo-box">
+      <div class="demo-bar">Preview</div>
+      <div class="demo-body">
+        <div class="img-demo">
+          <div class="img-card">
+            <div class="img-placeholder ip-nature">🌿</div>
+            <div class="img-caption">src="nature.jpg" · landscape photo</div>
+          </div>
+          <div class="img-card">
+            <div class="img-placeholder ip-city">🏙️</div>
+            <div class="img-caption">src="city.jpg" · any image URL</div>
+          </div>
+          <div class="img-card">
+            <div class="img-placeholder ip-food">😊</div>
+            <div class="img-caption">Your avatar — circular with CSS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-blue">
+      <span class="callout-icon">🔵</span>
+      <span>For a profile card avatar, always add <code>border-radius: 50%</code> in CSS to make it a perfect circle. The image itself doesn't need to be circular.</span>
+    </div>
+
+    <div class="s-head">Key attributes</div>
+    <div class="key-points">
+      <div class="kp"><div class="kp-icon">🔗</div><div class="kp-label">src</div><div class="kp-text">The path or URL to the image file. Required.</div></div>
+      <div class="kp"><div class="kp-icon">🏷️</div><div class="kp-label">alt</div><div class="kp-text">Text shown if image fails to load. Always include it.</div></div>
+      <div class="kp"><div class="kp-icon">📐</div><div class="kp-label">width / height</div><div class="kp-text">Sets size in pixels — or use CSS for more control.</div></div>
+      <div class="kp"><div class="kp-icon">🎨</div><div class="kp-label">class</div><div class="kp-text">Connects your image to a CSS style you define.</div></div>
+    </div>
+
+    <div class="l-nav">
+      <button class="nav-btn" onclick="go(0)">← Tags</button>
+      <button class="nav-btn next" onclick="go(2)">Padding →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- LESSON 3 — PADDING                -->
+  <!-- ══════════════════════════════════ -->
+  <div class="lesson" id="l-2">
+    <div class="l-header">
+      <div class="l-num">Lesson 03 of 04</div>
+      <div class="l-title">CSS <em>Padding</em></div>
+      <div class="l-subtitle">Padding is the space <em>inside</em> an element — between its content and its border. It makes things breathe.</div>
+    </div>
+
+    <div class="s-head">How padding works</div>
+    <p class="l-text">
+      Think of padding as the <strong>cushion inside a box</strong>. If a profile card has no padding, the text is jammed against the edges. Padding pushes the content inward, away from the walls of the element.
+    </p>
+
+    <div class="code-block">
+      <div class="code-bar">
+        <div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>
+        <span class="code-lang">CSS</span>
+      </div>
+      <div class="code-body"><span class="cc">.card</span> {
+  <span class="cc">padding</span>: <span class="cn">24px</span>;              <span class="cm">/* all 4 sides */</span>
+}
+
+<span class="cc">.card</span> {
+  <span class="cc">padding</span>: <span class="cn">16px 24px</span>;       <span class="cm">/* top/bottom  left/right */</span>
+}
+
+<span class="cc">.card</span> {
+  <span class="cc">padding-top</span>:    <span class="cn">20px</span>;    <span class="cm">/* individual sides */</span>
+  <span class="cc">padding-right</span>:  <span class="cn">24px</span>;
+  <span class="cc">padding-bottom</span>: <span class="cn">20px</span>;
+  <span class="cc">padding-left</span>:   <span class="cn">24px</span>;
+}</div>
+    </div>
+
+    <div class="s-head">Interactive demo</div>
+    <div class="interactive">
+      <div class="int-controls">
+        <button class="int-btn" onclick="setPad('8px')" id="pb-s">Small · 8px</button>
+        <button class="int-btn on" onclick="setPad('24px')" id="pb-m">Medium · 24px</button>
+        <button class="int-btn" onclick="setPad('48px')" id="pb-l">Large · 48px</button>
+      </div>
+      <div class="demo-box">
+        <div class="demo-bar">Result</div>
+        <div class="demo-body" style="padding:16px">
+          <div class="pad-demo">
+            <div class="pad-box-outer" id="padbox" style="padding:24px">
+              <div class="pad-label" id="padlabel">padding: 24px</div>
+              <div class="pad-box-inner">Your profile card content</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-amber">
+      <span class="callout-icon">💡</span>
+      <span>The yellow dashed area is the padding. Notice how larger padding makes the card feel more <strong>open and comfortable</strong> — this is exactly what you want for a profile card.</span>
+    </div>
+
+    <div class="key-points">
+      <div class="kp"><div class="kp-icon">📦</div><div class="kp-label">Inside the box</div><div class="kp-text">Padding lives inside the element. It adds to the element's size.</div></div>
+      <div class="kp"><div class="kp-icon">🎨</div><div class="kp-label">Background fills it</div><div class="kp-text">The element's background colour covers the padding area too.</div></div>
+      <div class="kp"><div class="kp-icon">📐</div><div class="kp-label">Units</div><div class="kp-text">Use <code>px</code> for fixed, <code>rem</code> for scalable, or <code>%</code> for relative.</div></div>
+      <div class="kp"><div class="kp-icon">✍️</div><div class="kp-label">Shorthand</div><div class="kp-text"><code>padding: 16px 24px</code> = top-bottom 16, left-right 24.</div></div>
+    </div>
+
+    <div class="l-nav">
+      <button class="nav-btn" onclick="go(1)">← Images</button>
+      <button class="nav-btn next" onclick="go(3)">Margin →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- LESSON 4 — MARGIN                 -->
+  <!-- ══════════════════════════════════ -->
+  <div class="lesson" id="l-3">
+    <div class="l-header">
+      <div class="l-num">Lesson 04 of 04</div>
+      <div class="l-title">CSS <em>Margin</em></div>
+      <div class="l-subtitle">Margin is the space <em>outside</em> an element — the breathing room between it and its neighbours.</div>
+    </div>
+
+    <div class="s-head">Padding vs. Margin</div>
+    <p class="l-text">
+      If padding is the cushion <strong>inside</strong> the box, margin is the <strong>empty space around</strong> the outside of the box. It pushes other elements away. For a profile card, margin controls how much space separates the card from the rest of the page.
+    </p>
+
+    <div class="code-block">
+      <div class="code-bar">
+        <div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div>
+        <span class="code-lang">CSS</span>
+      </div>
+      <div class="code-body"><span class="cc">.card</span> {
+  <span class="cc">margin</span>: <span class="cn">32px</span>;             <span class="cm">/* all 4 sides */</span>
+}
+
+<span class="cc">.card</span> {
+  <span class="cc">margin</span>: <span class="cn">0 auto</span>;         <span class="cm">/* centre horizontally */</span>
+}
+
+<span class="cc">.name</span> {
+  <span class="cc">margin-bottom</span>: <span class="cn">8px</span>;    <span class="cm">/* space below name */</span>
+}
+
+<span class="cc">.bio</span> {
+  <span class="cc">margin-top</span>: <span class="cn">12px</span>;      <span class="cm">/* space above bio */</span>
+}</div>
+    </div>
+
+    <div class="s-head">Interactive demo</div>
+    <div class="interactive">
+      <div class="int-controls">
+        <button class="int-btn" onclick="setMar('4px')" id="mb-s">None · 4px</button>
+        <button class="int-btn on" onclick="setMar('20px')" id="mb-m">Medium · 20px</button>
+        <button class="int-btn" onclick="setMar('44px')" id="mb-l">Large · 44px</button>
+      </div>
+      <div class="demo-box">
+        <div class="demo-bar">Result</div>
+        <div class="demo-body" style="padding:0">
+          <div class="mar-stage">
+            <div class="mar-box" id="marbox" style="margin:20px">
+              Profile Card · content here
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-green">
+      <span class="callout-icon">✅</span>
+      <span>To centre a card on the page, use <code>margin: 0 auto</code> with a fixed <code>width</code>. This is one of the most useful CSS tricks for card layouts.</span>
+    </div>
+
+    <div class="s-head">Padding vs Margin — side by side</div>
+    <div class="demo-box" style="margin-bottom:24px">
+      <div class="demo-bar">The Box Model</div>
+      <div class="demo-body">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0">
+          <div style="background:#fde68a;border:2px dashed #f59e0b;border-radius:8px;padding:20px;width:100%;text-align:center;font-size:11px;color:#92400e;font-weight:500;">
+            MARGIN — outside space
+            <div style="background:#fef9ee;border:2px solid #f59e0b;border-radius:6px;padding:16px;margin:12px 0 0;font-size:12px;color:#78350f">
+              BORDER
+              <div style="background:#fef3c7;border-radius:4px;padding:14px;margin:10px 0 0;font-size:12px;color:#92400e">
+                PADDING — inside space
+                <div style="background:white;border:1px solid #e5e0d8;border-radius:4px;padding:10px;margin:8px 0 0;font-size:13px;color:#1a1814;font-weight:500">
+                  Content
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="key-points">
+      <div class="kp"><div class="kp-icon">🏠</div><div class="kp-label">Outside the box</div><div class="kp-text">Margin lives outside the border. Background colour does NOT fill it.</div></div>
+      <div class="kp"><div class="kp-icon">↔️</div><div class="kp-label">Auto centering</div><div class="kp-text"><code>margin: 0 auto</code> centres block elements horizontally.</div></div>
+      <div class="kp"><div class="kp-icon">🔀</div><div class="kp-label">Collapse</div><div class="kp-text">Vertical margins between elements can merge — the larger one wins.</div></div>
+      <div class="kp"><div class="kp-icon">📏</div><div class="kp-label">Negative values</div><div class="kp-text">Negative margin pulls elements closer or overlaps them.</div></div>
+    </div>
+
+    <div class="callout callout-rose">
+      <span class="callout-icon">🎯</span>
+      <span><strong>Quick rule:</strong> Use <strong>padding</strong> to add space inside a box. Use <strong>margin</strong> to add space between boxes.</span>
+    </div>
+
+    <div class="l-nav">
+      <button class="nav-btn" onclick="go(2)">← Padding</button>
+      <button class="nav-btn finish" onclick="finish()">✓ Complete</button>
+    </div>
+  </div>
+
+</div><!-- end #main -->
+
+<script>
+const lessons = [
+  { title: "HTML Tags",    short: "Tags"    },
+  { title: "HTML Images",  short: "Images"  },
+  { title: "CSS Padding",  short: "Padding" },
+  { title: "CSS Margin",   short: "Margin"  },
+];
+
+let current = 0;
+const done = new Set();
+
+// Build sidebar nav
+const nav = document.getElementById('sb-nav');
+lessons.forEach((l, i) => {
+  const el = document.createElement('div');
+  el.className = 'nav-item' + (i === 0 ? ' active' : '');
+  el.id = 'ni-' + i;
+  el.innerHTML = `
+    <div class="nav-dot"></div>
+    <span>${l.title}</span>
+    <span class="nav-num">0${i+1}</span>
+  `;
+  el.onclick = () => go(i);
+  nav.appendChild(el);
+});
+
+function go(idx) {
+  done.add(current);
+  document.getElementById('l-' + current).classList.remove('active');
+  document.getElementById('ni-' + current).classList.remove('active');
+  if (current !== idx) document.getElementById('ni-' + current).classList.add('done');
+
+  document.getElementById('l-' + idx).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((el, i) => {
+    el.classList.remove('active');
+    if (done.has(i) && i !== idx) el.classList.add('done');
+  });
+  document.getElementById('ni-' + idx).classList.add('active');
+  document.getElementById('ni-' + idx).classList.remove('done');
+
+  current = idx;
+  document.getElementById('tb-tag').textContent = '0' + (idx + 1);
+  document.getElementById('tb-lesson').textContent = lessons[idx].title;
+
+  const pct = Math.round((done.size / lessons.length) * 100);
+  document.getElementById('progfill').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  closeSidebar();
+}
+
+function finish() {
+  done.add(current);
+  document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('active'); el.classList.add('done'); });
+  document.getElementById('progfill').style.width = '100%';
+  document.getElementById('pct').textContent = '100%';
+  const lesson = document.getElementById('l-3');
+  lesson.innerHTML += `
+    <div class="callout callout-green" style="margin-top:24px;animation:pageIn .5s ease both">
+      <span class="callout-icon">🎉</span>
+      <span><strong>You're done!</strong> You now know the four foundations of building a profile card — Tags, Images, Padding, and Margin. Go build it!</span>
+    </div>`;
+}
+
+// Padding demo
+function setPad(val) {
+  document.getElementById('padbox').style.padding = val;
+  document.getElementById('padlabel').textContent = 'padding: ' + val;
+  ['pb-s','pb-m','pb-l'].forEach(id => document.getElementById(id).classList.remove('on'));
+  if (val === '8px')  document.getElementById('pb-s').classList.add('on');
+  if (val === '24px') document.getElementById('pb-m').classList.add('on');
+  if (val === '48px') document.getElementById('pb-l').classList.add('on');
+}
+
+// Margin demo
+function setMar(val) {
+  document.getElementById('marbox').style.margin = val;
+  ['mb-s','mb-m','mb-l'].forEach(id => document.getElementById(id).classList.remove('on'));
+  if (val === '4px')  document.getElementById('mb-s').classList.add('on');
+  if (val === '20px') document.getElementById('mb-m').classList.add('on');
+  if (val === '44px') document.getElementById('mb-l').classList.add('on');
+}
+
+// Sidebar
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('on');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('on');
+}
+</script>
+</body>
+</html>
