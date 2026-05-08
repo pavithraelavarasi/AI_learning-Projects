@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reviewer View — Question 1</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f0e8;
+      --surface: #fffdf7;
+      --ink: #1a1714;
+      --ink-light: #5a524a;
+      --accent: #c0392b;
+      --accent-warm: #e67e22;
+      --accent-subtle: #f9f2e3;
+      --border: #d4c9b0;
+      --tag-bg: #1a1714;
+      --tag-text: #f5f0e8;
+      --code-bg: #2b2520;
+      --code-text: #f0d080;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 0 0 80px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--ink);
+      color: var(--bg);
+      padding: 48px 60px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 260px; height: 260px;
+      border-radius: 50%;
+      background: rgba(192,57,43,0.18);
+    }
+    .header-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-warm);
+      margin-bottom: 14px;
+    }
+    .header-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 800;
+      line-height: 1.1;
+      max-width: 640px;
+    }
+    .header-meta {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 2px;
+    }
+    .badge.outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* ── LAYOUT ── */
+    .page-body {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ── SECTION BLOCK ── */
+    .section {
+      margin-top: 52px;
+    }
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: var(--ink);
+    }
+
+    /* ── ORIGINAL QUESTION CARD ── */
+    .question-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-left: 5px solid var(--accent);
+      border-radius: 4px;
+      padding: 32px 36px;
+      position: relative;
+    }
+    .question-number {
+      font-family: 'Syne', sans-serif;
+      font-size: 80px;
+      font-weight: 800;
+      color: var(--border);
+      position: absolute;
+      top: -10px; right: 24px;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .question-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+    }
+    .question-card p {
+      font-size: 15.5px;
+      line-height: 1.75;
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+    .question-card p:last-child { margin-bottom: 0; }
+
+    /* ── INPUT SCENARIO ── */
+    .scenario-box {
+      background: var(--accent-subtle);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 22px 28px;
+      margin-top: 20px;
+    }
+    .scenario-box .label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      margin-bottom: 8px;
+    }
+    .scenario-box p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--ink);
+      font-style: italic;
+    }
+
+    /* ── EXPECTATIONS ── */
+    .expectations-grid {
+      margin-top: 24px;
+      display: grid;
+      gap: 10px;
+    }
+    .exp-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 14px 18px;
+    }
+    .exp-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      background: #fde8e6;
+      border-radius: 2px;
+      padding: 2px 7px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+    .exp-item p {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: var(--ink);
+    }
+    .exp-item code {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    /* ── REVIEW QUESTIONS ── */
+    .review-grid {
+      display: grid;
+      gap: 0;
+    }
+    .review-item {
+      border: 1px solid var(--border);
+      border-top: none;
+      background: var(--surface);
+      padding: 0;
+      transition: background 0.2s;
+      cursor: default;
+    }
+    .review-item:first-child { border-top: 1px solid var(--border); border-radius: 4px 4px 0 0; }
+    .review-item:last-child  { border-radius: 0 0 4px 4px; }
+    .review-item:hover { background: #fffaf0; }
+
+    .review-item-inner {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      min-height: 64px;
+    }
+    .review-index {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--ink);
+    }
+    .review-index.accent { background: var(--accent); }
+    .review-index.warm   { background: var(--accent-warm); }
+
+    .review-content {
+      padding: 16px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+    }
+    .review-category {
+      font-family: 'DM Mono', monospace;
+      font-size: 9.5px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+    }
+    .review-question {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+    .review-question code {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    /* ── CATEGORY DIVIDER ── */
+    .cat-header {
+      margin: 36px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .cat-header-pill {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .cat-header-pill.comprehension { background: #1a1714; color: #f5f0e8; }
+    .cat-header-pill.identification { background: #c0392b; color: #fff; }
+    .cat-header-pill.explanation    { background: #e67e22; color: #fff; }
+    .cat-header-pill.modification   { background: #27ae60; color: #fff; }
+    .cat-header-pill.articulation   { background: #2980b9; color: #fff; }
+    .cat-header-pill.critique       { background: #8e44ad; color: #fff; }
+
+    .cat-header-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── FOOTER NOTE ── */
+    .footer-note {
+      margin-top: 56px;
+      padding: 24px 28px;
+      background: var(--ink);
+      color: rgba(245,240,232,0.7);
+      border-radius: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+    .footer-note strong { color: var(--bg); }
+
+    @media (max-width: 600px) {
+      header { padding: 36px 24px 32px; }
+      .page-body { padding: 0 18px; }
+      .question-card { padding: 22px 20px; }
+      .question-number { font-size: 56px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">Reviewer View</div>
+  <div class="header-title">CSS Box Model &amp; Profile Card</div>
+  <div class="header-meta">
+    <span class="badge">Question 1</span>
+    <span class="badge outline">HTML &amp; CSS</span>
+    <span class="badge outline">Box Model</span>
+    <span class="badge outline">Reverse Engineering</span>
+  </div>
+</header>
+
+<div class="page-body">
+
+  <!-- ── ORIGINAL QUESTION ── -->
+  <div class="section">
+    <div class="section-label">Original Question</div>
+    <div class="question-card">
+      <div class="question-number">1</div>
+      <h2>Objective</h2>
+      <p>To develop CSS Box Model literacy by reverse-engineering an AI-generated personal profile card and making intentional modifications to observe how each property shapes layout and spacing.</p>
+
+      <div class="scenario-box">
+        <div class="label">Input / Scenario</div>
+        <p>You have just met someone at a networking event, and you want a quick way for them to remember who you are later. You need a simple visual card that shows your face, name, what you do, and a short note about yourself. Build the simplest card that lets you see this at a glance.</p>
+      </div>
+
+      <h2 style="margin-top:24px;">Expectations</h2>
+      <div class="expectations-grid">
+        <div class="exp-item"><span class="exp-num">E1</span><p>Read the AI-generated HTML and CSS code line by line and understand what each part does.</p></div>
+        <div class="exp-item"><span class="exp-num">E2</span><p>Identify where the Box Model properties — <code>margin</code>, <code>border</code>, <code>padding</code>, and <code>content</code> — appear in the code.</p></div>
+        <div class="exp-item"><span class="exp-num">E3</span><p>Explain in plain words how each property affects the card's appearance and spacing.</p></div>
+        <div class="exp-item"><span class="exp-num">E4</span><p>Modify at least one property from each Box Model layer and observe what changes in the browser.</p></div>
+        <div class="exp-item"><span class="exp-num">E5</span><p>Articulate the difference between <code>padding</code> and <code>margin</code> — without looking it up.</p></div>
+        <div class="exp-item"><span class="exp-num">E6</span><p>Critique the AI-generated code — identify one design or spacing decision you disagree with, explain why, and improve it.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── REVIEW QUESTIONS ── -->
+  <div class="section">
+    <div class="section-label">Reviewer Questions</div>
+    <div class="section-title">Post-Completion Review</div>
+
+    <!-- COMPREHENSION -->
+    <div class="cat-header">
+      <span class="cat-header-pill comprehension">Comprehension</span>
+      <span class="cat-header-line"></span>
+    </div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index">1</div>
+          <div class="review-content">
+            <span class="review-category">Code Reading</span>
+            <span class="review-question">Walk me through the HTML structure of your profile card. What elements did you use, and why?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index">2</div>
+          <div class="review-content">
+            <span class="review-category">Code Reading</span>
+            <span class="review-question">Pick any three CSS rules from the generated code and explain in plain language exactly what each one does to the card's appearance.</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index">3</div>
+          <div class="review-content">
+            <span class="review-category">Code Reading</span>
+            <span class="review-question">Is there any part of the code you found confusing or unexpected? What did you do to make sense of it?</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IDENTIFICATION -->
+    <div class="cat-header">
+      <span class="cat-header-pill identification">Box Model Identification</span>
+      <span class="cat-header-line"></span>
+    </div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index accent">4</div>
+          <div class="review-content">
+            <span class="review-category">Margin</span>
+            <span class="review-question">Show me exactly where <code>margin</code> appears in the code. What element does it apply to, and what visual effect does it create?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index accent">5</div>
+          <div class="review-content">
+            <span class="review-category">Border</span>
+            <span class="review-question">Where is <code>border</code> defined in the code? What happens visually if you remove it entirely?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index accent">6</div>
+          <div class="review-content">
+            <span class="review-category">Padding</span>
+            <span class="review-question">Point to where <code>padding</code> is set. Which element does it belong to, and what would happen to the card if you doubled its value?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index accent">7</div>
+          <div class="review-content">
+            <span class="review-category">Content</span>
+            <span class="review-question">Where is the "content" layer visible in your card — in the HTML and in the browser? How does a fixed <code>width</code> or <code>height</code> interact with it?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index accent">8</div>
+          <div class="review-content">
+            <span class="review-category">Box Sizing</span>
+            <span class="review-question">Does the code use <code>box-sizing: border-box</code>? If yes, what does that change about how width is calculated? If not, how does the default model affect your layout?</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPLANATION -->
+    <div class="cat-header">
+      <span class="cat-header-pill explanation">Explanation</span>
+      <span class="cat-header-line"></span>
+    </div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index warm">9</div>
+          <div class="review-content">
+            <span class="review-category">Conceptual</span>
+            <span class="review-question">Without looking anything up — explain the difference between <code>padding</code> and <code>margin</code> in your own words. Can you give a real-life analogy?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index warm">10</div>
+          <div class="review-content">
+            <span class="review-category">Conceptual</span>
+            <span class="review-question">If the card's text looks cramped, which Box Model property would you adjust first — and why?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index warm">11</div>
+          <div class="review-content">
+            <span class="review-category">Visual Reasoning</span>
+            <span class="review-question">If you increase the card's <code>padding</code> to <code>60px</code>, does the card get wider, the content area shrink, or both? Explain why, based on the Box Model.</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index warm">12</div>
+          <div class="review-content">
+            <span class="review-category">Spacing Logic</span>
+            <span class="review-question">What is <code>margin: 0 auto</code> doing in your code, if present? How does it center the card, and what condition must be true for it to work?</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODIFICATION -->
+    <div class="cat-header">
+      <span class="cat-header-pill modification">Modification &amp; Observation</span>
+      <span class="cat-header-line"></span>
+    </div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index" style="background:#27ae60;">13</div>
+          <div class="review-content">
+            <span class="review-category">Hands-On</span>
+            <span class="review-question">What specific change did you make to the <code>margin</code>? What did you observe in the browser, and did it match what you expected?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index" style="background:#27ae60;">14</div>
+          <div class="review-content">
+            <span class="review-category">Hands-On</span>
+            <span class="review-question">What change did you make to the <code>border</code>? Did changing the border width affect the card's total size? Why or why not?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index" style="background:#27ae60;">15</div>
+          <div class="review-content">
+            <span class="review-category">Hands-On</span>
+            <span class="review-question">What change did you make to <code>padding</code>? Show me the before and after in the browser. What shifted, and what stayed the same?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index" style="background:#27ae60;">16</div>
+          <div class="review-content">
+            <span class="review-category">Hands-On</span>
+            <span class="review-question">What change did you make to the content layer — such as <code>width</code>, <code>height</code>, or font size? How did other Box Model layers respond to it?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index" style="background:#27ae60;">17</div>
+          <div class="review-content">
+            <span class="review-category">Exploration</span>
+            <span class="review-question">Did any of your modifications produce an unexpected result? What surprised you, and how did you investigate or fix it?</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARTICULATION -->
+    <div class="cat-header">
+      <span class="cat-header-pill articulation">Articulation</span>
+      <span class="cat-header-line"></span>
+    </div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index" style="background:#2980b9;">18</div>
+          <div class="review-content">
+            <span class="review-category">Concept Check</span>
+            <span class="review-question">Imagine explaining the CSS Box Model to a non-technical friend in two sentences. What would you say?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index" style="background:#2980b9;">19</div>
+          <div class="review-content">
+            <span class="review-category">Concept Check</span>
+            <span class="review-question">If a colleague says "just add some padding to push the cards apart," what would you tell them is actually the right approach, and why?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index" style="background:#2980b9;">20</div>
+          <div class="review-content">
+            <span class="review-category">Deeper Understanding</span>
+            <span class="review-question">What is "margin collapse," and did you encounter anything like it while building the card?</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CRITIQUE -->
+    <div class="cat-header">
+      <span class="cat-header-pill critique">Critical Thinking</span>
+      <span class="cat-header-line"></span>
+    </div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index" style="background:#8e44ad;">21</div>
+          <div class="review-content">
+            <span class="review-category">Critique</span>
+            <span class="review-question">Which specific design or spacing decision in the AI-generated code did you disagree with? Walk me through your reasoning.</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index" style="background:#8e44ad;">22</div>
+          <div class="review-content">
+            <span class="review-category">Improvement</span>
+            <span class="review-question">Show me the improvement you made. How does the updated version better serve someone who just received your card at a networking event?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index" style="background:#8e44ad;">23</div>
+          <div class="review-content">
+            <span class="review-category">Reflection</span>
+            <span class="review-question">Looking back, is there anything in the AI-generated code you would have done differently from the start? What would it be, and what Box Model property is involved?</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-item">
+        <div class="review-item-inner">
+          <div class="review-index" style="background:#8e44ad;">24</div>
+          <div class="review-content">
+            <span class="review-category">Open-Ended</span>
+            <span class="review-question">The AI was told to build "the simplest card." Do you think it succeeded? Is there anything it included that you consider unnecessary, or anything important it left out?</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /review section -->
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <strong>Reviewer Note:</strong> These questions are designed to surface genuine understanding — not recall. Look for students who can connect what they see in the code to what they see in the browser, and who can explain their own modifications confidently. Struggle with Q9 (padding vs. margin without reference) and Q18 (plain-language explanation) are especially revealing. Probe follow-up on any answer that sounds memorized.
+  </div>
+
+</div><!-- /page-body -->
+</body>
+</html>
