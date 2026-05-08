@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn · CSS Flexbox</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #f7f5f2;
+  --surface: #ffffff;
+  --border:  #e5e0d8;
+  --border2: #ede9e3;
+  --ink:     #1a1814;
+  --muted:   #8c8479;
+  --dim:     #c4beb6;
+  --amber:   #d97706;
+  --amber-l: rgba(217,119,6,0.1);
+  --green:   #059669;
+  --green-l: rgba(5,150,105,0.1);
+  --blue:    #2563eb;
+  --blue-l:  rgba(37,99,235,0.08);
+  --rose:    #e11d48;
+  --rose-l:  rgba(225,29,72,0.08);
+  --shadow:  0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+}
+
+/* SIDEBAR */
+#sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 50;
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+}
+.sb-brand { padding: 24px 20px 20px; border-bottom: 1px solid var(--border2); }
+.sb-eyebrow { font-size: 9px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; }
+.sb-title { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--ink); line-height: 1.3; }
+.sb-progress { padding: 14px 20px; border-bottom: 1px solid var(--border2); }
+.sb-prog-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 8px; }
+.prog-track { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--amber), #f59e0b); border-radius: 99px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+.sb-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 20px; cursor: pointer; border-left: 2px solid transparent; color: var(--muted); font-size: 13px; font-weight: 400; transition: all 0.18s; }
+.nav-item:hover { color: var(--ink); background: rgba(217,119,6,0.04); }
+.nav-item.active { color: var(--ink); font-weight: 500; border-left-color: var(--amber); background: var(--amber-l); }
+.nav-item.done { color: var(--green); }
+.nav-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: all 0.2s; }
+.nav-item.active .nav-dot { background: var(--amber); box-shadow: 0 0 0 3px var(--amber-l); }
+.nav-item.done .nav-dot { background: var(--green); }
+.nav-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dim); margin-left: auto; }
+.sb-footer { padding: 16px 20px; border-top: 1px solid var(--border2); font-size: 11px; color: var(--dim); line-height: 1.5; }
+
+/* MAIN */
+#main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* TOPBAR */
+#topbar { position: sticky; top: 0; z-index: 40; background: rgba(247,245,242,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); height: 52px; display: flex; align-items: center; padding: 0 32px; gap: 12px; }
+.tb-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 3px 10px; border-radius: 4px; }
+.tb-sep { color: var(--dim); font-size: 12px; }
+.tb-lesson { font-size: 13px; font-weight: 500; color: var(--ink); }
+
+/* LESSONS */
+.lesson { display: none; flex: 1; padding: 48px 48px 80px; width: 100%; animation: pageIn 0.4s ease both; }
+.lesson.active { display: block; }
+@keyframes pageIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+.l-header { margin-bottom: 36px; }
+.l-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--amber); letter-spacing: 1px; margin-bottom: 10px; }
+.l-title { font-family: 'DM Serif Display', serif; font-size: clamp(30px, 4vw, 44px); line-height: 1.15; color: var(--ink); margin-bottom: 14px; }
+.l-title em { font-style: italic; color: var(--amber); }
+.l-subtitle { font-size: 15px; color: var(--muted); line-height: 1.7; font-weight: 300; max-width: 540px; }
+.l-divider { height: 1px; background: var(--border2); margin: 32px 0; }
+
+.s-head { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.s-head::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+
+.l-text { font-size: 15px; line-height: 1.8; color: var(--ink); font-weight: 300; margin-bottom: 24px; }
+.l-text strong { font-weight: 600; color: var(--ink); }
+.l-text code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--border2); padding: 2px 6px; border-radius: 4px; color: var(--amber); }
+
+/* CODE BLOCK */
+.code-block { background: #1e1c1a; border-radius: 12px; overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow); }
+.code-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: #161412; border-bottom: 1px solid #2a2824; }
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.cd-r { background: #ff5f57; } .cd-y { background: #ffbd2e; } .cd-g { background: #28c840; }
+.code-lang { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #5a5550; margin-left: auto; letter-spacing: 1px; text-transform: uppercase; }
+.code-body { padding: 18px 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.9; color: #c9c5be; white-space: pre; overflow-x: auto; }
+.cc { color: #7dd3fc; } .cv { color: #86efac; } .cn { color: #fca5a5; } .cm { color: #4a4844; font-style: italic; }
+
+/* CALLOUTS */
+.callout { display: flex; gap: 12px; align-items: flex-start; padding: 16px 18px; border-radius: 10px; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+.callout-amber { background: var(--amber-l); border: 1px solid rgba(217,119,6,0.2); }
+.callout-green  { background: var(--green-l);  border: 1px solid rgba(5,150,105,0.2); }
+.callout-blue   { background: var(--blue-l);   border: 1px solid rgba(37,99,235,0.15); }
+.callout-rose   { background: var(--rose-l);   border: 1px solid rgba(225,29,72,0.15); }
+
+.callout code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; }
+
+/* KEY POINTS */
+.key-points { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+.kp { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; transition: box-shadow 0.2s, transform 0.2s; }
+.kp:hover { box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+
+.kp-label { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.kp-text { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.kp-text code { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--border2); padding: 1px 4px; border-radius: 3px; color: var(--amber); }
+
+/* NAV BUTTONS */
+.l-nav { display: flex; gap: 12px; align-items: center; margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--border2); }
+.nav-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: all 0.18s; }
+.nav-btn:hover { border-color: var(--amber); color: var(--ink); background: var(--amber-l); }
+.nav-btn.next, .nav-btn.finish { background: var(--ink); color: var(--bg); border-color: var(--ink); margin-left: auto; }
+.nav-btn.next:hover { background: #333; }
+.nav-btn.finish { background: var(--green); border-color: var(--green); }
+.nav-btn.finish:hover { background: #047857; }
+
+/* INTERACTIVE */
+.interactive { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 28px; box-shadow: var(--shadow); }
+.int-controls { padding: 14px 16px; background: #faf9f7; border-bottom: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; }
+.int-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.int-btn:hover { border-color: var(--amber); color: var(--amber); }
+.int-btn.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.demo-body { background: #faf9f7; padding: 24px; min-height: 80px; }
+
+/* FLEX CANVAS */
+.flex-canvas { border: 2px dashed var(--border); border-radius: 10px; background: rgba(217,119,6,0.03); min-height: 90px; transition: all 0.35s cubic-bezier(.4,0,.2,1); padding: 12px; display: flex; justify-content: flex-start; align-items: flex-start; gap: 8px; overflow: hidden; }
+.flex-box { background: linear-gradient(135deg,#fef3c7,#fde68a); border: 1.5px solid #f59e0b; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: #78350f; transition: all 0.35s cubic-bezier(.4,0,.2,1); min-width: 48px; padding: 12px 10px; }
+
+.prop-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--amber); background: rgba(217,119,6,0.08); border: 1px solid rgba(217,119,6,0.2); padding: 5px 12px; border-radius: 5px; display: inline-block; margin-bottom: 12px; transition: all 0.3s; }
+
+/* AXIS DIAGRAM */
+.axis-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; display: flex; gap: 24px; align-items: center; box-shadow: var(--shadow); }
+.axis-box { flex: 1; height: 100px; border: 2px dashed var(--border); border-radius: 8px; position: relative; background: rgba(217,119,6,0.03); display: flex; align-items: center; justify-content: center; }
+.axis-arrow-h { position: absolute; bottom: 10px; left: 12px; right: 12px; height: 2px; background: var(--amber); }
+.axis-arrow-h::after { content:''; position:absolute; right:-1px; top:-4px; border: 5px solid transparent; border-left: 8px solid var(--amber); }
+.axis-arrow-v { position: absolute; right: 10px; top: 12px; bottom: 12px; width: 2px; background: #2563eb; }
+.axis-arrow-v::after { content:''; position:absolute; bottom:-1px; left:-4px; border: 5px solid transparent; border-top: 8px solid #2563eb; }
+.axis-label-h { position:absolute; bottom:16px; left:50%; transform:translateX(-50%); font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--amber); background:var(--surface); padding:0 4px; white-space:nowrap; }
+.axis-label-v { position:absolute; right:16px; top:50%; transform:translateY(-50%) rotate(90deg); font-family:'JetBrains Mono',monospace; font-size:9px; color:#2563eb; background:var(--surface); padding:0 4px; white-space:nowrap; }
+.axis-info { flex: 1; }
+.axis-info-row { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
+.axis-chip { font-family:'JetBrains Mono',monospace; font-size:10px; padding:3px 8px; border-radius:4px; font-weight:500; white-space:nowrap; }
+.chip-amber { background:var(--amber-l); color:var(--amber); }
+.chip-blue  { background:var(--blue-l);  color:var(--blue); }
+.axis-info-text { font-size:12px; color:var(--muted); }
+.axis-info-text code { font-family:'JetBrains Mono',monospace; font-size:11px; background:var(--border2); padding:1px 4px; border-radius:3px; }
+
+/* GROW DEMO */
+.grow-demo { display: flex; gap: 8px; background: rgba(217,119,6,0.04); border: 2px dashed var(--border); border-radius: 8px; padding: 12px; margin-bottom: 8px; transition: all 0.3s; }
+.gbox { border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; padding: 14px 8px; transition: all 0.4s cubic-bezier(.4,0,.2,1); }
+
+/* PLAYGROUND */
+#playground-section { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 28px; box-shadow: var(--shadow); }
+.pg-topbar { background: #1e1c1a; padding: 12px 18px; display: flex; align-items: center; gap: 8px; }
+.pg-dots { display: flex; gap: 6px; }
+.pg-dot { width: 10px; height: 10px; border-radius: 50%; }
+.pg-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #5a5550; margin-left: auto; letter-spacing: 1px; }
+.pg-body { display: grid; grid-template-columns: 1fr 1fr; min-height: 340px; }
+.pg-editor { background: #161412; border-right: 1px solid #2a2824; display: flex; flex-direction: column; }
+.pg-editor-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #4a4844; letter-spacing: 2px; text-transform: uppercase; padding: 10px 16px 8px; border-bottom: 1px solid #2a2824; }
+.pg-textarea { flex: 1; background: transparent; border: none; outline: none; resize: none; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #c9c5be; line-height: 1.8; padding: 14px 16px; tab-size: 2; }
+.pg-preview { background: var(--bg); display: flex; flex-direction: column; min-height: 340px; }
+.pg-preview-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; padding: 10px 16px 8px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.pg-preview-frame { flex: 1; padding: 20px; overflow: auto; }
+.pg-preview-frame * { box-sizing: border-box; }
+.pg-controls { background: #1a1816; padding: 10px 18px; display: flex; align-items: center; gap: 10px; border-top: 1px solid #2a2824; }
+.pg-run { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; background: var(--amber); color: white; border: none; padding: 7px 18px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.18s; }
+.pg-run:hover { background: #b45309; transform: translateY(-1px); }
+.pg-hint { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #3a3836; }
+
+/* SNIPPET PILLS */
+.snippet-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.pill { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 99px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.pill:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-l); }
+
+/* OVERLAY */
+#overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 45; }
+#overlay.on { display: block; }
+
+/* CENTER ALIGN — lesson content wrapper */
+.lesson-inner {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* REFLECTION BLOCK */
+.reflection {
+  background: linear-gradient(135deg, rgba(217,119,6,0.06), rgba(37,99,235,0.04));
+  border: 1px solid rgba(217,119,6,0.2);
+  border-left: 4px solid var(--amber);
+  border-radius: 12px;
+  padding: 22px 24px 20px;
+  margin: 32px 0 0;
+}
+.reflection-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px;
+}
+.reflection-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--amber);
+}
+.reflection-question {
+  font-size: 14px; font-weight: 500; color: var(--ink);
+  line-height: 1.6; margin-bottom: 14px;
+}
+.reflection-prompts {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 16px;
+}
+.reflection-prompt {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 13px; color: var(--muted); line-height: 1.5;
+}
+.reflection-prompt::before {
+  content: '→';
+  color: var(--amber); font-weight: 600; flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-top: 1px;
+}
+
+
+
+
+
+
+
+
+
+/* PLAYGROUND — fixed iframe approach */
+#pg-preview-iframe {
+  flex: 1; border: none; background: white; width: 100%;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+.hamburger { display: none; width: 32px; height: 32px; align-items: center; justify-content: center; cursor: pointer; flex-direction: column; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); padding: 6px; margin-right: 4px; gap: 0; }
+.hamburger span { display: block; width: 16px; height: 1.5px; background: var(--ink); border-radius: 2px; margin: 2px 0; }
+
+@media (max-width: 700px) {
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  .lesson { padding: 24px 20px 60px; }
+  .key-points { grid-template-columns: 1fr; }
+  .pg-body { grid-template-columns: 1fr; }
+  .pg-editor { min-height: 200px; }
+  #topbar { padding: 0 16px; }
+  .axis-diagram { flex-direction: column; }
+  .hamburger { display: flex; }
+}
+</style>
+</head>
+<body>
+
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<aside id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-eyebrow">CSS Module</div>
+    <div class="sb-title">Flexbox<br>Fundamentals</div>
+  </div>
+  <div class="sb-progress">
+    <div class="sb-prog-row"><span>Progress</span><span id="pct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="progfill"></div></div>
+  </div>
+  <nav class="sb-nav" id="sb-nav"></nav>
+  <div class="sb-footer">Learn · CSS Flexbox<br>5 Lessons + Playground</div>
+</aside>
+
+<div id="main">
+  <div id="topbar">
+    <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+    <span class="tb-tag" id="tb-tag">01</span>
+    <span class="tb-sep">›</span>
+    <span class="tb-lesson" id="tb-lesson">What is Flexbox?</span>
+  </div>
+
+  <!-- LESSON 1 -->
+  <div class="lesson active" id="l-0">
+  <div class="lesson-inner">
+    <div class="l-header">
+      <div class="l-num">Lesson 01 of 05</div>
+      <div class="l-title">What is <em>Flexbox?</em></div>
+      <div class="l-subtitle">Flexbox is CSS's one-dimensional layout system — it makes arranging items in a row or column effortless.</div>
+    </div>
+
+    <div class="s-head">The big idea</div>
+    <p class="l-text">Before Flexbox, centering things in CSS was famously painful. Flexbox changed that. It introduces a <strong>flex container</strong> and <strong>flex items</strong> inside it. You tell the container how to distribute space and align its children — and it just works.</p>
+    <p class="l-text">You activate it with a single line: <code>display: flex</code>. The container becomes flex, and all its direct children become flex items automatically.</p>
+
+    <div class="code-block">
+      <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">CSS</span></div>
+      <div class="code-body"><span class="cm">/* Step 1: Make the parent a flex container */</span>
+<span class="cc">.container</span> {
+  <span class="cc">display</span>: <span class="cv">flex</span>;   <span class="cm">/* ✨ That's it! */</span>
+}
+
+<span class="cm">/* All direct children become flex items automatically */</span>
+<span class="cc">.item</span> {
+  <span class="cm">/* No special rules needed */</span>
+}</div>
+    </div>
+
+    <div class="s-head">Main axis vs Cross axis</div>
+    <p class="l-text">Flexbox works along two axes. The <strong>main axis</strong> is where items are laid out (horizontal by default). The <strong>cross axis</strong> is perpendicular to it.</p>
+
+    <div class="axis-diagram">
+      <div class="axis-box">
+        <div class="axis-arrow-h"><div class="axis-label-h">main axis →</div></div>
+        <div class="axis-arrow-v"><div class="axis-label-v">cross axis</div></div>
+        <div style="display:flex;gap:6px;padding-bottom:24px">
+          <div style="background:var(--amber-l);border:1px solid var(--amber);border-radius:5px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber)">A</div>
+          <div style="background:var(--amber-l);border:1px solid var(--amber);border-radius:5px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber)">B</div>
+          <div style="background:var(--amber-l);border:1px solid var(--amber);border-radius:5px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber)">C</div>
+        </div>
+      </div>
+      <div class="axis-info">
+        <div class="axis-info-row"><div class="axis-chip chip-amber">main axis</div><div class="axis-info-text">Default: left → right. Controlled by <code>flex-direction</code></div></div>
+        <div class="axis-info-row"><div class="axis-chip chip-blue">cross axis</div><div class="axis-info-text">Always perpendicular to main. Controlled by <code>align-items</code></div></div>
+      </div>
+    </div>
+
+    <div class="s-head">See it live</div>
+    <div class="interactive">
+      <div class="int-controls">
+        <button class="int-btn on" onclick="setDir('row')" id="d-row">row</button>
+        <button class="int-btn" onclick="setDir('row-reverse')" id="d-rr">row-reverse</button>
+        <button class="int-btn" onclick="setDir('column')" id="d-col">column</button>
+        <button class="int-btn" onclick="setDir('column-reverse')" id="d-cr">column-reverse</button>
+      </div>
+      <div class="demo-body">
+        <div class="prop-label" id="dir-label">flex-direction: row</div>
+        <div class="flex-canvas" id="dir-canvas">
+          <div class="flex-box">A</div><div class="flex-box">B</div><div class="flex-box">C</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-amber">
+      
+      <span>When <code>flex-direction</code> is <code>column</code>, the <strong>main axis becomes vertical</strong>. This flips the behaviour of <code>justify-content</code> and <code>align-items</code>.</span>
+    </div>
+
+    <div class="key-points">
+      <div class="kp"><div class="kp-label">One parent, many children</div><div class="kp-text">Flexbox controls the relationship between a container and its direct children.</div></div>
+      <div class="kp"><div class="kp-label">Row by default</div><div class="kp-text">Items flow left to right unless you change <code>flex-direction</code>.</div></div>
+      <div class="kp"><div class="kp-label">Two axes</div><div class="kp-text">Main axis = direction of flow. Cross axis = perpendicular. Always.</div></div>
+      <div class="kp"><div class="kp-label">One line to activate</div><div class="kp-text"><code>display: flex</code> on any element unlocks the full system.</div></div>
+    </div>
+
+    <div class="l-nav"><button class="nav-btn next" onclick="go(1)">justify-content →</button></div>
+
+    <div class="reflection">
+      <div class="reflection-header">
+        
+        <div class="reflection-label">Reflect &amp; Discuss</div>
+      </div>
+      <div class="reflection-question">Now that you understand the basics of Flexbox, think about where you've seen it used.</div>
+      <div class="reflection-prompts">
+        <div class="reflection-prompt">Can you think of a website layout where items are lined up in a row? What might be using <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--border2);padding:1px 5px;border-radius:3px;color:var(--amber)">display: flex</code>?</div>
+        <div class="reflection-prompt">Why do you think having a "main axis" and "cross axis" is more powerful than just saying "horizontal" and "vertical"?</div>
+        <div class="reflection-prompt">What layout problem would you solve first with Flexbox?</div>
+      </div>
+    </div>
+
+  </div><!-- .lesson-inner -->
+  </div>
+
+  <!-- LESSON 2 -->
+  <div class="lesson" id="l-1">
+  <div class="lesson-inner">
+    <div class="l-header">
+      <div class="l-num">Lesson 02 of 05</div>
+      <div class="l-title"><em>justify-content</em></div>
+      <div class="l-subtitle">Control how items are distributed along the <strong>main axis</strong> — the direction your flex items flow.</div>
+    </div>
+
+    <div class="s-head">What it does</div>
+    <p class="l-text"><code>justify-content</code> decides what happens to the <strong>leftover space</strong> on the main axis. You can push all items to one end, spread them out evenly, or put space between them — without touching the items themselves.</p>
+
+    <div class="code-block">
+      <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">CSS</span></div>
+      <div class="code-body"><span class="cc">.container</span> {
+  <span class="cc">display</span>: <span class="cv">flex</span>;
+  <span class="cc">justify-content</span>: <span class="cv">flex-start</span>;    <span class="cm">/* default */</span>
+  <span class="cc">justify-content</span>: <span class="cv">flex-end</span>;      <span class="cm">/* push to end */</span>
+  <span class="cc">justify-content</span>: <span class="cv">center</span>;       <span class="cm">/* centre them */</span>
+  <span class="cc">justify-content</span>: <span class="cv">space-between</span>; <span class="cm">/* max gap between */</span>
+  <span class="cc">justify-content</span>: <span class="cv">space-around</span>;  <span class="cm">/* equal space around */</span>
+  <span class="cc">justify-content</span>: <span class="cv">space-evenly</span>;  <span class="cm">/* identical gaps */</span>
+}</div>
+    </div>
+
+    <div class="s-head">Interactive demo</div>
+    <div class="interactive">
+      <div class="int-controls">
+        <button class="int-btn on" onclick="setJC('flex-start')" id="jc-fs">flex-start</button>
+        <button class="int-btn" onclick="setJC('flex-end')" id="jc-fe">flex-end</button>
+        <button class="int-btn" onclick="setJC('center')" id="jc-c">center</button>
+        <button class="int-btn" onclick="setJC('space-between')" id="jc-sb">space-between</button>
+        <button class="int-btn" onclick="setJC('space-around')" id="jc-sa">space-around</button>
+        <button class="int-btn" onclick="setJC('space-evenly')" id="jc-se">space-evenly</button>
+      </div>
+      <div class="demo-body">
+        <div class="prop-label" id="jc-label">justify-content: flex-start</div>
+        <div class="flex-canvas" id="jc-canvas" style="justify-content:flex-start">
+          <div class="flex-box">A</div><div class="flex-box">B</div><div class="flex-box">C</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-blue">
+      
+      <span><strong>space-between</strong> is perfect for navbars — it puts the logo on the left and links on the right with no extra CSS needed.</span>
+    </div>
+
+    <div class="key-points">
+      <div class="kp"><div class="kp-label">flex-start</div><div class="kp-text">Items packed toward the start of the main axis. The default.</div></div>
+      <div class="kp"><div class="kp-label">center</div><div class="kp-text">Items centred on the main axis. The classic centering trick.</div></div>
+      <div class="kp"><div class="kp-label">space-between</div><div class="kp-text">First item at start, last at end. Space shared between the rest.</div></div>
+      <div class="kp"><div class="kp-label">space-evenly</div><div class="kp-text">All gaps — including edges — are exactly equal.</div></div>
+    </div>
+
+    <div class="l-nav">
+      <button class="nav-btn" onclick="go(0)">← What is Flexbox?</button>
+      <button class="nav-btn next" onclick="go(2)">align-items →</button>
+    </div>
+
+    <div class="reflection">
+      <div class="reflection-header">
+        
+        <div class="reflection-label">Reflect &amp; Discuss</div>
+      </div>
+      <div class="reflection-question">You've learned how to distribute space on the main axis. Let's connect it to real layouts.</div>
+      <div class="reflection-prompts">
+        <div class="reflection-prompt">Look at a website navigation bar. Which <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--border2);padding:1px 5px;border-radius:3px;color:var(--amber)">justify-content</code> value do you think it uses?</div>
+        <div class="reflection-prompt">When would you choose <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--border2);padding:1px 5px;border-radius:3px;color:var(--amber)">space-evenly</code> over <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--border2);padding:1px 5px;border-radius:3px;color:var(--amber)">space-between</code>?</div>
+        <div class="reflection-prompt">Try clicking through the interactive demo above — which value surprised you most?</div>
+      </div>
+    </div>
+
+  </div><!-- .lesson-inner -->
+  </div>
+
+  <!-- LESSON 3 -->
+  <div class="lesson" id="l-2">
+  <div class="lesson-inner">
+    <div class="l-header">
+      <div class="l-num">Lesson 03 of 05</div>
+      <div class="l-title"><em>align-items</em></div>
+      <div class="l-subtitle">Control how items sit on the <strong>cross axis</strong> — the axis perpendicular to your main direction.</div>
+    </div>
+
+    <div class="s-head">Cross axis alignment</div>
+    <p class="l-text">While <code>justify-content</code> handles the main axis, <code>align-items</code> handles the <strong>cross axis</strong>. By default it's <code>stretch</code> — items expand to fill the container's height. Change it to <code>center</code> and everything magically centres vertically.</p>
+
+    <div class="code-block">
+      <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">CSS</span></div>
+      <div class="code-body"><span class="cc">.container</span> {
+  <span class="cc">display</span>: <span class="cv">flex</span>;
+  <span class="cc">align-items</span>: <span class="cv">stretch</span>;     <span class="cm">/* default — fill height */</span>
+  <span class="cc">align-items</span>: <span class="cv">flex-start</span>; <span class="cm">/* top of container */</span>
+  <span class="cc">align-items</span>: <span class="cv">flex-end</span>;   <span class="cm">/* bottom of container */</span>
+  <span class="cc">align-items</span>: <span class="cv">center</span>;     <span class="cm">/* perfect vertical centre */</span>
+  <span class="cc">align-items</span>: <span class="cv">baseline</span>;   <span class="cm">/* align text baselines */</span>
+}
+
+<span class="cm">/* The famous "centre everything" combo: */</span>
+<span class="cc">.container</span> {
+  <span class="cc">display</span>: <span class="cv">flex</span>;
+  <span class="cc">justify-content</span>: <span class="cv">center</span>;
+  <span class="cc">align-items</span>: <span class="cv">center</span>;
+}</div>
+    </div>
+
+    <div class="s-head">Interactive demo</div>
+    <div class="interactive">
+      <div class="int-controls">
+        <button class="int-btn on" onclick="setAI('stretch')" id="ai-st">stretch</button>
+        <button class="int-btn" onclick="setAI('flex-start')" id="ai-fs">flex-start</button>
+        <button class="int-btn" onclick="setAI('flex-end')" id="ai-fe">flex-end</button>
+        <button class="int-btn" onclick="setAI('center')" id="ai-c">center</button>
+        <button class="int-btn" onclick="setAI('baseline')" id="ai-bl">baseline</button>
+      </div>
+      <div class="demo-body">
+        <div class="prop-label" id="ai-label">align-items: stretch</div>
+        <div class="flex-canvas" id="ai-canvas" style="align-items:stretch;min-height:160px">
+          <div class="flex-box" style="font-size:11px;padding:14px 10px">Small</div>
+          <div class="flex-box" style="font-size:18px;font-weight:600;padding:20px 16px">Medium</div>
+          <div class="flex-box" style="font-size:30px;padding:26px 20px">Big</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-green">
+      
+      <span><code>justify-content: center</code> + <code>align-items: center</code> = the classic CSS trick for perfectly centering anything in a box. No more margin hacks!</span>
+    </div>
+
+    <div class="key-points">
+      <div class="kp"><div class="kp-label">stretch (default)</div><div class="kp-text">Items fill the container's cross-axis dimension. Great for equal-height cards.</div></div>
+      <div class="kp"><div class="kp-label">center</div><div class="kp-text">Perfectly vertically centred. Works together with justify-content: center.</div></div>
+      <div class="kp"><div class="kp-label">baseline</div><div class="kp-text">Aligns text baselines across different font sizes — great for navbars.</div></div>
+      <div class="kp"><div class="kp-label">Axis flip!</div><div class="kp-text">In <code>flex-direction: column</code>, this controls horizontal centering instead.</div></div>
+    </div>
+
+    <div class="l-nav">
+      <button class="nav-btn" onclick="go(1)">← justify-content</button>
+      <button class="nav-btn next" onclick="go(3)">flex-grow &amp; shrink →</button>
+    </div>
+
+    <div class="reflection">
+      <div class="reflection-header">
+        
+        <div class="reflection-label">Reflect &amp; Discuss</div>
+      </div>
+      <div class="reflection-question">Centering things is one of the most common tasks in web design. Think about how <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--border2);padding:1px 5px;border-radius:3px;color:var(--amber)">align-items</code> changes the game.</div>
+      <div class="reflection-prompts">
+        <div class="reflection-prompt">Before Flexbox, how might a developer have tried to vertically center something? Why was it hard?</div>
+        <div class="reflection-prompt">What happens to <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--border2);padding:1px 5px;border-radius:3px;color:var(--amber)">align-items</code> when you switch <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--border2);padding:1px 5px;border-radius:3px;color:var(--amber)">flex-direction</code> to <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--border2);padding:1px 5px;border-radius:3px;color:var(--amber)">column</code>?</div>
+        <div class="reflection-prompt">In the "Big/Medium/Small" demo, which <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--border2);padding:1px 5px;border-radius:3px;color:var(--amber)">align-items</code> value looked most polished to you?</div>
+      </div>
+    </div>
+
+  </div><!-- .lesson-inner -->
+  </div>
+
+  <!-- LESSON 4 -->
+  <div class="lesson" id="l-3">
+  <div class="lesson-inner">
+    <div class="l-header">
+      <div class="l-num">Lesson 04 of 05</div>
+      <div class="l-title">flex-grow &amp; <em>flex-shrink</em></div>
+      <div class="l-subtitle">Control how items <strong>expand</strong> to fill space or <strong>shrink</strong> when space is tight.</div>
+    </div>
+
+    <div class="s-head">The flex shorthand</div>
+    <p class="l-text">Items can respond to available space. <code>flex-grow</code> lets an item <strong>absorb extra space</strong>. <code>flex-shrink</code> lets it <strong>give up space</strong> when the container is too small. The shorthand <code>flex</code> combines both, plus <code>flex-basis</code> (the starting size).</p>
+
+    <div class="code-block">
+      <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">CSS</span></div>
+      <div class="code-body"><span class="cm">/* flex: grow  shrink  basis */</span>
+<span class="cc">.item</span>         { <span class="cc">flex</span>: <span class="cn">0  1  auto</span>; } <span class="cm">/* default */</span>
+<span class="cc">.item-grow</span>    { <span class="cc">flex</span>: <span class="cn">1  1  auto</span>; } <span class="cm">/* take all spare space */</span>
+<span class="cc">.item-double</span>  { <span class="cc">flex</span>: <span class="cn">2  1  auto</span>; } <span class="cm">/* take 2x more space */</span>
+<span class="cc">.item-fixed</span>   { <span class="cc">flex</span>: <span class="cn">0  0  200px</span>; } <span class="cm">/* never grow or shrink */</span>
+
+<span class="cm">/* Common shorthand values */</span>
+<span class="cc">.item</span> { <span class="cc">flex</span>: <span class="cv">auto</span>; }   <span class="cm">/* grow + shrink freely */</span>
+<span class="cc">.item</span> { <span class="cc">flex</span>: <span class="cv">none</span>; }   <span class="cm">/* rigid — never flex */</span>
+<span class="cc">.item</span> { <span class="cc">flex</span>: <span class="cn">1</span>; }      <span class="cm">/* flex-grow: 1, shorthand */</span></div>
+    </div>
+
+    <div class="s-head">Interactive demo</div>
+    <div class="interactive">
+      <div class="int-controls">
+        <button class="int-btn on" onclick="setGrow('equal')" id="g-eq">Equal (1 1 1)</button>
+        <button class="int-btn" onclick="setGrow('dominant')" id="g-dom">Dominant (2 1 1)</button>
+        <button class="int-btn" onclick="setGrow('sidebar')" id="g-side">Sidebar layout</button>
+        <button class="int-btn" onclick="setGrow('none')" id="g-none">No grow</button>
+      </div>
+      <div class="demo-body">
+        <div class="prop-label" id="grow-label">flex: 1 — equal distribution</div>
+        <div class="grow-demo" id="grow-canvas">
+          <div class="gbox" id="g1" style="flex:1;background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px solid #f59e0b;color:#78350f">Nav</div>
+          <div class="gbox" id="g2" style="flex:1;background:linear-gradient(135deg,#dbeafe,#bfdbfe);border:1.5px solid #2563eb;color:#1e40af">Content</div>
+          <div class="gbox" id="g3" style="flex:1;background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:1.5px solid #059669;color:#065f46">Aside</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);margin-top:4px" id="grow-sub">All items share space equally</div>
+      </div>
+    </div>
+
+    <div class="callout callout-amber">
+      
+      <span>The classic <strong>sidebar layout</strong>: give the sidebar <code>flex: 0 0 240px</code> (fixed width) and the main content <code>flex: 1</code> (takes remaining space). Done.</span>
+    </div>
+
+    <div class="key-points">
+      <div class="kp"><div class="kp-label">flex-grow</div><div class="kp-text">0 = don't grow. 1 = grow to fill. 2 = grow twice as fast as 1.</div></div>
+      <div class="kp"><div class="kp-label">flex-shrink</div><div class="kp-text">0 = never shrink below basis. 1 = shrink proportionally when needed.</div></div>
+      <div class="kp"><div class="kp-label">flex-basis</div><div class="kp-text">The item's starting size before flex adjustments. Like width, but for flex.</div></div>
+      <div class="kp"><div class="kp-label">flex: 1 shorthand</div><div class="kp-text">Equivalent to <code>flex: 1 1 0</code>. Distributes space equally among siblings.</div></div>
+    </div>
+
+    <div class="l-nav">
+      <button class="nav-btn" onclick="go(2)">← align-items</button>
+      <button class="nav-btn next" onclick="go(4)">flex-wrap →</button>
+    </div>
+
+    <div class="reflection">
+      <div class="reflection-header">
+        
+        <div class="reflection-label">Reflect &amp; Discuss</div>
+      </div>
+      <div class="reflection-question">Grow and shrink let items respond dynamically to space. This is where Flexbox becomes truly powerful.</div>
+      <div class="reflection-prompts">
+        <div class="reflection-prompt">Look at the "Sidebar layout" preset in the demo. What values make the sidebar stay fixed while the content area grows?</div>
+        <div class="reflection-prompt">Why might you give one item <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--border2);padding:1px 5px;border-radius:3px;color:var(--amber)">flex: 2</code> and others <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--border2);padding:1px 5px;border-radius:3px;color:var(--amber)">flex: 1</code>?</div>
+        <div class="reflection-prompt">Can you think of a real UI where <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--border2);padding:1px 5px;border-radius:3px;color:var(--amber)">flex-shrink: 0</code> is important (hint: think avatars or icons)?</div>
+      </div>
+    </div>
+
+  </div><!-- .lesson-inner -->
+  </div>
+
+  <!-- LESSON 5 -->
+  <div class="lesson" id="l-4">
+  <div class="lesson-inner">
+    <div class="l-header">
+      <div class="l-num">Lesson 05 of 05</div>
+      <div class="l-title">flex-<em>wrap</em></div>
+      <div class="l-subtitle">Allow items to <strong>spill onto new lines</strong> instead of shrinking to fit — the key to responsive layouts.</div>
+    </div>
+
+    <div class="s-head">Why wrapping matters</div>
+    <p class="l-text">By default, flex items <strong>never wrap</strong> — they squeeze onto one line no matter how small they get. Set <code>flex-wrap: wrap</code> and items that don't fit will naturally flow to the next row, giving you a responsive grid with no media queries.</p>
+
+    <div class="code-block">
+      <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">CSS</span></div>
+      <div class="code-body"><span class="cc">.container</span> {
+  <span class="cc">display</span>: <span class="cv">flex</span>;
+  <span class="cc">flex-wrap</span>: <span class="cv">nowrap</span>;       <span class="cm">/* default — single line */</span>
+  <span class="cc">flex-wrap</span>: <span class="cv">wrap</span>;         <span class="cm">/* wrap to next row */</span>
+  <span class="cc">flex-wrap</span>: <span class="cv">wrap-reverse</span>;  <span class="cm">/* wrap upward */</span>
+}
+
+<span class="cm">/* Responsive card grid — no media queries needed! */</span>
+<span class="cc">.card-grid</span> {
+  <span class="cc">display</span>: <span class="cv">flex</span>;
+  <span class="cc">flex-wrap</span>: <span class="cv">wrap</span>;
+  <span class="cc">gap</span>: <span class="cn">16px</span>;
+}
+<span class="cc">.card</span> {
+  <span class="cc">flex</span>: <span class="cn">1 1 200px</span>; <span class="cm">/* grow, shrink, min 200px wide */</span>
+}</div>
+    </div>
+
+    <div class="s-head">Interactive demo</div>
+    <div class="interactive">
+      <div class="int-controls">
+        <button class="int-btn on" onclick="setWrap('nowrap')" id="w-nw">nowrap</button>
+        <button class="int-btn" onclick="setWrap('wrap')" id="w-w">wrap</button>
+        <button class="int-btn" onclick="setWrap('wrap-reverse')" id="w-wr">wrap-reverse</button>
+      </div>
+      <div class="demo-body">
+        <div class="prop-label" id="wrap-label">flex-wrap: nowrap</div>
+        <div class="flex-canvas" id="wrap-canvas" style="flex-wrap:nowrap;gap:8px;min-height:80px;align-items:flex-start;">
+          <div class="flex-box" style="width:110px;flex-shrink:0;flex-grow:0;">Card 1</div>
+          <div class="flex-box" style="width:110px;flex-shrink:0;flex-grow:0;">Card 2</div>
+          <div class="flex-box" style="width:110px;flex-shrink:0;flex-grow:0;">Card 3</div>
+          <div class="flex-box" style="width:110px;flex-shrink:0;flex-grow:0;">Card 4</div>
+          <div class="flex-box" style="width:110px;flex-shrink:0;flex-grow:0;">Card 5</div>
+          <div class="flex-box" style="width:110px;flex-shrink:0;flex-grow:0;">Card 6</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-rose">
+      
+      <span><strong>Responsive pattern:</strong> <code>flex: 1 1 200px</code> on cards inside a <code>flex-wrap: wrap</code> container gives you a fluid grid that reflows automatically at every screen size.</span>
+    </div>
+
+    <div class="key-points">
+      <div class="kp"><div class="kp-label">nowrap (default)</div><div class="kp-text">All items on one line. They will shrink if needed. Can cause overflow.</div></div>
+      <div class="kp"><div class="kp-label">wrap</div><div class="kp-text">Overflowing items move to the next line. The responsive go-to.</div></div>
+      <div class="kp"><div class="kp-label">wrap-reverse</div><div class="kp-text">Wraps upward — new rows appear above. Rarely needed but good to know.</div></div>
+      <div class="kp"><div class="kp-label">gap + wrap</div><div class="kp-text">Use <code>gap</code> instead of margins for clean spacing in wrapped layouts.</div></div>
+    </div>
+
+    <div class="l-divider"></div>
+    <div class="s-head">Live Playground</div>
+    <p class="l-text">Write any Flexbox CSS below and see it render instantly. Try combining everything you've learned — or load a preset snippet!</p>
+
+    <div class="snippet-pills">
+      <div class="pill" onclick="loadSnippet('center')">Perfect center</div>
+      <div class="pill" onclick="loadSnippet('navbar')">Navbar layout</div>
+      <div class="pill" onclick="loadSnippet('sidebar')">Sidebar + content</div>
+      <div class="pill" onclick="loadSnippet('cards')">Responsive cards</div>
+      <div class="pill" onclick="loadSnippet('stack')">Vertical stack</div>
+    </div>
+
+    <div id="playground-section">
+      <div class="pg-topbar">
+        <div class="pg-dots">
+          <div class="pg-dot" style="background:#ff5f57"></div>
+          <div class="pg-dot" style="background:#ffbd2e"></div>
+          <div class="pg-dot" style="background:#28c840"></div>
+        </div>
+        <div class="pg-title">FLEXBOX PLAYGROUND</div>
+      </div>
+      <div class="pg-body">
+        <div class="pg-editor">
+          <div class="pg-editor-label">CSS</div>
+          <textarea class="pg-textarea" id="css-input" spellcheck="false">.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  background: #faf9f7;
+  border: 2px dashed #e5e0d8;
+  border-radius: 10px;
+  gap: 12px;
+}
+
+.box {
+  padding: 16px 24px;
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  border-radius: 8px;
+  font-family: monospace;
+  font-weight: 600;
+  color: #78350f;
+}</textarea>
+        </div>
+        <div class="pg-preview">
+          <div class="pg-preview-label">PREVIEW</div>
+          <iframe id="preview-frame" style="flex:1;border:none;width:100%;min-height:290px;background:white;display:block;"></iframe>
+        </div>
+      </div>
+      <div class="pg-controls">
+        <button class="pg-run" onclick="runPlayground()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1.5l9 4.5-9 4.5V1.5z"/></svg>
+          Run
+        </button>
+        <span class="pg-hint">Ctrl+Enter to run · Edit CSS on the left</span>
+      </div>
+    </div>
+
+    <div class="callout callout-green" style="margin-top:24px">
+      
+      <span><strong>You've learned Flexbox!</strong> You now know <code>display: flex</code>, <code>flex-direction</code>, <code>justify-content</code>, <code>align-items</code>, <code>flex-grow/shrink</code>, and <code>flex-wrap</code>. You can layout anything.</span>
+    </div>
+
+    <div class="l-nav">
+      <button class="nav-btn" onclick="go(3)">← flex-grow &amp; shrink</button>
+      <button class="nav-btn finish" onclick="finish()">✓ Complete</button>
+    </div>
+
+    <div class="reflection">
+      <div class="reflection-header">
+        
+        <div class="reflection-label">Final Reflection</div>
+      </div>
+      <div class="reflection-question">You've completed the full Flexbox module. Take a moment to reflect on what you've built.</div>
+      <div class="reflection-prompts">
+        <div class="reflection-prompt">Which Flexbox property do you think you'll use most often — and why?</div>
+        <div class="reflection-prompt">Try building a layout in the playground above that uses at least 3 properties from this course. Describe what you made.</div>
+        <div class="reflection-prompt">What would you want to learn next: CSS Grid, animations, or responsive design?</div>
+      </div>
+    </div>
+
+  </div><!-- .lesson-inner -->
+  </div><!-- #l-4 -->
+</div><!-- #main -->
+
+<script>
+const lessons = [
+  { title: "What is Flexbox?",      short: "Intro"   },
+  { title: "justify-content",        short: "Justify" },
+  { title: "align-items",            short: "Align"   },
+  { title: "flex-grow & shrink",     short: "Grow"    },
+  { title: "flex-wrap + Playground", short: "Wrap"    },
+];
+
+let current = 0;
+const done = new Set();
+
+const nav = document.getElementById('sb-nav');
+lessons.forEach((l, i) => {
+  const el = document.createElement('div');
+  el.className = 'nav-item' + (i === 0 ? ' active' : '');
+  el.id = 'ni-' + i;
+  el.innerHTML = `<div class="nav-dot"></div><span>${l.title}</span><span class="nav-num">0${i+1}</span>`;
+  el.onclick = () => go(i);
+  nav.appendChild(el);
+});
+
+function go(idx) {
+  done.add(current);
+  document.getElementById('l-' + current).classList.remove('active');
+  document.getElementById('ni-' + current).classList.remove('active');
+  if (current !== idx) document.getElementById('ni-' + current).classList.add('done');
+  document.getElementById('l-' + idx).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((el, i) => {
+    el.classList.remove('active');
+    if (done.has(i) && i !== idx) el.classList.add('done');
+  });
+  document.getElementById('ni-' + idx).classList.add('active');
+  document.getElementById('ni-' + idx).classList.remove('done');
+  current = idx;
+  document.getElementById('tb-tag').textContent = '0' + (idx + 1);
+  document.getElementById('tb-lesson').textContent = lessons[idx].title;
+  const pct = Math.round((done.size / lessons.length) * 100);
+  document.getElementById('progfill').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  closeSidebar();
+}
+
+function finish() {
+  done.add(current);
+  document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('active'); el.classList.add('done'); });
+  document.getElementById('progfill').style.width = '100%';
+  document.getElementById('pct').textContent = '100%';
+}
+
+function saveRef(idx, btn) {
+  const ta = document.getElementById('ref-' + idx);
+  if (ta.value.trim() === '') return;
+  btn.textContent = '✓ Saved';
+  btn.classList.add('saved');
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '✓ Saved';
+  }, 200);
+}
+
+function setDir(val) {
+  const c = document.getElementById('dir-canvas');
+  c.style.flexDirection = val;
+  c.style.minHeight = (val === 'column' || val === 'column-reverse') ? '180px' : '80px';
+  document.getElementById('dir-label').textContent = 'flex-direction: ' + val;
+  ['d-row','d-rr','d-col','d-cr'].forEach(id => document.getElementById(id).classList.remove('on'));
+  ({ row:'d-row','row-reverse':'d-rr',column:'d-col','column-reverse':'d-cr' })[val] && document.getElementById(({ row:'d-row','row-reverse':'d-rr',column:'d-col','column-reverse':'d-cr' })[val]).classList.add('on');
+}
+
+function setJC(val) {
+  document.getElementById('jc-canvas').style.justifyContent = val;
+  document.getElementById('jc-label').textContent = 'justify-content: ' + val;
+  ['jc-fs','jc-fe','jc-c','jc-sb','jc-sa','jc-se'].forEach(id => document.getElementById(id).classList.remove('on'));
+  const m = {'flex-start':'jc-fs','flex-end':'jc-fe','center':'jc-c','space-between':'jc-sb','space-around':'jc-sa','space-evenly':'jc-se'};
+  document.getElementById(m[val]).classList.add('on');
+}
+
+function setAI(val) {
+  document.getElementById('ai-canvas').style.alignItems = val;
+  document.getElementById('ai-label').textContent = 'align-items: ' + val;
+  ['ai-st','ai-fs','ai-fe','ai-c','ai-bl'].forEach(id => document.getElementById(id).classList.remove('on'));
+  const m = {'stretch':'ai-st','flex-start':'ai-fs','flex-end':'ai-fe','center':'ai-c','baseline':'ai-bl'};
+  document.getElementById(m[val]).classList.add('on');
+}
+
+function setGrow(mode) {
+  const g1=document.getElementById('g1'), g2=document.getElementById('g2'), g3=document.getElementById('g3');
+  ['g-eq','g-dom','g-side','g-none'].forEach(id => document.getElementById(id).classList.remove('on'));
+  const configs = {
+    equal:    { flex:['1','1','1'], label:'flex: 1 — equal distribution', sub:'All items share space equally', btn:'g-eq' },
+    dominant: { flex:['2','1','1'], label:'flex: 2 1 1 — Nav gets double', sub:'Nav absorbs twice the spare space', btn:'g-dom' },
+    sidebar:  { flex:['0 0 80px','1','0 0 60px'], label:'flex: 0 0 fixed — sidebar layout', sub:'Nav and Aside fixed; Content fills remaining space', btn:'g-side' },
+    none:     { flex:['0 0 auto','0 0 auto','0 0 auto'], label:'flex: 0 0 auto — no growing', sub:'Items keep their natural size', btn:'g-none' }
+  };
+  const c = configs[mode];
+  g1.style.flex = c.flex[0]; g2.style.flex = c.flex[1]; g3.style.flex = c.flex[2];
+  document.getElementById('grow-label').textContent = c.label;
+  document.getElementById('grow-sub').textContent = c.sub;
+  document.getElementById(c.btn).classList.add('on');
+}
+
+function setWrap(val) {
+  const canvas = document.getElementById('wrap-canvas');
+  canvas.style.flexWrap = val;
+  canvas.style.alignItems = 'flex-start';
+  canvas.style.minHeight = (val === 'nowrap') ? '80px' : '160px';
+  canvas.style.overflow = (val === 'nowrap') ? 'hidden' : 'visible';
+  document.getElementById('wrap-label').textContent = 'flex-wrap: ' + val;
+  ['w-nw','w-w','w-wr'].forEach(id => document.getElementById(id).classList.remove('on'));
+  const m = {'nowrap':'w-nw','wrap':'w-w','wrap-reverse':'w-wr'};
+  document.getElementById(m[val]).classList.add('on');
+}
+
+const snippets = {
+  center: `.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  background: #faf9f7;
+  border: 2px dashed #e5e0d8;
+  border-radius: 10px;
+  gap: 12px;
+}
+.box {
+  padding: 16px 24px;
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  border-radius: 8px;
+  font-family: monospace;
+  font-weight: 600;
+  color: #78350f;
+}`,
+  navbar: `.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: #1a1814;
+  border-radius: 10px;
+  gap: 16px;
+}
+.box {
+  padding: 8px 16px;
+  background: rgba(217,119,6,0.15);
+  border: 1px solid #d97706;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #fbbf24;
+}
+.box:first-child {
+  font-size: 15px;
+  font-weight: 700;
+  background: transparent;
+  border: none;
+  color: #faf9f7;
+}`,
+  sidebar: `.container {
+  display: flex;
+  gap: 12px;
+  height: 160px;
+}
+.box:nth-child(1) {
+  flex: 0 0 80px;
+  background: #1a1814;
+  color: #fbbf24;
+  font-family: monospace;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+.box:nth-child(2) {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #e5e0d8;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  color: #8c8479;
+  font-size: 12px;
+}
+.box:nth-child(3) { display: none; }`,
+  cards: `.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 4px;
+}
+.box {
+  flex: 1 1 80px;
+  padding: 20px 12px;
+  background: white;
+  border: 1px solid #e5e0d8;
+  border-radius: 10px;
+  font-family: monospace;
+  font-size: 12px;
+  color: #8c8479;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}`,
+  stack: `.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: #f7f5f2;
+  border-radius: 10px;
+}
+.box {
+  padding: 10px 16px;
+  background: #fef3c7;
+  border-left: 3px solid #d97706;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  color: #78350f;
+}`
+};
+
+function loadSnippet(name) {
+  document.getElementById('css-input').value = snippets[name];
+  runPlayground();
+}
+
+function runPlayground() {
+  const css = document.getElementById('css-input').value;
+  const frame = document.getElementById('preview-frame');
+  const html = `<!DOCTYPE html><html><head><style>*{box-sizing:border-box;margin:0;padding:0}body{padding:20px;font-family:sans-serif}${css}</style></head><body><div class="container"><div class="box">A</div><div class="box">B</div><div class="box">C</div></div></body></html>`;
+  const doc = frame.contentDocument || frame.contentWindow.document;
+  doc.open(); doc.write(html); doc.close();
+}
+
+document.getElementById('css-input').addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runPlayground(); }
+});
+
+runPlayground();
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('on'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('on'); }
+</script>
+</body>
+</html>
