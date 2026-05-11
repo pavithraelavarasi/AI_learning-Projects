@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn · Semantic HTML & Accessibility</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════ */
+:root {
+  --bg:      #f7f5f2;
+  --surface: #ffffff;
+  --border:  #e5e0d8;
+  --border2: #ede9e3;
+  --ink:     #1a1814;
+  --muted:   #8c8479;
+  --dim:     #c4beb6;
+  --amber:   #d97706;
+  --amber-l: rgba(217,119,6,0.10);
+  --amber-d: rgba(217,119,6,0.18);
+  --green:   #059669;
+  --green-l: rgba(5,150,105,0.10);
+  --blue:    #2563eb;
+  --blue-l:  rgba(37,99,235,0.08);
+  --rose:    #e11d48;
+  --rose-l:  rgba(225,29,72,0.08);
+  --violet:  #7c3aed;
+  --violet-l:rgba(124,58,237,0.08);
+  --shadow:  0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ═══════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════ */
+#sidebar {
+  width: 224px; flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top:0; left:0; bottom:0;
+  z-index: 50;
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+}
+.sb-brand { padding: 24px 20px 18px; border-bottom: 1px solid var(--border2); }
+.sb-eyebrow { font-size: 9px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; }
+.sb-title { font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--ink); line-height: 1.3; }
+.sb-progress { padding: 14px 20px; border-bottom: 1px solid var(--border2); }
+.sb-prog-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 8px; }
+.prog-track { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--amber), #f59e0b); border-radius: 99px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+.sb-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
+.sb-section-label { font-size: 9px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); padding: 10px 20px 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; cursor: pointer; border-left: 2px solid transparent; color: var(--muted); font-size: 12.5px; font-weight: 400; transition: all .18s; }
+.nav-item:hover { color: var(--ink); background: rgba(217,119,6,0.04); }
+.nav-item.active { color: var(--ink); font-weight: 500; border-left-color: var(--amber); background: var(--amber-l); }
+.nav-item.done { color: var(--green); }
+.nav-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: all .2s; }
+.nav-item.active .nav-dot { background: var(--amber); box-shadow: 0 0 0 3px var(--amber-l); }
+.nav-item.done .nav-dot { background: var(--green); }
+.nav-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dim); margin-left: auto; }
+.sb-footer { padding: 14px 20px; border-top: 1px solid var(--border2); font-size: 11px; color: var(--dim); line-height: 1.5; }
+
+/* ═══════════════════════════════════════════════════
+   MAIN + TOPBAR
+═══════════════════════════════════════════════════ */
+#main { margin-left: 224px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+#topbar { position: sticky; top: 0; z-index: 40; background: rgba(247,245,242,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); height: 52px; display: flex; align-items: center; padding: 0 32px; gap: 12px; width: 100%; align-self: flex-start; }
+.tb-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 3px 10px; border-radius: 4px; }
+.tb-sep { color: var(--dim); font-size: 12px; }
+.tb-lesson { font-size: 13px; font-weight: 500; color: var(--ink); }
+
+/* ═══════════════════════════════════════════════════
+   LESSON SHELL
+═══════════════════════════════════════════════════ */
+.lesson { display: none; flex: 1; padding: 48px 48px 80px; width: 100%; max-width: 820px; animation: pageIn .4s ease both; }
+.lesson.active { display: block; }
+@keyframes pageIn { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: translateY(0); } }
+
+.l-header { margin-bottom: 36px; }
+.l-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--amber); letter-spacing: 1px; margin-bottom: 10px; }
+.l-title { font-family: 'DM Serif Display', serif; font-size: clamp(28px,4vw,42px); line-height: 1.15; color: var(--ink); margin-bottom: 14px; }
+.l-title em { font-style: italic; color: var(--amber); }
+.l-subtitle { font-size: 15px; color: var(--muted); line-height: 1.7; font-weight: 300; max-width: 560px; }
+.l-divider { height: 1px; background: var(--border2); margin: 32px 0; }
+.s-head { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.s-head::after { content:''; flex:1; height:1px; background: var(--border2); }
+
+.l-text { font-size: 15px; line-height: 1.8; color: var(--ink); font-weight: 300; margin-bottom: 24px; }
+.l-text strong { font-weight: 600; }
+.l-text code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--border2); padding: 2px 6px; border-radius: 4px; color: var(--amber); }
+
+/* code block */
+.code-block { background: #1e1c1a; border-radius: 12px; overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow); }
+.code-bar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid #2e2c28; }
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.cd-r{background:#ff5f57;} .cd-y{background:#febc2e;} .cd-g{background:#28c840;}
+.code-lang { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #666; margin-left: auto; letter-spacing: 1px; }
+.code-body { padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; color: #d4d0c8; overflow-x: auto; white-space: pre; }
+.ct{color:#9cdcfe;} .ca{color:#ce9178;} .cv{color:#98c379;} .cc{color:#7ec8e3;} .cn{color:#d19a66;} .cm{color:#636d83;font-style:italic;}
+
+/* demo box */
+.demo-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow); }
+.demo-bar { background: var(--bg); border-bottom: 1px solid var(--border); padding: 10px 16px; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.demo-body { padding: 24px; }
+
+/* callout */
+.callout { border-radius: 10px; padding: 16px 18px; margin-bottom: 24px; font-size: 14px; line-height: 1.7; display: flex; gap: 12px; }
+.callout-amber  { background: var(--amber-l);  border-left: 3px solid var(--amber);  color: #92400e; }
+.callout-green  { background: var(--green-l);  border-left: 3px solid var(--green);  color: #065f46; }
+.callout-blue   { background: var(--blue-l);   border-left: 3px solid var(--blue);   color: #1e3a8a; }
+.callout-rose   { background: var(--rose-l);   border-left: 3px solid var(--rose);   color: #9f1239; }
+.callout-violet { background: var(--violet-l); border-left: 3px solid var(--violet); color: #4c1d95; }
+.callout-icon { font-size: 16px; flex-shrink: 0; line-height: 1.6; }
+.callout code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; }
+
+/* key points */
+.key-points { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.kp { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; transition: all .2s; }
+.kp:hover { border-color: var(--amber); box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+.kp-icon { font-size: 18px; margin-bottom: 8px; }
+.kp-label { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.kp-text  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.kp-text code { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--border2); padding: 1px 4px; border-radius: 3px; color: var(--amber); }
+
+/* interactive */
+.interactive { margin-bottom: 28px; }
+.int-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.int-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: all .18s; }
+.int-btn:hover { border-color: var(--amber); color: var(--amber); }
+.int-btn.on { background: var(--amber); border-color: var(--amber); color: #fff; }
+
+/* nav */
+.l-nav { display: flex; align-items: center; justify-content: space-between; padding-top: 36px; border-top: 1px solid var(--border2); margin-top: 12px; }
+.nav-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 24px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: all .2s; }
+.nav-btn:hover { border-color: var(--ink); color: var(--ink); }
+.nav-btn.next   { background: var(--ink); color:#fff; border-color: var(--ink); }
+.nav-btn.next:hover { background: #2d2a26; }
+.nav-btn.finish { background: var(--green); color:#fff; border-color: var(--green); }
+.nav-btn.pg-btn { background: var(--blue); color:#fff; border-color: var(--blue); }
+.nav-btn.acc-btn { background: var(--violet); color:#fff; border-color: var(--violet); }
+
+/* overlay + hamburger */
+#overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.2); z-index:49; }
+#overlay.on { display:block; }
+#hamburger { display:none; width:36px; height:36px; background:var(--surface); border:1px solid var(--border); border-radius:8px; flex-direction:column; align-items:center; justify-content:center; gap:4px; cursor:pointer; margin-right:8px; }
+#hamburger span { display:block; width:14px; height:1.5px; background:var(--ink); border-radius:2px; }
+
+/* ═══════════════════════════════════════════════════
+   LESSON 1 — SEMANTIC vs DIV SOUP
+═══════════════════════════════════════════════════ */
+.soup-stage { background: var(--bg); border-radius: 12px; padding: 20px; border: 2px dashed var(--border); }
+.soup-item { background: #e5e0d8; border-radius: 6px; padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); margin-bottom: 8px; opacity: 0; transform: translateX(-20px); transition: all .4s ease; }
+.soup-item.show { opacity: 1; transform: translateX(0); }
+.soup-item.sem { background: var(--amber-l); border-left: 3px solid var(--amber); color: #92400e; }
+.soup-item.blue-sem { background: var(--blue-l); border-left-color: var(--blue); color: #1e3a8a; }
+.soup-item.green-sem { background: var(--green-l); border-left-color: var(--green); color: #065f46; }
+.soup-item.rose-sem { background: var(--rose-l); border-left-color: var(--rose); color: #9f1239; }
+
+/* ═══════════════════════════════════════════════════
+   LESSON 2 — PAGE ANATOMY (Real-world Claude.ai mockup)
+═══════════════════════════════════════════════════ */
+.page-anatomy { display: flex; flex-direction: column; gap: 6px; }
+.pa-zone { border-radius: 8px; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; opacity: 0; transform: scaleX(0.92); transform-origin: left; transition: opacity .45s ease, transform .45s cubic-bezier(.4,0,.2,1); cursor: pointer; position: relative; }
+.pa-zone.reveal { opacity: 1; transform: scaleX(1); }
+.pa-zone:hover { filter: brightness(0.97); }
+.pa-zone-tag { font-size: 11px; opacity: .75; }
+.pa-zone-note { font-size: 10px; font-family: 'DM Sans', sans-serif; font-weight: 400; opacity: .7; }
+.pz-header { background:#fef3c7; color:#92400e; border:1.5px solid #fbbf24; }
+.pz-nav    { background:#dbeafe; color:#1e40af; border:1.5px solid #93c5fd; }
+.pz-main   { background:#dcfce7; color:#166534; border:1.5px solid #86efac; min-height:60px; align-items:flex-start; padding:14px 16px; }
+.pz-article{ background:#f0fdf4; color:#15803d; border:1.5px dashed #86efac; margin:6px 0 6px 16px; }
+.pz-aside  { background:#faf5ff; color:#6b21a8; border:1.5px dashed #d8b4fe; margin:0 0 0 16px; }
+.pz-footer { background:#fee2e2; color:#991b1b; border:1.5px solid #fca5a5; }
+.pa-connector { width: 2px; height: 12px; background: var(--border); margin: 0 auto; opacity: 0; transition: opacity .3s; }
+.pa-connector.show { opacity: 1; }
+
+/* ── Real page anatomy mockup ── */
+.real-page-wrap { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); font-family: 'DM Sans', sans-serif; font-size: 13px; margin-bottom: 24px; position: relative; }
+.rp-browser-bar { background: #2d2a26; padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
+.rp-dot { width: 9px; height: 9px; border-radius: 50%; }
+.rp-url { flex: 1; background: #3d3a36; border-radius: 4px; padding: 4px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #8c8479; margin: 0 12px; }
+
+/* zone labels that appear on hover/reveal */
+.rp-zone { position: relative; cursor: pointer; transition: all .3s; }
+.rp-zone-label { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.5px; padding: 2px 6px; border-radius: 3px; opacity: 0; transition: opacity .2s; pointer-events: none; white-space: nowrap; font-weight: 600; }
+.real-page-wrap.labels-on .rp-zone-label { opacity: 1; }
+.rp-zone:hover .rp-zone-label { opacity: 1 !important; }
+
+/* Claude.ai-inspired header zone */
+.rp-header { background: #ffffff; border-bottom: 1px solid #e5e0d8; padding: 14px 20px; display: flex; align-items: center; gap: 14px; opacity: 0; transform: translateY(-8px); transition: opacity .4s ease, transform .4s ease; }
+.rp-header.reveal { opacity: 1; transform: translateY(0); }
+.rp-header-logo { width: 24px; height: 24px; background: #d97706; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.rp-header-name { font-family: 'DM Serif Display', serif; font-size: 15px; color: #1a1814; font-weight: 400; }
+.rp-header-tagline { font-size: 11px; color: #8c8479; font-weight: 300; }
+.rp-header .rp-zone-label { background: #fef3c7; color: #92400e; right: 12px; top: 50%; }
+
+/* Claude.ai-inspired nav */
+.rp-nav { background: #f7f5f2; border-bottom: 1px solid #e5e0d8; padding: 0 20px; display: flex; align-items: center; gap: 0; opacity: 0; transform: translateY(-6px); transition: opacity .4s ease .12s, transform .4s ease .12s; }
+.rp-nav.reveal { opacity: 1; transform: translateY(0); }
+.rp-nav-link { font-size: 12px; color: #8c8479; padding: 10px 14px; border-bottom: 2px solid transparent; transition: all .2s; cursor: pointer; }
+.rp-nav-link:hover { color: #1a1814; }
+.rp-nav-link.active { color: #d97706; border-bottom-color: #d97706; font-weight: 500; }
+.rp-nav .rp-zone-label { background: #dbeafe; color: #1e40af; bottom: 4px; top: auto; transform: none; right: 12px; }
+
+/* Claude.ai-inspired main layout */
+.rp-main { background: #f7f5f2; display: flex; min-height: 220px; opacity: 0; transition: opacity .4s ease .28s; }
+.rp-main.reveal { opacity: 1; }
+
+/* Sidebar (aside) — chat history style */
+.rp-aside { width: 160px; flex-shrink: 0; background: #ffffff; border-right: 1px solid #e5e0d8; padding: 14px 12px; opacity: 0; transform: translateX(-10px); transition: opacity .4s ease .45s, transform .4s ease .45s; }
+.rp-aside.reveal { opacity: 1; transform: translateX(0); }
+.rp-aside-title { font-size: 9px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #c4beb6; margin-bottom: 10px; }
+.rp-aside-item { padding: 6px 8px; border-radius: 6px; font-size: 11px; color: #8c8479; margin-bottom: 4px; cursor: pointer; transition: all .15s; }
+.rp-aside-item:hover { background: #f7f5f2; color: #1a1814; }
+.rp-aside-item.active { background: rgba(217,119,6,0.08); color: #92400e; font-weight: 500; }
+.rp-aside .rp-zone-label { background: #faf5ff; color: #6b21a8; right: 6px; bottom: 8px; top: auto; transform: none; }
+
+/* Article — main conversation area */
+.rp-article { flex: 1; padding: 20px; opacity: 0; transform: translateY(8px); transition: opacity .4s ease .55s, transform .4s ease .55s; }
+.rp-article.reveal { opacity: 1; transform: translateY(0); }
+.rp-msg { border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; font-size: 12px; line-height: 1.6; }
+.rp-msg-user { background: #ffffff; border: 1px solid #e5e0d8; color: #1a1814; max-width: 75%; margin-left: auto; border-radius: 10px 10px 2px 10px; }
+.rp-msg-ai   { background: #f0fdf4; border: 1px solid #86efac; color: #166534; max-width: 88%; border-radius: 10px 10px 10px 2px; }
+.rp-msg-label { font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; opacity: 0.6; margin-bottom: 4px; }
+.rp-article .rp-zone-label { background: #dcfce7; color: #15803d; right: 8px; top: 8px; transform: none; }
+
+/* Footer */
+.rp-footer { background: #1a1814; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; opacity: 0; transform: translateY(6px); transition: opacity .4s ease .75s, transform .4s ease .75s; }
+.rp-footer.reveal { opacity: 1; transform: translateY(0); }
+.rp-footer-text { font-size: 10px; color: #636d83; }
+.rp-footer-links { display: flex; gap: 14px; }
+.rp-footer-link { font-size: 10px; color: #636d83; text-decoration: none; cursor: pointer; }
+.rp-footer-link:hover { color: #8c8479; }
+.rp-footer .rp-zone-label { background: #fee2e2; color: #991b1b; right: 80px; bottom: 50%; top: auto; transform: translateY(50%); }
+
+/* label toggle btn */
+.label-toggle-btn { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: all .18s; margin-left: auto; }
+.label-toggle-btn.on { background: var(--violet); border-color: var(--violet); color: #fff; }
+
+/* ═══════════════════════════════════════════════════
+   LESSON 3 — HEADER & NAV
+═══════════════════════════════════════════════════ */
+.nav-preview { background: #1e1c1a; border-radius: 10px; overflow: hidden; }
+.nav-preview-bar { background: #2e2c28; padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
+.nav-preview-dot { width: 9px; height: 9px; border-radius: 50%; }
+.nav-preview-body { padding: 18px 20px; display: flex; align-items: center; gap: 0; }
+.nav-link { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: #d4d0c8; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all .25s; white-space: nowrap; }
+.nav-link:hover, .nav-link.lit { background: rgba(217,119,6,.15); color: #f59e0b; }
+.nav-logo { font-family: 'DM Serif Display', serif; font-size: 18px; color: #f7f5f2; margin-right: auto; }
+
+/* ═══════════════════════════════════════════════════
+   LESSON 4 — ARTICLE & SECTION
+═══════════════════════════════════════════════════ */
+.art-preview { background: var(--bg); border-radius: 10px; padding: 20px; border: 2px dashed var(--border); }
+.art-block { border-radius: 8px; padding: 12px 16px; margin-bottom: 10px; opacity: 0; transform: translateY(10px); transition: all .4s ease; font-size: 13px; line-height: 1.6; }
+.art-block.show { opacity: 1; transform: translateY(0); }
+.art-h1  { background:#fef3c7; color:#92400e; font-family:'DM Serif Display',serif; font-size:18px; }
+.art-p   { background:var(--surface); color:var(--muted); border:1px solid var(--border); }
+.art-sec { background:#dbeafe; color:#1e40af; font-weight:600; font-size:12px; letter-spacing:1px; text-transform:uppercase; }
+.art-sub { background:#f0f9ff; color:#0369a1; font-family:'DM Serif Display',serif; font-size:15px; margin-left:16px; }
+.art-pp  { background:var(--surface); color:var(--muted); border:1px solid var(--border); margin-left:16px; }
+.art-tag { font-family:'JetBrains Mono', monospace; font-size:10px; opacity:.6; float:right; font-style:normal; }
+
+/* ═══════════════════════════════════════════════════
+   LESSON 5 — MORE SEMANTIC TAGS spotlight
+═══════════════════════════════════════════════════ */
+.tag-spotlight { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
+.spot-card { background: var(--surface); border: 2px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; transition: all .25s; position: relative; overflow: hidden; }
+.spot-card::before { content:''; position:absolute; inset:0; background: var(--amber-l); opacity:0; transition: opacity .25s; }
+.spot-card:hover::before, .spot-card.active-spot::before { opacity:1; }
+.spot-card.active-spot { border-color: var(--amber); box-shadow: var(--shadow-hover); }
+.spot-tag { font-family:'JetBrains Mono',monospace; font-size:13px; color: var(--amber); font-weight:500; margin-bottom:6px; position:relative; }
+.spot-desc { font-size:12px; color:var(--muted); line-height:1.5; position:relative; }
+.spot-example { margin-top: 12px; padding: 14px 16px; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); font-size: 13px; line-height: 1.6; color: var(--ink); min-height: 52px; transition: all .3s ease; }
+
+/* ═══════════════════════════════════════════════════
+   LESSON 6 — SEMANTIC PLAYGROUND
+═══════════════════════════════════════════════════ */
+#l-5.active { max-width: 100%; width: 100%; padding: 0; align-self: stretch; }
+#pg-wrap { display: flex; height: calc(100vh - 52px); overflow: hidden; width: 100%; }
+#pg-controls { width: 280px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+.pg-section { padding: 16px 18px; border-bottom: 1px solid var(--border2); }
+.pg-section-title { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.pg-section-title::after { content:''; flex:1; height:1px; background: var(--border2); }
+.pg-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.pg-chip { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: all .15s; }
+.pg-chip:hover { border-color: var(--amber); color: var(--amber); }
+.pg-chip.on { background: var(--amber); border-color: var(--amber); color:#fff; }
+.pg-chip.active-chip { background: var(--ink); border-color: var(--ink); color: #fff; }
+.pg-label-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.pg-textarea { width: 100%; min-height: 72px; font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--ink); resize: vertical; line-height: 1.6; transition: border-color .18s; }
+.pg-textarea:focus { outline: none; border-color: var(--amber); }
+.pg-input { width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--ink); transition: border-color .18s; margin-bottom: 10px; }
+.pg-input:focus { outline: none; border-color: var(--amber); }
+.pg-toggle { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.pg-toggle-label { font-size: 12px; color: var(--ink); }
+.pg-switch { position:relative; width:36px; height:20px; }
+.pg-switch input { opacity:0; width:0; height:0; }
+.pg-slider { position:absolute; inset:0; border-radius:99px; background: var(--border); cursor:pointer; transition:.25s; }
+.pg-slider::before { content:''; position:absolute; width:14px; height:14px; border-radius:50%; background:#fff; left:3px; bottom:3px; transition:.25s; }
+.pg-switch input:checked + .pg-slider { background: var(--amber); }
+.pg-switch input:checked + .pg-slider::before { transform: translateX(16px); }
+#pg-preview { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+#pg-preview-top { flex:1; overflow:auto; background: var(--bg); display:flex; align-items:flex-start; justify-content:center; padding: 24px 24px 12px; }
+#pg-rendered { width:100%; max-width:600px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); min-height: 280px; font-family: 'DM Sans', sans-serif; }
+#pg-rendered header  { background:#fef3c7; padding:12px 18px; border-bottom:1px solid #fbbf24; font-weight:600; color:#92400e; }
+#pg-rendered nav     { background:#dbeafe; padding:10px 18px; border-bottom:1px solid #93c5fd; display:flex; gap:14px; font-size:13px; color:#1e40af; }
+#pg-rendered nav span { cursor:pointer; padding:4px 8px; border-radius:4px; transition:.15s; }
+#pg-rendered nav span:hover { background:rgba(37,99,235,.1); }
+#pg-rendered main    { padding:18px; min-height:120px; color:var(--ink); font-size:13px; line-height:1.7; display:flex; gap:14px; }
+#pg-rendered article { flex:1; }
+#pg-rendered aside   { width:140px; background:#f5f3ff; border-radius:8px; padding:10px; font-size:11px; color:#6b21a8; flex-shrink:0; }
+#pg-rendered footer  { background:#fee2e2; padding:10px 18px; border-top:1px solid #fca5a5; font-size:11px; color:#991b1b; text-align:center; }
+#pg-rendered section { margin-bottom:10px; }
+#pg-rendered h1 { font-family:'DM Serif Display',serif; font-size:20px; margin-bottom:8px; color:var(--ink); }
+#pg-rendered h2 { font-family:'DM Serif Display',serif; font-size:15px; margin-bottom:6px; color:var(--ink); }
+#pg-code { height: 180px; flex-shrink:0; background: #1e1c1a; border-top: 1px solid #2e2c28; padding: 14px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.75; color: #d4d0c8; overflow-y: auto; white-space: pre; }
+.pgc-tag  { color: #9cdcfe; }
+.pgc-attr { color: #ce9178; }
+.pgc-val  { color: #98c379; }
+.pgc-dim  { color: #636d83; font-style:italic; }
+.pgc-txt  { color: #d4d0c8; }
+.pg-bottom-nav { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:30; background:var(--surface); border:1px solid var(--border); border-radius:99px; padding:6px 8px; display:flex; gap:6px; box-shadow:var(--shadow); }
+.pg-bottom-nav .nav-btn { padding:8px 18px; font-size:12px; }
+
+/* ═══════════════════════════════════════════════════
+   LESSON 7 — ACCESSIBILITY
+═══════════════════════════════════════════════════ */
+.acc-rule { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; transition: all .2s; position: relative; overflow: hidden; }
+.acc-rule::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--violet); border-radius: 3px 0 0 3px; }
+.acc-rule:hover { box-shadow: var(--shadow-hover); }
+.acc-rule-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--violet); font-weight: 600; letter-spacing: 1px; margin-bottom: 6px; }
+.acc-rule-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+.acc-rule-body { font-size: 13px; color: var(--muted); line-height: 1.7; }
+.acc-rule-body code { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--border2); padding: 1px 5px; border-radius: 3px; color: var(--amber); }
+.acc-good-bad { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.acc-good { background: var(--green-l); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #065f46; border-left: 3px solid var(--green); }
+.acc-bad  { background: var(--rose-l); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #9f1239; border-left: 3px solid var(--rose); }
+.acc-good code, .acc-bad code { background: rgba(0,0,0,0.06); }
+.acc-good-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 5px; opacity: 0.7; }
+.acc-rule-mini { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+.acc-mini-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; transition: all .2s; }
+.acc-mini-card:hover { border-color: var(--violet); }
+.acc-mini-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--violet); margin-bottom: 4px; }
+.acc-mini-title { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.acc-mini-body  { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.acc-mini-body code { font-family: 'JetBrains Mono', monospace; font-size: 10px; background: var(--border2); padding: 1px 4px; border-radius: 3px; color: var(--amber); }
+
+/* contrast checker */
+.contrast-demo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.contrast-box { border-radius: 8px; padding: 14px; font-size: 13px; line-height: 1.5; position: relative; }
+.contrast-ratio { position: absolute; top: 8px; right: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+
+/* keyboard nav demo */
+.kbd-demo { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.kbd-el { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; background: var(--surface); border: 2px solid var(--border); font-size: 13px; color: var(--ink); transition: all .2s; cursor: pointer; }
+.kbd-el:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); background: var(--blue-l); }
+.kbd-el.no-focus:focus { outline: none; border-color: var(--border); box-shadow: none; }
+.kbd-el-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dim); margin-left: auto; }
+
+/* ═══════════════════════════════════════════════════
+   LESSON 8 — ACCESSIBILITY PLAYGROUND
+═══════════════════════════════════════════════════ */
+#l-7.active { max-width: 100%; width: 100%; padding: 0; align-self: stretch; }
+#apg-wrap { display: flex; height: calc(100vh - 52px); overflow: hidden; width: 100%; }
+#apg-controls { width: 290px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+#apg-preview-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+#apg-rendered-area { flex: 1; overflow: auto; background: var(--bg); padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+#apg-score-bar { height: 52px; flex-shrink: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 16px; }
+
+.apg-section { padding: 14px 16px; border-bottom: 1px solid var(--border2); }
+.apg-section-title { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.apg-section-title::after { content:''; flex:1; height:1px; background: var(--border2); }
+
+.apg-toggle { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.apg-toggle-label { font-size: 12px; color: var(--ink); line-height: 1.4; }
+.apg-toggle-sub  { font-size: 10px; color: var(--muted); }
+
+/* score */
+.apg-score-label { font-size: 12px; color: var(--muted); }
+.apg-score-num { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 600; transition: color .3s; }
+.apg-score-track { flex: 1; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.apg-score-fill { height: 100%; border-radius: 99px; transition: width .5s cubic-bezier(.4,0,.2,1), background .3s; }
+.apg-score-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; transition: all .3s; }
+
+/* rendered elements */
+.apg-card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
+.apg-card-title { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); padding: 10px 16px; border-bottom: 1px solid var(--border2); background: var(--bg); }
+
+/* issues overlay */
+.apg-issue { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; border-radius: 8px; font-size: 12px; line-height: 1.5; margin-bottom: 6px; }
+.apg-issue-error { background: var(--rose-l); color: #9f1239; border-left: 3px solid var(--rose); }
+.apg-issue-warn  { background: var(--amber-l); color: #92400e; border-left: 3px solid var(--amber); }
+.apg-issue-pass  { background: var(--green-l); color: #065f46; border-left: 3px solid var(--green); }
+.apg-issue-icon  { flex-shrink: 0; font-weight: 700; font-family: 'JetBrains Mono', monospace; font-size: 11px; padding-top: 1px; }
+.apg-bottom-nav { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:30; background:var(--surface); border:1px solid var(--border); border-radius:99px; padding:6px 8px; display:flex; gap:6px; box-shadow:var(--shadow); }
+.apg-bottom-nav .nav-btn { padding:8px 18px; font-size:12px; }
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-224px); }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  .lesson { padding: 28px 20px 72px; }
+  .key-points, .tag-spotlight, .acc-rule-mini { grid-template-columns: 1fr; }
+  #hamburger { display: flex !important; }
+  #topbar { padding: 0 16px; }
+  #pg-controls { width: 220px; }
+  #apg-controls { width: 220px; }
+  .acc-good-bad { grid-template-columns: 1fr; }
+  .contrast-demo { grid-template-columns: 1fr; }
+  .rp-aside { display: none; }
+  .l-nav { flex-direction: column; gap: 10px; align-items: stretch; }
+  .l-nav .nav-btn { text-align: center; }
+}
+@media (max-width: 600px) {
+  .lesson { padding: 22px 16px 80px; }
+  .l-title { font-size: 26px; }
+  .demo-body { padding: 16px; }
+  .acc-rule { padding: 16px; }
+  #pg-wrap, #apg-wrap { flex-direction: column; }
+  #pg-controls, #apg-controls { width: 100%; height: auto; max-height: 220px; flex-shrink: 0; border-right: none; border-bottom: 1px solid var(--border); }
+  .pg-bottom-nav, .apg-bottom-nav { bottom: 12px; left: 16px; right: 16px; transform: none; justify-content: center; border-radius: 12px; }
+  .code-body { font-size: 11px; }
+}
+@media (min-width: 769px) and (max-width: 1100px) {
+  .lesson { padding: 40px 36px 80px; }
+}
+</style>
+</head>
+<body>
+
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<nav id="sidebar" aria-label="Course navigation">
+  <div class="sb-brand">
+    <div class="sb-eyebrow">HTML · Structure</div>
+    <div class="sb-title">Semantic HTML &amp;<br>Accessibility</div>
+  </div>
+  <div class="sb-progress">
+    <div class="sb-prog-row"><span>Progress</span><span id="pct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="progfill"></div></div>
+  </div>
+  <div class="sb-nav" id="sb-nav"></div>
+  <div class="sb-footer">8 topics · ~40 min</div>
+</nav>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<div id="main">
+  <div id="topbar">
+    <button id="hamburger" onclick="toggleSidebar()" aria-label="Open navigation">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="tb-tag" id="tb-tag">01</span>
+    <span class="tb-sep" aria-hidden="true">›</span>
+    <span class="tb-lesson" id="tb-lesson">Why Semantic HTML?</span>
+  </div>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  LESSON 1 — WHY SEMANTIC HTML?       ║
+     ╚══════════════════════════════════════╝ -->
+<div class="lesson active" id="l-0">
+  <div class="l-header">
+    <div class="l-num">Lesson 01 of 08</div>
+    <h1 class="l-title">Why <em>Semantic</em> HTML?</h1>
+    <p class="l-subtitle">Semantic tags tell the browser — and humans — <em>what</em> a piece of content is, not just how it looks. This makes your pages smarter, more accessible, and easier to maintain.</p>
+  </div>
+
+  <div class="s-head">Div soup vs. semantic structure</div>
+  <p class="l-text">
+    A page built with only <code>&lt;div&gt;</code> tags looks the same visually, but has <strong>no meaning</strong>. Screen readers, search engines, and other developers have no idea what role each block plays. Semantic HTML replaces generic divs with <strong>meaningful tags</strong>.
+  </p>
+
+  <div class="demo-box">
+    <div class="demo-bar">Watch the transformation — click the buttons</div>
+    <div class="demo-body">
+      <div class="int-controls" style="margin-bottom:20px">
+        <button class="int-btn on" id="btn-soup" onclick="showSoup()">Div Soup</button>
+        <button class="int-btn" id="btn-sem" onclick="showSemantic()">Semantic</button>
+      </div>
+      <div class="soup-stage" id="soup-stage"></div>
+    </div>
+  </div>
+
+  <div class="callout callout-amber">
+    <span class="callout-icon" aria-hidden="true">&#9670;</span>
+    <span>Semantic HTML is the <strong>vocabulary of the web</strong>. Each tag carries meaning that machines and humans can understand instantly — without reading the content inside.</span>
+  </div>
+
+  <div class="key-points">
+    <div class="kp"><div class="kp-label">Accessibility</div><div class="kp-text">Screen readers use tags to navigate. <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;header&gt;</code> create automatic landmarks.</div></div>
+    <div class="kp"><div class="kp-label">SEO</div><div class="kp-text">Search engines rank pages higher when they can understand the structure and hierarchy of content.</div></div>
+    <div class="kp"><div class="kp-label">Cleaner Code</div><div class="kp-text">Semantic tags are self-documenting. <code>&lt;footer&gt;</code> is instantly clearer than <code>&lt;div class="footer"&gt;</code>.</div></div>
+    <div class="kp"><div class="kp-label">Team Friendly</div><div class="kp-text">Any developer can scan a semantic page and immediately understand where everything lives.</div></div>
+  </div>
+
+  <div class="l-nav">
+    <span></span>
+    <button class="nav-btn next" onclick="go(1)">Page Anatomy →</button>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  LESSON 2 — PAGE ANATOMY             ║
+     ╚══════════════════════════════════════╝ -->
+<div class="lesson" id="l-1">
+  <div class="l-header">
+    <div class="l-num">Lesson 02 of 08</div>
+    <h1 class="l-title">Page <em>Anatomy</em></h1>
+    <p class="l-subtitle">Every webpage is made of zones. Semantic HTML gives each zone a name. See how a real site like Claude.ai maps to these exact tags — then watch them build in order.</p>
+  </div>
+
+  <div class="s-head">Real page: Claude.ai — identify each zone</div>
+  <p class="l-text">
+    The mockup below mirrors the actual structure of Claude.ai — the AI assistant you are using right now. Toggle labels to see which semantic tag maps to each visible region.
+  </p>
+
+  <!-- Real page mockup -->
+  <div class="demo-box">
+    <div class="demo-bar" style="display:flex;align-items:center">
+      <span>Claude.ai — real page anatomy</span>
+      <button class="label-toggle-btn" id="label-toggle" onclick="toggleLabels()" style="margin-left:auto">Show HTML labels</button>
+    </div>
+    <div class="demo-body" style="padding:0">
+      <div class="real-page-wrap" id="real-page">
+        <div class="rp-browser-bar">
+          <div class="rp-dot" style="background:#ff5f57"></div>
+          <div class="rp-dot" style="background:#febc2e"></div>
+          <div class="rp-dot" style="background:#28c840"></div>
+          <div class="rp-url">claude.ai/chat</div>
+        </div>
+        <!-- header -->
+        <header class="rp-zone rp-header reveal" id="rph-header" onclick="spotRealZone('header')">
+          <div class="rp-header-logo" aria-hidden="true">C</div>
+          <span class="rp-header-name">Claude</span>
+          <span class="rp-header-tagline">AI assistant by Anthropic</span>
+          <span class="rp-zone-label" aria-hidden="true">&lt;header&gt;</span>
+        </header>
+        <!-- nav -->
+        <nav class="rp-zone rp-nav reveal" id="rph-nav" onclick="spotRealZone('nav')">
+          <span class="rp-nav-link active">New Chat</span>
+          <span class="rp-nav-link">Projects</span>
+          <span class="rp-nav-link">Starred</span>
+          <span class="rp-nav-link">Settings</span>
+          <span class="rp-zone-label" aria-hidden="true">&lt;nav&gt;</span>
+        </nav>
+        <!-- main area -->
+        <main class="rp-zone rp-main reveal" id="rph-main" style="position:relative;display:flex" onclick="spotRealZone('main')">
+          <!-- aside: chat history -->
+          <aside class="rp-zone rp-aside reveal" id="rph-aside" onclick="event.stopPropagation();spotRealZone('aside')">
+            <div class="rp-aside-title">Recent chats</div>
+            <div class="rp-aside-item active">HTML Semantics</div>
+            <div class="rp-aside-item">CSS Grid Deep Dive</div>
+            <div class="rp-aside-item">JS Array Methods</div>
+            <div class="rp-aside-item">Accessibility Guide</div>
+            <span class="rp-zone-label" aria-hidden="true">&lt;aside&gt;</span>
+          </aside>
+          <!-- article: conversation -->
+          <article class="rp-zone rp-article reveal" id="rph-article" onclick="event.stopPropagation();spotRealZone('article')">
+            <div class="rp-msg rp-msg-user">
+              <div class="rp-msg-label">User</div>
+              What is semantic HTML and why does it matter?
+            </div>
+            <div class="rp-msg rp-msg-ai">
+              <div class="rp-msg-label">Claude</div>
+              Semantic HTML uses meaningful tags like <strong>&lt;header&gt;</strong>, <strong>&lt;main&gt;</strong>, and <strong>&lt;article&gt;</strong> instead of generic divs. This helps screen readers, search engines, and other developers understand your content.
+            </div>
+            <span class="rp-zone-label" aria-hidden="true">&lt;article&gt;</span>
+          </article>
+        </main>
+        <!-- footer -->
+        <footer class="rp-zone rp-footer reveal" id="rph-footer" onclick="spotRealZone('footer')">
+          <span class="rp-footer-text">© 2024 Anthropic, PBC</span>
+          <div class="rp-footer-links">
+            <a class="rp-footer-link" href="#" onclick="return false">Privacy</a>
+            <a class="rp-footer-link" href="#" onclick="return false">Terms</a>
+            <a class="rp-footer-link" href="#" onclick="return false">Usage Policy</a>
+          </div>
+          <span class="rp-zone-label" aria-hidden="true">&lt;footer&gt;</span>
+        </footer>
+      </div>
+      <div id="real-zone-info" style="padding:14px 20px;font-size:13px;color:var(--muted);line-height:1.6;display:none;border-top:1px solid var(--border2);background:var(--bg)"></div>
+    </div>
+  </div>
+
+  <div class="s-head">Abstract view — watch each zone build</div>
+  <p class="l-text">
+    Click <strong>Build the page</strong> to see each zone appear in order, top to bottom — the same way a browser parses real HTML. Click any zone to learn more.
+  </p>
+
+  <div class="demo-box">
+    <div class="demo-bar">Animated Page Structure</div>
+    <div class="demo-body">
+      <div class="int-controls">
+        <button class="int-btn on" id="btn-build" onclick="buildPage()">&#9654; Build the page</button>
+        <button class="int-btn" onclick="resetPage()">&#8635; Reset</button>
+      </div>
+      <div class="page-anatomy" id="page-anatomy">
+        <div class="pa-zone pz-header" id="pz-header" onclick="spotZone('header')">
+          <span>&lt;header&gt; <span class="pa-zone-tag">— Site branding, logo</span></span>
+          <span class="pa-zone-note">Top of every page</span>
+        </div>
+        <div class="pa-connector" id="pc-1">&#8595;</div>
+        <div class="pa-zone pz-nav" id="pz-nav" onclick="spotZone('nav')">
+          <span>&lt;nav&gt; <span class="pa-zone-tag">— Navigation links</span></span>
+          <span class="pa-zone-note">Primary menu</span>
+        </div>
+        <div class="pa-connector" id="pc-2">&#8595;</div>
+        <div class="pa-zone pz-main" id="pz-main" onclick="spotZone('main')">
+          <div>
+            <div>&lt;main&gt; <span class="pa-zone-tag">— Primary content</span></div>
+            <div style="margin-top:8px;margin-left:16px;display:flex;flex-direction:column;gap:6px">
+              <div class="pa-zone pz-article" id="pz-article" style="opacity:0;transform:scaleX(0.92);" onclick="event.stopPropagation();spotZone('article')">
+                <span>&lt;article&gt; <span class="pa-zone-tag">— Self-contained content</span></span>
+              </div>
+              <div class="pa-zone pz-aside" id="pz-aside" style="opacity:0;transform:scaleX(0.92);" onclick="event.stopPropagation();spotZone('aside')">
+                <span>&lt;aside&gt; <span class="pa-zone-tag">— Related sidebar</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pa-connector" id="pc-3">&#8595;</div>
+        <div class="pa-zone pz-footer" id="pz-footer" onclick="spotZone('footer')">
+          <span>&lt;footer&gt; <span class="pa-zone-tag">— Copyright, links</span></span>
+          <span class="pa-zone-note">Bottom of page</span>
+        </div>
+      </div>
+      <div id="zone-info" style="margin-top:16px;font-size:13px;color:var(--muted);min-height:36px;line-height:1.6;transition:all .3s;padding:12px 14px;background:var(--bg);border-radius:8px;display:none;"></div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">HTML</span></div>
+    <div class="code-body"><span class="ct">&lt;body&gt;</span>
+  <span class="ct">&lt;header&gt;</span>…site logo, branding…<span class="ct">&lt;/header&gt;</span>
+  <span class="ct">&lt;nav&gt;</span>…links…<span class="ct">&lt;/nav&gt;</span>
+  <span class="ct">&lt;main&gt;</span>
+    <span class="ct">&lt;article&gt;</span>…primary content…<span class="ct">&lt;/article&gt;</span>
+    <span class="ct">&lt;aside&gt;</span>…sidebar…<span class="ct">&lt;/aside&gt;</span>
+  <span class="ct">&lt;/main&gt;</span>
+  <span class="ct">&lt;footer&gt;</span>…copyright, links…<span class="ct">&lt;/footer&gt;</span>
+<span class="ct">&lt;/body&gt;</span></div>
+  </div>
+
+  <div class="callout callout-blue">
+    <span class="callout-icon" aria-hidden="true">&#11044;</span>
+    <span>There should only be <strong>one <code>&lt;main&gt;</code></strong> per page. It wraps the unique content of that specific page — not repeated elements like the nav or footer.</span>
+  </div>
+
+  <div class="l-nav">
+    <button class="nav-btn" onclick="go(0)">← Why Semantic?</button>
+    <button class="nav-btn next" onclick="go(2)">&lt;header&gt; &amp; &lt;nav&gt; →</button>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  LESSON 3 — HEADER & NAV             ║
+     ╚══════════════════════════════════════╝ -->
+<div class="lesson" id="l-2">
+  <div class="l-header">
+    <div class="l-num">Lesson 03 of 08</div>
+    <h1 class="l-title"><em>&lt;header&gt;</em> &amp; &lt;nav&gt;</h1>
+    <p class="l-subtitle">The header introduces your page or section. The nav holds your navigation links — and together they form the top of every great website.</p>
+  </div>
+
+  <div class="s-head">What goes in &lt;header&gt;?</div>
+  <p class="l-text"><code>&lt;header&gt;</code> typically holds the <strong>site logo</strong>, page title, or introductory content for a section. It's not just the top of the page — any <code>&lt;article&gt;</code> or <code>&lt;section&gt;</code> can also have its own <code>&lt;header&gt;</code>.</p>
+
+  <div class="code-block">
+    <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">HTML</span></div>
+    <div class="code-body"><span class="ct">&lt;header&gt;</span>
+  <span class="ct">&lt;a</span> <span class="ca">href=</span><span class="cv">"/"</span><span class="ct">&gt;</span>
+    <span class="ct">&lt;img</span> <span class="ca">src=</span><span class="cv">"logo.svg"</span> <span class="ca">alt=</span><span class="cv">"MySite"</span><span class="ct">&gt;</span>
+  <span class="ct">&lt;/a&gt;</span>
+  <span class="ct">&lt;h1&gt;</span>MySite<span class="ct">&lt;/h1&gt;</span>
+  <span class="ct">&lt;p&gt;</span>A short tagline here<span class="ct">&lt;/p&gt;</span>
+<span class="ct">&lt;/header&gt;</span></div>
+  </div>
+
+  <div class="s-head">What goes in &lt;nav&gt;?</div>
+  <p class="l-text"><code>&lt;nav&gt;</code> wraps <strong>primary navigation links</strong> only — the main menu. Not every group of links qualifies; footer links or breadcrumbs don't need to be inside a <code>&lt;nav&gt;</code>.</p>
+
+  <div class="code-block">
+    <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">HTML</span></div>
+    <div class="code-body"><span class="ct">&lt;nav&gt;</span>
+  <span class="ct">&lt;ul&gt;</span>
+    <span class="ct">&lt;li&gt;&lt;a</span> <span class="ca">href=</span><span class="cv">"/"</span><span class="ct">&gt;</span>Home<span class="ct">&lt;/a&gt;&lt;/li&gt;</span>
+    <span class="ct">&lt;li&gt;&lt;a</span> <span class="ca">href=</span><span class="cv">"/about"</span><span class="ct">&gt;</span>About<span class="ct">&lt;/a&gt;&lt;/li&gt;</span>
+    <span class="ct">&lt;li&gt;&lt;a</span> <span class="ca">href=</span><span class="cv">"/blog"</span><span class="ct">&gt;</span>Blog<span class="ct">&lt;/a&gt;&lt;/li&gt;</span>
+  <span class="ct">&lt;/ul&gt;</span>
+<span class="ct">&lt;/nav&gt;</span></div>
+  </div>
+
+  <div class="s-head">Live preview — hover the nav links</div>
+  <div class="demo-box">
+    <div class="demo-bar">Animated nav preview</div>
+    <div class="demo-body" style="padding:0">
+      <div class="nav-preview">
+        <div class="nav-preview-bar">
+          <div class="nav-preview-dot" style="background:#ff5f57"></div>
+          <div class="nav-preview-dot" style="background:#febc2e"></div>
+          <div class="nav-preview-dot" style="background:#28c840"></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#666;margin-left:auto">mysite.com</span>
+        </div>
+        <div style="background:#2e2c28;padding:14px 20px;border-bottom:1px solid #3e3c38;display:flex;align-items:center;gap:14px">
+          <span class="nav-logo">MySite</span>
+          <span style="font-size:11px;color:#8c8479;font-family:'DM Sans',sans-serif">A short tagline</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#636d83;margin-left:auto;letter-spacing:1px">&lt;header&gt;</span>
+        </div>
+        <div class="nav-preview-body" style="gap:4px;">
+          <span class="nav-link lit">Home</span>
+          <span class="nav-link">About</span>
+          <span class="nav-link">Blog</span>
+          <span class="nav-link">Contact</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#636d83;margin-left:auto;letter-spacing:1px">&lt;nav&gt;</span>
+        </div>
+        <div style="padding:20px 20px 24px;display:flex;flex-direction:column;gap:8px">
+          <div style="height:14px;background:#3e3c38;border-radius:4px;width:60%"></div>
+          <div style="height:10px;background:#2e2c28;border-radius:4px;width:85%"></div>
+          <div style="height:10px;background:#2e2c28;border-radius:4px;width:70%"></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#636d83;letter-spacing:1px">&lt;main&gt;…&lt;/main&gt;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-rose">
+    <span class="callout-icon" aria-hidden="true">&#11044;</span>
+    <span><strong>Common mistake:</strong> Using <code>&lt;header&gt;</code> only for the page top. Remember — any <code>&lt;article&gt;</code> or <code>&lt;section&gt;</code> can have its own <code>&lt;header&gt;</code> to introduce that section's content.</span>
+  </div>
+
+  <div class="key-points">
+    <div class="kp"><div class="kp-label">&lt;header&gt; scope</div><div class="kp-text">Can be a page-level header <em>or</em> a section-level header. Context determines meaning.</div></div>
+    <div class="kp"><div class="kp-label">&lt;nav&gt; purpose</div><div class="kp-text">Only for major navigation links. Use <code>&lt;ul&gt;</code> + <code>&lt;li&gt;</code> inside for accessibility.</div></div>
+    <div class="kp"><div class="kp-label">Multiple navs</div><div class="kp-text">A page can have more than one <code>&lt;nav&gt;</code> — e.g. site-wide nav and a table of contents.</div></div>
+    <div class="kp"><div class="kp-label">Landmark role</div><div class="kp-text">Screen readers expose <code>&lt;header&gt;</code> and <code>&lt;nav&gt;</code> as landmark regions for quick jumping.</div></div>
+  </div>
+
+  <div class="l-nav">
+    <button class="nav-btn" onclick="go(1)">← Page Anatomy</button>
+    <button class="nav-btn next" onclick="go(3)">&lt;article&gt; &amp; &lt;section&gt; →</button>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  LESSON 4 — ARTICLE & SECTION        ║
+     ╚══════════════════════════════════════╝ -->
+<div class="lesson" id="l-3">
+  <div class="l-header">
+    <div class="l-num">Lesson 04 of 08</div>
+    <h1 class="l-title"><em>&lt;article&gt;</em> &amp; &lt;section&gt;</h1>
+    <p class="l-subtitle">These two tags organise the content inside <code>&lt;main&gt;</code>. Article is for self-contained pieces. Section groups related content thematically.</p>
+  </div>
+
+  <div class="s-head">The key difference</div>
+  <p class="l-text">
+    An <code>&lt;article&gt;</code> should make sense <strong>on its own</strong> — like a blog post, news story, or product card. A <code>&lt;section&gt;</code> groups related content that <strong>belongs together</strong> within a larger whole, like chapters in a book.
+  </p>
+
+  <div class="code-block">
+    <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">HTML</span></div>
+    <div class="code-body"><span class="ct">&lt;article&gt;</span>                        <span class="cm">← self-contained post</span>
+  <span class="ct">&lt;header&gt;</span>
+    <span class="ct">&lt;h2&gt;</span>My Blog Post Title<span class="ct">&lt;/h2&gt;</span>
+    <span class="ct">&lt;time</span> <span class="ca">datetime=</span><span class="cv">"2024-06-01"</span><span class="ct">&gt;</span>June 1, 2024<span class="ct">&lt;/time&gt;</span>
+  <span class="ct">&lt;/header&gt;</span>
+
+  <span class="ct">&lt;section&gt;</span>                      <span class="cm">← Introduction section</span>
+    <span class="ct">&lt;h3&gt;</span>Introduction<span class="ct">&lt;/h3&gt;</span>
+    <span class="ct">&lt;p&gt;</span>Opening paragraph…<span class="ct">&lt;/p&gt;</span>
+  <span class="ct">&lt;/section&gt;</span>
+
+  <span class="ct">&lt;section&gt;</span>                      <span class="cm">← Next section</span>
+    <span class="ct">&lt;h3&gt;</span>The Main Point<span class="ct">&lt;/h3&gt;</span>
+    <span class="ct">&lt;p&gt;</span>More content…<span class="ct">&lt;/p&gt;</span>
+  <span class="ct">&lt;/section&gt;</span>
+<span class="ct">&lt;/article&gt;</span></div>
+  </div>
+
+  <div class="s-head">Watch the content build — click to reveal</div>
+  <div class="demo-box">
+    <div class="demo-bar">Animated article structure</div>
+    <div class="demo-body">
+      <div class="int-controls">
+        <button class="int-btn on" onclick="buildArticle()" id="btn-art-build">&#9654; Build article</button>
+        <button class="int-btn" onclick="resetArticle()">&#8635; Reset</button>
+      </div>
+      <div class="art-preview" id="art-preview">
+        <div class="art-block art-h1" id="ab-1"><em class="art-tag">&lt;article&gt; &gt; &lt;header&gt; &gt; &lt;h2&gt;</em>My Blog Post Title</div>
+        <div class="art-block art-p"  id="ab-2"><em class="art-tag">&lt;time&gt;</em>Published: June 1, 2024</div>
+        <div class="art-block art-sec" id="ab-3"><em class="art-tag">&lt;section&gt;</em>INTRODUCTION</div>
+        <div class="art-block art-sub" id="ab-4"><em class="art-tag">&lt;h3&gt;</em>Why This Matters</div>
+        <div class="art-block art-pp"  id="ab-5"><em class="art-tag">&lt;p&gt;</em>The opening paragraph of the first section lives here, introducing the topic clearly.</div>
+        <div class="art-block art-sec" id="ab-6"><em class="art-tag">&lt;section&gt;</em>THE MAIN POINT</div>
+        <div class="art-block art-sub" id="ab-7"><em class="art-tag">&lt;h3&gt;</em>Going Deeper</div>
+        <div class="art-block art-pp"  id="ab-8"><em class="art-tag">&lt;p&gt;</em>A second section with its own heading. Each section stands as a clear thematic chunk.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-green">
+    <span class="callout-icon" aria-hidden="true">&#10003;</span>
+    <span><strong>Simple test for <code>&lt;article&gt;</code>:</strong> Could you publish this block independently on another site? If yes → <code>&lt;article&gt;</code>. If it needs the surrounding page to make sense → <code>&lt;section&gt;</code> or plain <code>&lt;div&gt;</code>.</span>
+  </div>
+
+  <div class="key-points">
+    <div class="kp"><div class="kp-label">&lt;article&gt; examples</div><div class="kp-text">Blog posts, news items, forum posts, product cards, comments — anything independently shareable.</div></div>
+    <div class="kp"><div class="kp-label">&lt;section&gt; examples</div><div class="kp-text">Chapters in a document, tabs in a UI, thematic groupings within a larger page.</div></div>
+    <div class="kp"><div class="kp-label">Nesting</div><div class="kp-text"><code>&lt;article&gt;</code> can contain <code>&lt;section&gt;</code>s. A <code>&lt;section&gt;</code> can contain <code>&lt;article&gt;</code>s (e.g. a comments section).</div></div>
+    <div class="kp"><div class="kp-label">Headings required</div><div class="kp-text">Every <code>&lt;section&gt;</code> and <code>&lt;article&gt;</code> should have a heading so screen readers can navigate between them.</div></div>
+  </div>
+
+  <div class="l-nav">
+    <button class="nav-btn" onclick="go(2)">← header &amp; nav</button>
+    <button class="nav-btn next" onclick="go(4)">More Semantic Tags →</button>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  LESSON 5 — MORE SEMANTIC TAGS       ║
+     ╚══════════════════════════════════════╝ -->
+<div class="lesson" id="l-4">
+  <div class="l-header">
+    <div class="l-num">Lesson 05 of 08</div>
+    <h1 class="l-title">More <em>Semantic</em> Tags</h1>
+    <p class="l-subtitle">Beyond the big five structural tags live a set of content-level semantic elements that give specific meaning to the pieces inside your articles and sections.</p>
+  </div>
+
+  <div class="s-head">Click a tag to see a live example</div>
+  <div class="tag-spotlight">
+    <div class="spot-card" id="sc-aside" onclick="spotTag('aside')">
+      <div class="spot-tag">&lt;aside&gt;</div>
+      <div class="spot-desc">Related, tangential content — sidebar, pull-quote, or supplementary info.</div>
+    </div>
+    <div class="spot-card" id="sc-figure" onclick="spotTag('figure')">
+      <div class="spot-tag">&lt;figure&gt; + &lt;figcaption&gt;</div>
+      <div class="spot-desc">Self-contained media with a caption — images, charts, code snippets.</div>
+    </div>
+    <div class="spot-card" id="sc-time" onclick="spotTag('time')">
+      <div class="spot-tag">&lt;time&gt;</div>
+      <div class="spot-desc">Machine-readable dates and times via the <code>datetime</code> attribute.</div>
+    </div>
+    <div class="spot-card" id="sc-address" onclick="spotTag('address')">
+      <div class="spot-tag">&lt;address&gt;</div>
+      <div class="spot-desc">Contact information for the nearest <code>&lt;article&gt;</code> or the whole document.</div>
+    </div>
+  </div>
+  <div class="spot-example" id="spot-example">
+    <span style="color:var(--dim);font-size:13px">Click a tag card above to see a live example</span>
+  </div>
+
+  <div class="l-divider"></div>
+
+  <div class="code-block">
+    <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">HTML — all four in context</span></div>
+    <div class="code-body"><span class="ct">&lt;main&gt;</span>
+  <span class="ct">&lt;article&gt;</span>
+    <span class="ct">&lt;h2&gt;</span>Post Title<span class="ct">&lt;/h2&gt;</span>
+    <span class="ct">&lt;time</span> <span class="ca">datetime=</span><span class="cv">"2024-09-15"</span><span class="ct">&gt;</span>Sept 15, 2024<span class="ct">&lt;/time&gt;</span>
+
+    <span class="ct">&lt;figure&gt;</span>
+      <span class="ct">&lt;img</span> <span class="ca">src=</span><span class="cv">"chart.png"</span> <span class="ca">alt=</span><span class="cv">"Sales chart for Q3"</span><span class="ct">&gt;</span>
+      <span class="ct">&lt;figcaption&gt;</span>Q3 sales by region<span class="ct">&lt;/figcaption&gt;</span>
+    <span class="ct">&lt;/figure&gt;</span>
+
+    <span class="ct">&lt;address&gt;</span>
+      Written by <span class="ct">&lt;a</span> <span class="ca">href=</span><span class="cv">"mailto:a@b.com"</span><span class="ct">&gt;</span>Arjun Kumar<span class="ct">&lt;/a&gt;</span>
+    <span class="ct">&lt;/address&gt;</span>
+  <span class="ct">&lt;/article&gt;</span>
+
+  <span class="ct">&lt;aside&gt;</span>
+    <span class="ct">&lt;h3&gt;</span>Related Posts<span class="ct">&lt;/h3&gt;</span>
+    …links…
+  <span class="ct">&lt;/aside&gt;</span>
+<span class="ct">&lt;/main&gt;</span></div>
+  </div>
+
+  <div class="callout callout-violet">
+    <span class="callout-icon" aria-hidden="true">&#11044;</span>
+    <span><code>&lt;time datetime="2024-09-15"&gt;</code> — the <strong>datetime attribute</strong> is the machine-readable version. The text inside can say anything; the attribute gives the exact, parseable date to browsers and scrapers.</span>
+  </div>
+
+  <div class="l-nav">
+    <button class="nav-btn" onclick="go(3)">← article &amp; section</button>
+    <button class="nav-btn pg-btn" onclick="go(5)">Semantic Playground →</button>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  LESSON 6 — SEMANTIC PLAYGROUND      ║
+     ╚══════════════════════════════════════╝ -->
+<div class="lesson" id="l-5">
+  <div id="pg-wrap">
+    <div id="pg-controls">
+      <div class="pg-section">
+        <div class="pg-section-title">Page Zones</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5">Toggle zones to add or remove them from the rendered page.</p>
+        <div class="pg-toggle"><span class="pg-toggle-label">&lt;header&gt;</span><label class="pg-switch"><input type="checkbox" id="tog-header" checked onchange="renderPage()"><span class="pg-slider"></span></label></div>
+        <div class="pg-toggle"><span class="pg-toggle-label">&lt;nav&gt;</span><label class="pg-switch"><input type="checkbox" id="tog-nav" checked onchange="renderPage()"><span class="pg-slider"></span></label></div>
+        <div class="pg-toggle"><span class="pg-toggle-label">&lt;aside&gt;</span><label class="pg-switch"><input type="checkbox" id="tog-aside" checked onchange="renderPage()"><span class="pg-slider"></span></label></div>
+        <div class="pg-toggle"><span class="pg-toggle-label">&lt;footer&gt;</span><label class="pg-switch"><input type="checkbox" id="tog-footer" checked onchange="renderPage()"><span class="pg-slider"></span></label></div>
+      </div>
+      <div class="pg-section">
+        <div class="pg-section-title">Content</div>
+        <div class="pg-label-row"><span>Site name</span></div>
+        <input class="pg-input" type="text" id="pg-sitename" value="MySite" oninput="renderPage()">
+        <div class="pg-label-row"><span>Nav links</span></div>
+        <div class="pg-chip-row" id="pg-navlinks">
+          <div class="pg-chip on" onclick="toggleNavLink(this,'Home')">Home</div>
+          <div class="pg-chip on" onclick="toggleNavLink(this,'About')">About</div>
+          <div class="pg-chip on" onclick="toggleNavLink(this,'Blog')">Blog</div>
+          <div class="pg-chip" onclick="toggleNavLink(this,'Contact')">Contact</div>
+          <div class="pg-chip" onclick="toggleNavLink(this,'Portfolio')">Portfolio</div>
+        </div>
+        <div class="pg-label-row" style="margin-top:10px"><span>Article title</span></div>
+        <input class="pg-input" type="text" id="pg-title" value="My First Semantic Page" oninput="renderPage()">
+        <div class="pg-label-row"><span>Article body</span></div>
+        <textarea class="pg-textarea" id="pg-body" oninput="renderPage()">This is the main article content, wrapped in &lt;article&gt;. It sits inside &lt;main&gt; and tells the page's primary story.</textarea>
+        <div class="pg-label-row" style="margin-top:10px"><span>Aside text</span></div>
+        <textarea class="pg-textarea" id="pg-aside" style="min-height:54px" oninput="renderPage()">Related links and extra context go here.</textarea>
+        <div class="pg-label-row" style="margin-top:10px"><span>Footer text</span></div>
+        <input class="pg-input" type="text" id="pg-footer" value="© 2024 MySite. All rights reserved." oninput="renderPage()">
+      </div>
+      <div class="pg-section">
+        <div class="pg-section-title">Section tags</div>
+        <div class="pg-label-row"><span>Active tag</span></div>
+        <div class="pg-chip-row">
+          <div class="pg-chip active-chip" id="chip-article" onclick="setInnerTag('article')">article</div>
+          <div class="pg-chip" id="chip-section" onclick="setInnerTag('section')">section</div>
+          <div class="pg-chip" id="chip-div"     onclick="setInnerTag('div')">div</div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5">Swap the inner content wrapper. Notice how <code style="font-size:11px;background:var(--border2);padding:1px 4px;border-radius:3px;color:var(--amber)">&lt;div&gt;</code> loses all semantic meaning in the code output.</p>
+      </div>
+    </div>
+    <div id="pg-preview">
+      <div id="pg-preview-top">
+        <div id="pg-rendered"></div>
+      </div>
+      <div id="pg-code"></div>
+    </div>
+  </div>
+  <div class="pg-bottom-nav">
+    <button class="nav-btn" onclick="go(4)" style="padding:8px 18px;font-size:12px">← More Tags</button>
+    <button class="nav-btn acc-btn" onclick="go(6)" style="padding:8px 18px;font-size:12px">Accessibility →</button>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  LESSON 7 — ACCESSIBILITY            ║
+     ╚══════════════════════════════════════╝ -->
+<div class="lesson" id="l-6">
+  <div class="l-header">
+    <div class="l-num">Lesson 07 of 08</div>
+    <h1 class="l-title">Web <em>Accessibility</em></h1>
+    <p class="l-subtitle">Accessible HTML ensures that your pages work for everyone — including people using screen readers, keyboard navigation, or low-vision displays. These 10 rules form your accessibility foundation.</p>
+  </div>
+
+  <!-- Rule 1 -->
+  <div class="acc-rule">
+    <div class="acc-rule-num">RULE 01</div>
+    <div class="acc-rule-title">Use Semantic HTML Elements</div>
+    <div class="acc-rule-body">
+      Use the right tag for the right purpose. Semantic elements carry built-in accessibility roles — no extra ARIA needed.
+      <div class="acc-good-bad" style="margin-top:12px">
+        <div class="acc-bad"><div class="acc-good-label">Avoid</div><code>&lt;div onclick="..."&gt;Submit&lt;/div&gt;</code><br>No role, no keyboard access.</div>
+        <div class="acc-good"><div class="acc-good-label">Better</div><code>&lt;button&gt;Submit&lt;/button&gt;</code><br>Focusable, activatable by keyboard.</div>
+      </div>
+      <div style="margin-top:12px;font-size:13px;line-height:1.7">
+        Use <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;footer&gt;</code> instead of generic <code>&lt;div&gt;</code> everywhere. Never skip heading levels — <code>&lt;h1&gt;</code> → <code>&lt;h2&gt;</code> → <code>&lt;h3&gt;</code> in order.
+      </div>
+    </div>
+  </div>
+
+  <!-- Rule 2 -->
+  <div class="acc-rule">
+    <div class="acc-rule-num">RULE 02</div>
+    <div class="acc-rule-title">Add Alt Text to Every Image</div>
+    <div class="acc-rule-body">
+      Every <code>&lt;img&gt;</code> must have an <code>alt</code> attribute.
+      <div class="acc-good-bad" style="margin-top:12px">
+        <div class="acc-good"><div class="acc-good-label">Descriptive</div><code>alt="A student reading a book"</code></div>
+        <div class="acc-good"><div class="acc-good-label">Decorative</div><code>alt=""</code> — empty, not missing</div>
+        <div class="acc-bad" style="grid-column:1/-1"><div class="acc-good-label">Never</div><code>alt="image1.jpg"</code> — filename is not a description</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rule 3 -->
+  <div class="acc-rule">
+    <div class="acc-rule-num">RULE 03</div>
+    <div class="acc-rule-title">Proper Heading Hierarchy</div>
+    <div class="acc-rule-body">
+      One <code>&lt;h1&gt;</code> per page (the main title). Subheadings follow in order: <code>&lt;h2&gt;</code>, <code>&lt;h3&gt;</code>, etc. Never skip levels — going from <code>&lt;h1&gt;</code> directly to <code>&lt;h4&gt;</code> breaks the document outline for screen readers.
+      <!-- Animated heading hierarchy -->
+      <div id="heading-demo" style="margin-top:14px;background:var(--bg);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;border:1px solid var(--border)">
+        <div id="hd-1" style="color:#d97706;opacity:0;transform:translateX(-12px);transition:all .35s">h1 — Page Title (one per page)</div>
+        <div id="hd-2" style="color:#2563eb;margin-left:20px;opacity:0;transform:translateX(-12px);transition:all .35s .1s">h2 — Main Section</div>
+        <div id="hd-3" style="color:#059669;margin-left:40px;opacity:0;transform:translateX(-12px);transition:all .35s .2s">h3 — Subsection</div>
+        <div id="hd-4" style="color:#7c3aed;margin-left:60px;opacity:0;transform:translateX(-12px);transition:all .35s .3s">h4 — Sub-subsection</div>
+        <div id="hd-5" style="color:#2563eb;margin-left:20px;opacity:0;transform:translateX(-12px);transition:all .35s .45s">h2 — Next Main Section</div>
+      </div>
+      <button class="int-btn" style="margin-top:10px" onclick="animateHeadings()">Show hierarchy flow</button>
+    </div>
+  </div>
+
+  <!-- Rule 4 -->
+  <div class="acc-rule">
+    <div class="acc-rule-num">RULE 04</div>
+    <div class="acc-rule-title">Label All Form Inputs</div>
+    <div class="acc-rule-body">
+      Every input must have an associated <code>&lt;label&gt;</code>. The <code>for</code> attribute on the label must match the <code>id</code> on the input.
+      <div class="code-block" style="margin-top:12px;margin-bottom:0">
+        <div class="code-bar"><div class="code-dot cd-r"></div><div class="code-dot cd-y"></div><div class="code-dot cd-g"></div><span class="code-lang">HTML</span></div>
+        <div class="code-body" style="font-size:12px"><span class="ct">&lt;label</span> <span class="ca">for=</span><span class="cv">"email"</span><span class="ct">&gt;</span>Email address<span class="ct">&lt;/label&gt;</span>
+<span class="ct">&lt;input</span> <span class="ca">type=</span><span class="cv">"email"</span> <span class="ca">id=</span><span class="cv">"email"</span> <span class="ca">name=</span><span class="cv">"email"</span><span class="ct">&gt;</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rule 5 -->
+  <div class="acc-rule">
+    <div class="acc-rule-num">RULE 05</div>
+    <div class="acc-rule-title">Sufficient Color Contrast</div>
+    <div class="acc-rule-body">
+      Text must be readable against its background. Minimum contrast ratio: 4.5:1 for normal text (3:1 for large text). Never rely on color alone to convey meaning.
+      <div class="contrast-demo">
+        <div class="contrast-box" style="background:#ffffff;color:#767676">
+          <span class="contrast-ratio" style="background:#fee2e2;color:#991b1b">3.0:1 Fail</span>
+          This grey text on white fails the contrast check. Hard to read for low-vision users.
+        </div>
+        <div class="contrast-box" style="background:#ffffff;color:#1a1814">
+          <span class="contrast-ratio" style="background:#dcfce7;color:#065f46">15.3:1 Pass</span>
+          Dark text on white. Clear for almost all users including those with low vision.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rule 6 -->
+  <div class="acc-rule">
+    <div class="acc-rule-num">RULE 06</div>
+    <div class="acc-rule-title">Keyboard Navigation</div>
+    <div class="acc-rule-body">
+      All interactive elements must be reachable with the <kbd style="font-family:'JetBrains Mono',monospace;background:var(--border2);padding:2px 6px;border-radius:4px;font-size:11px">Tab</kbd> key. Never remove the default focus outline without a replacement.
+      <div class="kbd-demo" style="margin-top:12px">
+        <button class="kbd-el" tabindex="0">
+          This button has a visible focus ring — try tabbing to it
+          <span class="kbd-el-label">tab here</span>
+        </button>
+        <button class="kbd-el no-focus" tabindex="0" style="cursor:pointer">
+          This button has <code style="font-size:11px;background:var(--border2);padding:1px 4px;border-radius:3px">outline:none</code> — invisible when focused
+          <span class="kbd-el-label" style="color:var(--rose)">bad practice</span>
+        </button>
+        <a href="#" class="kbd-el" onclick="return false" tabindex="0">
+          Links are also keyboard-accessible — this one has a focus ring
+          <span class="kbd-el-label">tab here</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rules 7–10 as compact cards -->
+  <div class="s-head" style="margin-top:8px">Rules 7–10 at a glance</div>
+  <div class="acc-rule-mini">
+    <div class="acc-mini-card">
+      <div class="acc-mini-num">RULE 07</div>
+      <div class="acc-mini-title">Meaningful Link Text</div>
+      <div class="acc-mini-body">Never <code>&lt;a&gt;Click here&lt;/a&gt;</code>. Links must describe their destination: <code>&lt;a&gt;Read about HTML semantics&lt;/a&gt;</code>. Screen readers list all links out of context.</div>
+    </div>
+    <div class="acc-mini-card">
+      <div class="acc-mini-num">RULE 08</div>
+      <div class="acc-mini-title">Language Attribute</div>
+      <div class="acc-mini-body">Always declare <code>&lt;html lang="en"&gt;</code>. Screen readers use this to choose the correct voice and pronunciation engine. Without it, content may be mispronounced.</div>
+    </div>
+    <div class="acc-mini-card">
+      <div class="acc-mini-num">RULE 09</div>
+      <div class="acc-mini-title">Use &lt;title&gt; in &lt;head&gt;</div>
+      <div class="acc-mini-body">Every page needs <code>&lt;title&gt;My Portfolio&lt;/title&gt;</code>. It is the first thing a screen reader announces when the page loads. Tab titles also help orientation.</div>
+    </div>
+    <div class="acc-mini-card">
+      <div class="acc-mini-num">RULE 10</div>
+      <div class="acc-mini-title">Pair Visual Cues with Text</div>
+      <div class="acc-mini-body">Never rely on color or icons alone. An error turning red must also say "Error: This field is required." Color blindness affects 1 in 12 men.</div>
+    </div>
+  </div>
+
+  <div class="l-nav">
+    <button class="nav-btn" onclick="go(5)">← Semantic Playground</button>
+    <button class="nav-btn acc-btn" onclick="go(7)">Accessibility Playground →</button>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════╗
+     ║  LESSON 8 — ACCESSIBILITY PLAYGROUND ║
+     ╚══════════════════════════════════════╝ -->
+<div class="lesson" id="l-7">
+  <div id="apg-wrap">
+    <!-- Controls -->
+    <div id="apg-controls">
+      <div class="apg-section">
+        <div class="apg-section-title">Toggle Issues</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5">Turn each issue on or off. Watch the preview and score update live.</p>
+
+        <div class="apg-toggle">
+          <div>
+            <div class="apg-toggle-label">Missing alt text</div>
+            <div class="apg-toggle-sub">img without alt attribute</div>
+          </div>
+          <label class="pg-switch"><input type="checkbox" id="apg-alt" onchange="renderAccessibility()"><span class="pg-slider"></span></label>
+        </div>
+        <div class="apg-toggle">
+          <div>
+            <div class="apg-toggle-label">Skipped heading level</div>
+            <div class="apg-toggle-sub">h1 jumps directly to h4</div>
+          </div>
+          <label class="pg-switch"><input type="checkbox" id="apg-heading" onchange="renderAccessibility()"><span class="pg-slider"></span></label>
+        </div>
+        <div class="apg-toggle">
+          <div>
+            <div class="apg-toggle-label">Unlabelled input</div>
+            <div class="apg-toggle-sub">input without label</div>
+          </div>
+          <label class="pg-switch"><input type="checkbox" id="apg-label" onchange="renderAccessibility()"><span class="pg-slider"></span></label>
+        </div>
+        <div class="apg-toggle">
+          <div>
+            <div class="apg-toggle-label">Poor color contrast</div>
+            <div class="apg-toggle-sub">light grey on white</div>
+          </div>
+          <label class="pg-switch"><input type="checkbox" id="apg-contrast" onchange="renderAccessibility()"><span class="pg-slider"></span></label>
+        </div>
+        <div class="apg-toggle">
+          <div>
+            <div class="apg-toggle-label">No focus outline</div>
+            <div class="apg-toggle-sub">outline: none on button</div>
+          </div>
+          <label class="pg-switch"><input type="checkbox" id="apg-focus" onchange="renderAccessibility()"><span class="pg-slider"></span></label>
+        </div>
+        <div class="apg-toggle">
+          <div>
+            <div class="apg-toggle-label">Vague link text</div>
+            <div class="apg-toggle-sub">"Click here" instead of descriptive text</div>
+          </div>
+          <label class="pg-switch"><input type="checkbox" id="apg-link" onchange="renderAccessibility()"><span class="pg-slider"></span></label>
+        </div>
+        <div class="apg-toggle">
+          <div>
+            <div class="apg-toggle-label">Missing lang attribute</div>
+            <div class="apg-toggle-sub">html without lang="en"</div>
+          </div>
+          <label class="pg-switch"><input type="checkbox" id="apg-lang" onchange="renderAccessibility()"><span class="pg-slider"></span></label>
+        </div>
+        <div class="apg-toggle">
+          <div>
+            <div class="apg-toggle-label">Color-only error state</div>
+            <div class="apg-toggle-sub">error shown in red only, no text</div>
+          </div>
+          <label class="pg-switch"><input type="checkbox" id="apg-color" onchange="renderAccessibility()"><span class="pg-slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview pane -->
+    <div id="apg-preview-pane">
+      <div id="apg-rendered-area">
+        <!-- Preview card -->
+        <div class="apg-card">
+          <div class="apg-card-title">Live Preview</div>
+          <div id="apg-live-preview" style="padding:18px;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.7"></div>
+        </div>
+        <!-- Issues card -->
+        <div class="apg-card">
+          <div class="apg-card-title">Accessibility Report</div>
+          <div id="apg-issues" style="padding:14px"></div>
+        </div>
+      </div>
+      <!-- Score bar -->
+      <div id="apg-score-bar">
+        <span class="apg-score-label">Score</span>
+        <span class="apg-score-num" id="apg-score-num">100</span>
+        <div class="apg-score-track">
+          <div class="apg-score-fill" id="apg-score-fill" style="width:100%;background:var(--green)"></div>
+        </div>
+        <span class="apg-score-badge" id="apg-score-badge" style="background:var(--green-l);color:#065f46">Excellent</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="apg-bottom-nav">
+    <button class="nav-btn" onclick="go(6)" style="padding:8px 18px;font-size:12px">← Accessibility</button>
+    <button class="nav-btn finish" onclick="finish()" style="padding:8px 18px;font-size:12px">Complete Course</button>
+  </div>
+</div>
+
+</div><!-- end #main -->
+
+<!-- ══════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════ -->
+<script>
+/* ─── LESSON NAV ───────────────────────────── */
+const LESSONS = [
+  { title:'Why Semantic HTML?',                 short:'Why Semantic?' },
+  { title:'Page Anatomy',                       short:'Page Anatomy'  },
+  { title:'&lt;header&gt; &amp; &lt;nav&gt;',  short:'header & nav'  },
+  { title:'&lt;article&gt; &amp; &lt;section&gt;', short:'article & section' },
+  { title:'More Semantic Tags',                 short:'More Tags'     },
+  { title:'Semantic Playground',                short:'Playground'    },
+  { title:'Accessibility',                      short:'Accessibility' },
+  { title:'A11y Playground',                    short:'A11y Playground' },
+];
+
+// Sidebar section labels
+const SECTION_LABELS = { 0: 'Semantic HTML', 6: 'Accessibility' };
+
+let current = 0;
+const done = new Set();
+
+const navEl = document.getElementById('sb-nav');
+LESSONS.forEach((l, i) => {
+  if (SECTION_LABELS[i]) {
+    const lbl = document.createElement('div');
+    lbl.className = 'sb-section-label';
+    lbl.textContent = SECTION_LABELS[i];
+    navEl.appendChild(lbl);
+  }
+  const el = document.createElement('div');
+  el.className = 'nav-item' + (i === 0 ? ' active' : '');
+  el.id = 'ni-' + i;
+  el.innerHTML = `<div class="nav-dot"></div><span>${l.short}</span><span class="nav-num">0${i+1}</span>`;
+  el.onclick = () => go(i);
+  navEl.appendChild(el);
+});
+
+function go(idx) {
+  done.add(current);
+  document.getElementById('l-' + current).classList.remove('active');
+  document.getElementById('ni-' + current).classList.remove('active');
+  if (current !== idx) document.getElementById('ni-' + current).classList.add('done');
+
+  document.getElementById('l-' + idx).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((el, i) => {
+    el.classList.remove('active');
+    if (done.has(i) && i !== idx) el.classList.add('done');
+  });
+  document.getElementById('ni-' + idx).classList.add('active');
+  document.getElementById('ni-' + idx).classList.remove('done');
+
+  current = idx;
+  document.getElementById('tb-tag').textContent = String(idx+1).padStart(2,'0');
+  document.getElementById('tb-lesson').innerHTML = LESSONS[idx].title;
+
+  const pct = Math.round((done.size / LESSONS.length) * 100);
+  document.getElementById('progfill').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+
+  window.scrollTo({ top:0, behavior:'smooth' });
+  closeSidebar();
+
+  if (idx === 5) renderPage();
+  if (idx === 1) { resetPage(); }
+  if (idx === 3) { resetArticle(); }
+  if (idx === 0) { initSoup(); }
+  if (idx === 7) { renderAccessibility(); }
+}
+
+function finish() {
+  done.add(current);
+  document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('active'); el.classList.add('done'); });
+  document.getElementById('progfill').style.width = '100%';
+  document.getElementById('pct').textContent = '100%';
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:68px;right:24px;z-index:99;background:var(--surface);border:1px solid var(--green);border-radius:12px;padding:16px 20px;box-shadow:var(--shadow-hover);animation:pageIn .4s ease both;max-width:300px;';
+  toast.innerHTML = '<div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:4px">Course Complete!</div><div style="font-size:12px;color:var(--muted);line-height:1.5">You now understand semantic HTML structure and web accessibility. Go build something great!</div>';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 7000);
+}
+
+/* ─── LESSON 1 — DIV SOUP ─────────────────── */
+const SOUP_ITEMS = [
+  { text:'&lt;div class="header"&gt; Site Name &lt;/div&gt;', sem:false },
+  { text:'&lt;div class="nav"&gt; Links &lt;/div&gt;',       sem:false },
+  { text:'&lt;div class="main"&gt; Content &lt;/div&gt;',    sem:false },
+  { text:'&lt;div class="sidebar"&gt; Sidebar &lt;/div&gt;', sem:false },
+  { text:'&lt;div class="footer"&gt; Footer &lt;/div&gt;',   sem:false },
+];
+const SEM_ITEMS = [
+  { text:'&lt;header&gt; Site Name &lt;/header&gt;', cls:'sem' },
+  { text:'&lt;nav&gt; Links &lt;/nav&gt;',           cls:'sem blue-sem' },
+  { text:'&lt;main&gt; Content &lt;/main&gt;',       cls:'sem green-sem' },
+  { text:'&lt;aside&gt; Sidebar &lt;/aside&gt;',     cls:'sem' },
+  { text:'&lt;footer&gt; Footer &lt;/footer&gt;',    cls:'sem rose-sem' },
+];
+
+function initSoup() {
+  const stage = document.getElementById('soup-stage');
+  stage.innerHTML = '';
+  SOUP_ITEMS.forEach((item, i) => {
+    const el = document.createElement('div');
+    el.className = 'soup-item';
+    el.innerHTML = item.text;
+    el.id = 'si-' + i;
+    stage.appendChild(el);
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.soup-item').forEach((el, i) => {
+      setTimeout(() => el.classList.add('show'), i * 120);
+    });
+  }, 100);
+}
+function showSoup() {
+  document.getElementById('btn-soup').classList.add('on');
+  document.getElementById('btn-sem').classList.remove('on');
+  const items = document.querySelectorAll('.soup-item');
+  items.forEach((el, i) => {
+    setTimeout(() => { el.className = 'soup-item show'; el.innerHTML = SOUP_ITEMS[i].text; }, i*100);
+  });
+}
+function showSemantic() {
+  document.getElementById('btn-sem').classList.add('on');
+  document.getElementById('btn-soup').classList.remove('on');
+  const items = document.querySelectorAll('.soup-item');
+  items.forEach((el, i) => {
+    setTimeout(() => { el.className = 'soup-item show ' + SEM_ITEMS[i].cls; el.innerHTML = SEM_ITEMS[i].text; }, i*100);
+  });
+}
+initSoup();
+
+/* ─── LESSON 2 — REAL PAGE ANATOMY ─────────── */
+function toggleLabels() {
+  const page = document.getElementById('real-page');
+  const btn  = document.getElementById('label-toggle');
+  page.classList.toggle('labels-on');
+  if (page.classList.contains('labels-on')) {
+    btn.textContent = 'Hide HTML labels';
+    btn.classList.add('on');
+  } else {
+    btn.textContent = 'Show HTML labels';
+    btn.classList.remove('on');
+  }
+}
+
+const REAL_ZONE_INFO = {
+  header:  '<strong>&lt;header&gt;</strong> — Claude.ai uses this for the top bar with the logo, product name, and brand identity. Appears on every page.',
+  nav:     '<strong>&lt;nav&gt;</strong> — The tab row (New Chat, Projects, Starred, Settings) is a primary navigation landmark. Screen readers can jump directly to it.',
+  main:    '<strong>&lt;main&gt;</strong> — Wraps the entire chat area. Everything unique to this page lives inside main — the conversation, the sidebar history.',
+  aside:   '<strong>&lt;aside&gt;</strong> — The chat history sidebar is tangentially related to the current conversation — perfect for aside. It supplements but isn\'t the primary content.',
+  article: '<strong>&lt;article&gt;</strong> — The conversation itself is self-contained and could be shared or exported independently — fitting for article.',
+  footer:  '<strong>&lt;footer&gt;</strong> — Copyright, Privacy, Terms, Usage Policy. Supplementary links at the bottom of the page.',
+};
+function spotRealZone(name) {
+  const info = document.getElementById('real-zone-info');
+  info.style.display = 'block';
+  info.innerHTML = REAL_ZONE_INFO[name] || '';
+}
+
+/* ─── LESSON 2 — ABSTRACT BUILD ANIMATION ── */
+const PA_ORDER = [
+  { id:'pz-header', connector:'pc-1' },
+  { id:'pz-nav',    connector:'pc-2' },
+  { id:'pz-main',   connector:'pc-3' },
+  { id:'pz-footer', connector:null   },
+];
+const ZONE_INFO = {
+  header:  '&lt;header&gt; — Introduces the page or a section. Holds logos, site title, or a hero image.',
+  nav:     '&lt;nav&gt; — Wraps primary navigation links. Screen readers surface it as a landmark so users can jump straight to the menu.',
+  main:    '&lt;main&gt; — One per page. Contains the unique content of that page — not navigation or footer.',
+  article: '&lt;article&gt; — Self-contained content that could be syndicated independently. Blog posts, news stories, forum threads.',
+  aside:   '&lt;aside&gt; — Tangentially related content. A sidebar, pull quote, or related links section.',
+  footer:  '&lt;footer&gt; — Closing content for the page or a section. Copyright notices, site links, contact info.',
+};
+let pageBuilt = false;
+function buildPage() {
+  if (pageBuilt) return;
+  pageBuilt = true;
+  document.getElementById('btn-build').classList.remove('on');
+  const delays = [0, 350, 700, 950];
+  PA_ORDER.forEach((z, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(z.id);
+      if(el) el.classList.add('reveal');
+    }, delays[i]);
+    if (z.connector) {
+      setTimeout(() => {
+        const c = document.getElementById(z.connector);
+        if(c) c.classList.add('show');
+      }, delays[i] + 180);
+    }
+  });
+  setTimeout(() => {
+    const a = document.getElementById('pz-article');
+    const b = document.getElementById('pz-aside');
+    if(a) { a.style.opacity='1'; a.style.transform='scaleX(1)'; }
+    setTimeout(() => { if(b) { b.style.opacity='1'; b.style.transform='scaleX(1)'; } }, 250);
+  }, 1000);
+}
+function resetPage() {
+  pageBuilt = false;
+  document.getElementById('btn-build').classList.add('on');
+  PA_ORDER.forEach(z => {
+    const el = document.getElementById(z.id);
+    if(el) el.classList.remove('reveal');
+    if (z.connector) {
+      const c = document.getElementById(z.connector);
+      if(c) c.classList.remove('show');
+    }
+  });
+  ['pz-article','pz-aside'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) { el.style.opacity='0'; el.style.transform='scaleX(0.92)'; }
+  });
+  const info = document.getElementById('zone-info');
+  info.style.display='none'; info.innerHTML='';
+}
+function spotZone(name) {
+  const info = document.getElementById('zone-info');
+  info.style.display = 'block';
+  info.innerHTML = ZONE_INFO[name] || '';
+}
+
+/* ─── LESSON 4 — ARTICLE BUILD ──────────── */
+let artBuilt = false;
+function buildArticle() {
+  if(artBuilt) return;
+  artBuilt = true;
+  document.getElementById('btn-art-build').classList.remove('on');
+  for(let i=1;i<=8;i++){
+    setTimeout(()=>{ const el = document.getElementById('ab-'+i); if(el) el.classList.add('show'); }, (i-1)*220);
+  }
+}
+function resetArticle(){
+  artBuilt = false;
+  document.getElementById('btn-art-build').classList.add('on');
+  for(let i=1;i<=8;i++){
+    const el = document.getElementById('ab-'+i);
+    if(el) el.classList.remove('show');
+  }
+}
+
+/* ─── LESSON 5 — TAG SPOTLIGHT ──────────── */
+const SPOT_EXAMPLES = {
+  aside: `<aside style="background:#f5f3ff;border-left:3px solid #7c3aed;padding:14px 16px;border-radius:8px;font-size:13px;color:#4c1d95">
+  <strong>Related Articles</strong><br>
+  &bull; Understanding CSS Grid<br>
+  &bull; Flexbox in 5 minutes<br>
+  &bull; The Box Model explained
+</aside>`,
+  figure: `<figure style="text-align:center;margin:0">
+  <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);height:80px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:8px">&#128202;</div>
+  <figcaption style="font-size:12px;color:#8c8479;font-style:italic">Fig 1. Q3 revenue chart — all regions combined.</figcaption>
+</figure>`,
+  time: `<p style="font-size:13px;color:#1a1814">Published on 
+  <time datetime="2024-09-15" style="background:#fef3c7;padding:2px 8px;border-radius:4px;color:#92400e;font-weight:500">September 15, 2024</time>
+  &mdash; the <code style="font-size:11px;background:#ede9e3;padding:1px 4px;border-radius:3px">datetime</code> attribute holds the machine-readable version.</p>`,
+  address: `<address style="font-style:normal;background:#dcfce7;border-left:3px solid #059669;padding:12px 16px;border-radius:8px;font-size:13px;color:#065f46">
+  Written by <strong>Arjun Kumar</strong><br>
+  <a href="mailto:arjun@example.com" style="color:#059669">arjun@example.com</a><br>
+  Chennai, India
+</address>`,
+};
+function spotTag(name) {
+  document.querySelectorAll('.spot-card').forEach(c => c.classList.remove('active-spot'));
+  document.getElementById('sc-' + name).classList.add('active-spot');
+  const ex = document.getElementById('spot-example');
+  ex.style.opacity = '0';
+  setTimeout(() => { ex.innerHTML = SPOT_EXAMPLES[name] || ''; ex.style.opacity = '1'; }, 180);
+}
+
+/* ─── LESSON 6 — SEMANTIC PLAYGROUND ──── */
+let activeNavLinks = ['Home','About','Blog'];
+let innerTag = 'article';
+
+function toggleNavLink(el, name) {
+  const idx = activeNavLinks.indexOf(name);
+  if (idx > -1) { activeNavLinks.splice(idx,1); el.classList.remove('on'); }
+  else { activeNavLinks.push(name); el.classList.add('on'); }
+  renderPage2();
+}
+function setInnerTag(tag) {
+  innerTag = tag;
+  ['article','section','div'].forEach(t => {
+    const c = document.getElementById('chip-'+t);
+    if(c) c.classList.remove('on','active-chip');
+  });
+  const chip = document.getElementById('chip-'+tag);
+  if(chip) chip.classList.add('active-chip');
+  renderPage2();
+}
+function renderPage() { renderPage2(); }
+function renderPage2() {
+  const showHeader = document.getElementById('tog-header').checked;
+  const showNav    = document.getElementById('tog-nav').checked;
+  const showAside  = document.getElementById('tog-aside').checked;
+  const showFooter = document.getElementById('tog-footer').checked;
+  const siteName   = document.getElementById('pg-sitename').value || 'MySite';
+  const artTitle   = document.getElementById('pg-title').value || 'Article Title';
+  const artBody    = document.getElementById('pg-body').value || '';
+  const asideText  = document.getElementById('pg-aside').value || '';
+  const footerText = document.getElementById('pg-footer').value || '';
+  const rendered   = document.getElementById('pg-rendered');
+  let html = '';
+  if (showHeader) html += `<header><span style="font-family:'DM Serif Display',serif;font-size:17px">${esc(siteName)}</span></header>`;
+  if (showNav)    html += `<nav>${activeNavLinks.map(l=>`<span>${esc(l)}</span>`).join('')}</nav>`;
+  html += `<main style="flex-direction:${showAside?'row':'column'}">`;
+  html += `<${innerTag}><h1>${esc(artTitle)}</h1><p>${esc(artBody)}</p></${innerTag}>`;
+  if (showAside)  html += `<aside><strong>Sidebar</strong><br><span style="font-size:11px">${esc(asideText)}</span></aside>`;
+  html += `</main>`;
+  if (showFooter) html += `<footer>${esc(footerText)}</footer>`;
+  rendered.innerHTML = html;
+
+  const code = document.getElementById('pg-code');
+  let c = '';
+  if(showHeader) c += `<span class="pgc-tag">&lt;header&gt;</span><span class="pgc-txt">${esc(siteName)}</span><span class="pgc-tag">&lt;/header&gt;</span>\n`;
+  if(showNav)    c += `<span class="pgc-tag">&lt;nav&gt;</span><span class="pgc-txt">${activeNavLinks.map(l=>`<span>${esc(l)}</span>`).join(' ')}</span><span class="pgc-tag">&lt;/nav&gt;</span>\n`;
+  c += `<span class="pgc-tag">&lt;main&gt;</span>\n`;
+  const tagColor = innerTag === 'div' ? '#e5e0d8' : '#9cdcfe';
+  c += `  <span style="color:${tagColor}">&lt;${innerTag}&gt;</span>\n`;
+  c += `    <span class="pgc-tag">&lt;h1&gt;</span><span class="pgc-txt">${esc(artTitle)}</span><span class="pgc-tag">&lt;/h1&gt;</span>\n`;
+  c += `    <span class="pgc-tag">&lt;p&gt;</span><span class="pgc-dim pgc-txt">${esc(artBody.substring(0,60))}${artBody.length>60?'…':''}</span><span class="pgc-tag">&lt;/p&gt;</span>\n`;
+  c += `  <span style="color:${tagColor}">&lt;/${innerTag}&gt;</span>\n`;
+  if(innerTag==='div') c += `  <span class="pgc-dim">  &#8593; &lt;div&gt; carries no semantic meaning</span>\n`;
+  if(showAside)  c += `  <span class="pgc-tag">&lt;aside&gt;</span><span class="pgc-dim">…sidebar…</span><span class="pgc-tag">&lt;/aside&gt;</span>\n`;
+  c += `<span class="pgc-tag">&lt;/main&gt;</span>\n`;
+  if(showFooter) c += `<span class="pgc-tag">&lt;footer&gt;</span><span class="pgc-txt">${esc(footerText)}</span><span class="pgc-tag">&lt;/footer&gt;</span>\n`;
+  code.innerHTML = c;
+}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ─── LESSON 7 — HEADING HIERARCHY ANIMATION ─ */
+let hdAnimated = false;
+function animateHeadings() {
+  if (hdAnimated) {
+    ['hd-1','hd-2','hd-3','hd-4','hd-5'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) { el.style.opacity='0'; el.style.transform='translateX(-12px)'; }
+    });
+    hdAnimated = false;
+    setTimeout(() => { hdAnimated = false; animateHeadings(); }, 400);
+    return;
+  }
+  hdAnimated = true;
+  ['hd-1','hd-2','hd-3','hd-4','hd-5'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) { el.style.opacity='1'; el.style.transform='translateX(0)'; }
+  });
+}
+
+/* ─── LESSON 8 — ACCESSIBILITY PLAYGROUND ─── */
+function renderAccessibility() {
+  const hasAlt      = document.getElementById('apg-alt').checked;
+  const hasHeading  = document.getElementById('apg-heading').checked;
+  const hasLabel    = document.getElementById('apg-label').checked;
+  const hasContrast = document.getElementById('apg-contrast').checked;
+  const hasFocus    = document.getElementById('apg-focus').checked;
+  const hasLink     = document.getElementById('apg-link').checked;
+  const hasLang     = document.getElementById('apg-lang').checked;
+  const hasColor    = document.getElementById('apg-color').checked;
+
+  // Live preview
+  const preview = document.getElementById('apg-live-preview');
+  let phtml = '';
+
+  // lang attribute indicator
+  if (hasLang) {
+    phtml += `<div style="background:#fee2e2;border-left:3px solid #e11d48;padding:8px 12px;border-radius:6px;font-size:12px;color:#9f1239;margin-bottom:12px;font-family:'JetBrains Mono',monospace">html lang="" missing — screen reader may mispronounce content</div>`;
+  }
+
+  // heading
+  if (hasHeading) {
+    phtml += `<h1 style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:4px;color:var(--ink)">Page Title (h1)</h1>`;
+    phtml += `<h4 style="font-family:'DM Serif Display',serif;font-size:14px;margin-bottom:12px;color:#e11d48;border-left:3px solid #e11d48;padding-left:8px">Skipped to h4 — broke outline! (should be h2)</h4>`;
+  } else {
+    phtml += `<h1 style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:4px;color:var(--ink)">Page Title (h1)</h1>`;
+    phtml += `<h2 style="font-family:'DM Serif Display',serif;font-size:15px;margin-bottom:12px;color:var(--muted)">Section Title (h2)</h2>`;
+  }
+
+  // image
+  if (hasAlt) {
+    phtml += `<div style="margin-bottom:12px"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60' viewBox='0 0 120 60'%3E%3Crect width='120' height='60' fill='%23e5e0d8'/%3E%3Ctext x='60' y='35' text-anchor='middle' fill='%238c8479' font-size='11' font-family='sans-serif'%3EImage%3C/text%3E%3C/svg%3E" style="border-radius:6px;display:block"><div style="font-size:11px;color:#e11d48;margin-top:4px;font-family:'JetBrains Mono',monospace">Missing alt attribute!</div></div>`;
+  } else {
+    phtml += `<div style="margin-bottom:12px"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60' viewBox='0 0 120 60'%3E%3Crect width='120' height='60' fill='%23dcfce7'/%3E%3Ctext x='60' y='35' text-anchor='middle' fill='%23065f46' font-size='11' font-family='sans-serif'%3EImage%3C/text%3E%3C/svg%3E" alt="A diagram showing semantic HTML structure" style="border-radius:6px;display:block"><div style="font-size:11px;color:#059669;margin-top:4px;font-family:'JetBrains Mono',monospace">alt="A diagram showing semantic HTML structure"</div></div>`;
+  }
+
+  // contrast
+  if (hasContrast) {
+    phtml += `<p style="font-size:13px;color:#b0a89f;background:#ffffff;padding:8px 10px;border-radius:6px;margin-bottom:12px;border:1px solid var(--border)">This text has insufficient contrast (ratio ~2.3:1) — hard to read for low-vision users.</p>`;
+  } else {
+    phtml += `<p style="font-size:13px;color:#1a1814;background:#ffffff;padding:8px 10px;border-radius:6px;margin-bottom:12px;border:1px solid var(--border)">This text has strong contrast (15.3:1) — readable for all users.</p>`;
+  }
+
+  // form label
+  if (hasLabel) {
+    phtml += `<div style="margin-bottom:12px"><input type="email" placeholder="Enter email" style="width:100%;padding:8px 12px;border-radius:6px;border:2px solid #e11d48;background:#fff8f8;font-family:'DM Sans',sans-serif;font-size:13px;outline:none"><div style="font-size:11px;color:#e11d48;margin-top:4px;font-family:'JetBrains Mono',monospace">No &lt;label&gt; — screen reader cannot announce this field</div></div>`;
+  } else {
+    phtml += `<div style="margin-bottom:12px"><label for="apg-email-demo" style="display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px">Email address</label><input type="email" id="apg-email-demo" placeholder="you@example.com" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:#fff;font-family:'DM Sans',sans-serif;font-size:13px;outline:none"></div>`;
+  }
+
+  // link text
+  if (hasLink) {
+    phtml += `<p style="font-size:13px;margin-bottom:12px">Learn more about HTML: <a href="#" onclick="return false" style="color:#2563eb;text-decoration:underline">click here</a> — screen readers hear "click here" with no context.</p>`;
+  } else {
+    phtml += `<p style="font-size:13px;margin-bottom:12px">Read the <a href="#" onclick="return false" style="color:#2563eb;text-decoration:underline">complete guide to semantic HTML</a> — descriptive link text.</p>`;
+  }
+
+  // focus outline
+  if (hasFocus) {
+    phtml += `<button style="padding:8px 18px;border-radius:8px;background:var(--ink);color:#fff;border:none;font-size:13px;cursor:pointer;outline:none" onfocus="this.style.outline='none'" tabindex="0">Submit (no focus ring)</button>`;
+  } else {
+    phtml += `<button style="padding:8px 18px;border-radius:8px;background:var(--ink);color:#fff;border:none;font-size:13px;cursor:pointer" tabindex="0">Submit (visible focus ring)</button>`;
+  }
+
+  // color-only error
+  if (hasColor) {
+    phtml += `<div style="margin-top:12px;padding:10px 12px;border-radius:6px;background:#fee2e2;color:#e11d48;font-size:13px">This field is required</div><div style="font-size:11px;color:#9f1239;margin-top:4px;font-family:'JetBrains Mono',monospace">Color only — no error icon, no "Error:" prefix. Colorblind users miss this.</div>`;
+  } else {
+    phtml += `<div style="margin-top:12px;padding:10px 12px;border-radius:6px;background:#fee2e2;border-left:3px solid #e11d48;font-size:13px;display:flex;gap:8px;align-items:flex-start"><span style="font-weight:700;color:#e11d48;font-size:14px">&#9888;</span><span><strong style="color:#e11d48">Error:</strong> This field is required. Please enter a value.</span></div>`;
+  }
+
+  preview.innerHTML = phtml;
+
+  // Build issues report
+  const issues = [];
+  if (hasAlt)      issues.push({ type:'error', msg:'Missing alt attribute on &lt;img&gt; — screen readers cannot describe this image.' });
+  if (hasHeading)  issues.push({ type:'error', msg:'Heading hierarchy skipped: &lt;h1&gt; jumps directly to &lt;h4&gt;. This breaks the document outline.' });
+  if (hasLabel)    issues.push({ type:'error', msg:'&lt;input&gt; has no associated &lt;label&gt;. Screen readers cannot announce what this field is for.' });
+  if (hasContrast) issues.push({ type:'error', msg:'Color contrast ratio ~2.3:1 fails WCAG AA (minimum 4.5:1 for normal text).' });
+  if (hasFocus)    issues.push({ type:'error', msg:'Focus outline removed — keyboard users cannot see which element is focused.' });
+  if (hasLink)     issues.push({ type:'warn',  msg:'"Click here" link text is meaningless out of context. Use descriptive text.' });
+  if (hasLang)     issues.push({ type:'warn',  msg:'Missing lang attribute on &lt;html&gt; — speech synthesis may use wrong language.' });
+  if (hasColor)    issues.push({ type:'warn',  msg:'Error state shown in red only — no text or icon. Color-blind users cannot distinguish it.' });
+
+  const passCount = 8 - issues.length;
+  if (passCount > 0) issues.push({ type:'pass', msg:`${passCount} of 8 rule${passCount>1?'s':''} passing correctly.` });
+
+  const issueEl = document.getElementById('apg-issues');
+  issueEl.innerHTML = issues.map(is => {
+    const cls = is.type === 'error' ? 'apg-issue-error' : is.type === 'warn' ? 'apg-issue-warn' : 'apg-issue-pass';
+    const icon = is.type === 'error' ? 'ERR' : is.type === 'warn' ? 'WRN' : 'OK';
+    return `<div class="apg-issue ${cls}"><span class="apg-issue-icon">${icon}</span><span>${is.msg}</span></div>`;
+  }).join('');
+
+  // Score
+  const errors   = issues.filter(i=>i.type==='error').length;
+  const warnings = issues.filter(i=>i.type==='warn').length;
+  const score = Math.max(0, 100 - (errors * 14) - (warnings * 7));
+  document.getElementById('apg-score-num').textContent = score;
+  document.getElementById('apg-score-fill').style.width = score + '%';
+  let color = score >= 80 ? 'var(--green)' : score >= 50 ? 'var(--amber)' : 'var(--rose)';
+  let badge = score >= 80 ? 'Excellent' : score >= 50 ? 'Needs Work' : 'Critical Issues';
+  let badgeBg = score >= 80 ? 'var(--green-l)' : score >= 50 ? 'var(--amber-l)' : 'var(--rose-l)';
+  let badgeColor = score >= 80 ? '#065f46' : score >= 50 ? '#92400e' : '#9f1239';
+  document.getElementById('apg-score-num').style.color = color;
+  document.getElementById('apg-score-fill').style.background = color;
+  const badgeEl = document.getElementById('apg-score-badge');
+  badgeEl.textContent = badge;
+  badgeEl.style.background = badgeBg;
+  badgeEl.style.color = badgeColor;
+}
+
+/* ─── SIDEBAR TOGGLE ─────────────────── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('on');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('on');
+}
+</script>
+</body>
+</html>
