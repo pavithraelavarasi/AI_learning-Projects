@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reviewer View — All Questions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f0e8;
+      --surface: #fffdf7;
+      --ink: #1a1714;
+      --ink-light: #5a524a;
+      --accent: #c0392b;
+      --accent-warm: #e67e22;
+      --accent-subtle: #f9f2e3;
+      --border: #d4c9b0;
+      --tag-bg: #1a1714;
+      --tag-text: #f5f0e8;
+      --code-bg: #2b2520;
+      --code-text: #f0d080;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 0 0 80px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--ink);
+      color: var(--bg);
+      padding: 48px 60px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 260px; height: 260px;
+      border-radius: 50%;
+      background: rgba(192,57,43,0.18);
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: 200px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: rgba(230,126,34,0.10);
+    }
+    .header-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-warm);
+      margin-bottom: 14px;
+    }
+    .header-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(26px, 4vw, 46px);
+      font-weight: 800;
+      line-height: 1.1;
+      max-width: 700px;
+    }
+    .header-subtitle {
+      margin-top: 10px;
+      font-size: 15px;
+      color: rgba(245,240,232,0.6);
+      font-style: italic;
+      max-width: 560px;
+      line-height: 1.6;
+    }
+    .header-meta {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 2px;
+    }
+    .badge.outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* ── NAV INDEX ── */
+    .nav-index {
+      background: var(--surface);
+      border-bottom: 1.5px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      overflow-x: auto;
+    }
+    .nav-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      gap: 0;
+    }
+    .nav-inner a {
+      font-family: 'DM Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      text-decoration: none;
+      padding: 13px 14px;
+      border-bottom: 2.5px solid transparent;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .nav-inner a:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ── LAYOUT ── */
+    .page-body {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ── QUESTION BLOCK ── */
+    .question-block {
+      margin-top: 64px;
+      padding-top: 16px;
+      border-top: 2px solid var(--border);
+    }
+    .question-block:first-child { border-top: none; }
+
+    .block-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .block-eyebrow::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── QUESTION CARD ── */
+    .question-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-left: 5px solid var(--accent);
+      border-radius: 4px;
+      padding: 32px 36px;
+      position: relative;
+    }
+    .question-number {
+      font-family: 'Syne', sans-serif;
+      font-size: 80px;
+      font-weight: 800;
+      color: var(--border);
+      position: absolute;
+      top: -10px; right: 24px;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .question-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+    }
+    .question-card p {
+      font-size: 15.5px;
+      line-height: 1.75;
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+    .question-card p:last-child { margin-bottom: 0; }
+
+    /* ── INPUT SCENARIO ── */
+    .scenario-box {
+      background: var(--accent-subtle);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 22px 28px;
+      margin-top: 20px;
+    }
+    .scenario-box .label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      margin-bottom: 8px;
+    }
+    .scenario-box p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--ink);
+      font-style: italic;
+    }
+
+    /* ── EXPECTATIONS ── */
+    .expectations-grid {
+      margin-top: 24px;
+      display: grid;
+      gap: 10px;
+    }
+    .exp-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 14px 18px;
+    }
+    .exp-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      background: #fde8e6;
+      border-radius: 2px;
+      padding: 2px 7px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+    .exp-item p {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: var(--ink);
+    }
+    .exp-item code {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    /* ── REVIEW QUESTIONS ── */
+    .review-section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 36px 0 20px;
+      color: var(--ink);
+    }
+    .review-grid {
+      display: grid;
+      gap: 0;
+    }
+    .review-item {
+      border: 1px solid var(--border);
+      border-top: none;
+      background: var(--surface);
+      transition: background 0.2s;
+      cursor: default;
+    }
+    .review-item:first-child { border-top: 1px solid var(--border); border-radius: 4px 4px 0 0; }
+    .review-item:last-child  { border-radius: 0 0 4px 4px; }
+    .review-item:hover { background: #fffaf0; }
+
+    .review-item-inner {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      min-height: 64px;
+    }
+    .review-index {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--ink);
+    }
+    .review-index.accent  { background: var(--accent); }
+    .review-index.warm    { background: var(--accent-warm); }
+    .review-index.green   { background: #27ae60; }
+    .review-index.blue    { background: #2980b9; }
+    .review-index.purple  { background: #8e44ad; }
+    .review-index.teal    { background: #16a085; }
+
+    .review-content {
+      padding: 16px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+    }
+    .review-category {
+      font-family: 'DM Mono', monospace;
+      font-size: 9.5px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+    }
+    .review-question {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+    .review-question code {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    /* ── CATEGORY DIVIDER ── */
+    .cat-header {
+      margin: 28px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .cat-header-pill {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .cat-header-pill.comprehension  { background: #1a1714; color: #f5f0e8; }
+    .cat-header-pill.identification { background: #c0392b; color: #fff; }
+    .cat-header-pill.explanation    { background: #e67e22; color: #fff; }
+    .cat-header-pill.modification   { background: #27ae60; color: #fff; }
+    .cat-header-pill.articulation   { background: #2980b9; color: #fff; }
+    .cat-header-pill.critique       { background: #8e44ad; color: #fff; }
+    .cat-header-pill.deepdive       { background: #16a085; color: #fff; }
+
+    .cat-header-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── FOOTER NOTE ── */
+    .footer-note {
+      margin-top: 56px;
+      padding: 24px 28px;
+      background: var(--ink);
+      color: rgba(245,240,232,0.7);
+      border-radius: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+    .footer-note strong { color: var(--bg); }
+
+    /* ── DAY DIVIDER ── */
+    .day-divider {
+      margin: 72px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .day-divider-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: var(--ink);
+      color: var(--bg);
+      padding: 5px 16px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .day-divider-line { flex: 1; height: 2px; background: var(--border); }
+
+    @media (max-width: 600px) {
+      header { padding: 36px 24px 32px; }
+      .page-body { padding: 0 18px; }
+      .question-card { padding: 22px 20px; }
+      .question-number { font-size: 56px; }
+      .nav-inner { padding: 0 10px; }
+      .nav-inner a { padding: 13px 9px; font-size: 9.5px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">Reviewer View — Complete Set</div>
+  <div class="header-title">All 10 Assignment Questions &amp; Review Sheets</div>
+  <div class="header-subtitle">HTML, CSS, JavaScript, and Java OOP — Days 1 through 10</div>
+  <div class="header-meta">
+    <span class="badge">10 Questions</span>
+    <span class="badge outline">HTML &amp; CSS</span>
+    <span class="badge outline">JavaScript</span>
+    <span class="badge outline">Java OOP</span>
+    <span class="badge outline">Reverse Engineering</span>
+  </div>
+</header>
+
+<!-- STICKY NAV -->
+<nav class="nav-index">
+  <div class="nav-inner">
+    <a href="#q1">Q1 Box Model</a>
+    <a href="#q2">Q2 Flexbox</a>
+    <a href="#q3">Q3 Landing Page</a>
+    <a href="#q4">Q4 Counter</a>
+    <a href="#q5">Q5 Menu Board</a>
+    <a href="#q6">Q6 Storage</a>
+    <a href="#q7">Q7 OOP Basics</a>
+    <a href="#q8">Q8 Inheritance</a>
+    <a href="#q9">Q9 Polymorphism</a>
+    <a href="#q10">Q10 Final</a>
+  </div>
+</nav>
+
+<div class="page-body">
+
+  <!-- ════════════════════════════════════════════════
+       DAY 1 — CSS BOX MODEL
+  ═══════════════════════════════════════════════════ -->
+  <div id="q1" class="question-block">
+    <div class="block-eyebrow">Day 1 — HTML &amp; CSS</div>
+    <div class="question-card">
+      <div class="question-number">1</div>
+      <h2>Objective</h2>
+      <p>To develop CSS Box Model literacy by reverse-engineering an AI-generated personal profile card and making intentional modifications to observe how each property shapes layout and spacing.</p>
+      <div class="scenario-box">
+        <div class="label">Input / Scenario</div>
+        <p>You have just met someone at a networking event, and you want a quick way for them to remember who you are later. You need a simple visual card that shows your face, name, what you do, and a short note about yourself. Build the simplest card that lets you see this at a glance.</p>
+      </div>
+      <h2 style="margin-top:24px;">Expectations</h2>
+      <div class="expectations-grid">
+        <div class="exp-item"><span class="exp-num">E1</span><p>Read the AI-generated HTML and CSS code line by line and understand what each part does.</p></div>
+        <div class="exp-item"><span class="exp-num">E2</span><p>Identify where the Box Model properties — <code>margin</code>, <code>border</code>, <code>padding</code>, and <code>content</code> — appear in the code.</p></div>
+        <div class="exp-item"><span class="exp-num">E3</span><p>Explain in plain words how each property affects the card's appearance and spacing.</p></div>
+        <div class="exp-item"><span class="exp-num">E4</span><p>Modify at least one property from each Box Model layer and observe what changes in the browser.</p></div>
+        <div class="exp-item"><span class="exp-num">E5</span><p>Articulate the difference between <code>padding</code> and <code>margin</code> — without looking it up.</p></div>
+        <div class="exp-item"><span class="exp-num">E6</span><p>Critique the AI-generated code — identify one design or spacing decision you disagree with, explain why, and improve it.</p></div>
+      </div>
+    </div>
+
+    <div class="review-section-title">Post-Completion Review</div>
+
+    <div class="cat-header"><span class="cat-header-pill comprehension">Comprehension</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">1</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Walk me through the HTML structure of your profile card. What elements did you use, and why?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">2</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Pick any three CSS rules from the generated code and explain in plain language exactly what each one does to the card's appearance.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">3</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Is there any part of the code you found confusing or unexpected? What did you do to make sense of it?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill identification">Box Model Identification</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">4</div><div class="review-content"><span class="review-category">Margin</span><span class="review-question">Show me exactly where <code>margin</code> appears in the code. What element does it apply to, and what visual effect does it create?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">5</div><div class="review-content"><span class="review-category">Border</span><span class="review-question">Where is <code>border</code> defined in the code? What happens visually if you remove it entirely?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">6</div><div class="review-content"><span class="review-category">Padding</span><span class="review-question">Point to where <code>padding</code> is set. Which element does it belong to, and what would happen to the card if you doubled its value?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">7</div><div class="review-content"><span class="review-category">Content</span><span class="review-question">Where is the "content" layer visible in your card — in the HTML and in the browser? How does a fixed <code>width</code> or <code>height</code> interact with it?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill explanation">Explanation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">8</div><div class="review-content"><span class="review-category">Conceptual</span><span class="review-question">Without looking anything up — explain the difference between <code>padding</code> and <code>margin</code> in your own words. Can you give a real-life analogy?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">9</div><div class="review-content"><span class="review-category">Visual Reasoning</span><span class="review-question">If you increase the card's <code>padding</code> to <code>60px</code>, does the card get wider, the content area shrink, or both? Explain why based on the Box Model.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">10</div><div class="review-content"><span class="review-category">Spacing Logic</span><span class="review-question">What is <code>margin: 0 auto</code> doing in your code, if present? How does it center the card, and what condition must be true for it to work?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill modification">Modification &amp; Observation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">11</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">What specific change did you make to <code>margin</code>? What did you observe in the browser, and did it match what you expected?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">12</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">What change did you make to <code>border</code>? Did changing the border width affect the card's total size? Why or why not?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">13</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">What change did you make to <code>padding</code>? Show me the before and after in the browser. What shifted, and what stayed the same?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill articulation">Articulation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">14</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">Explain the CSS Box Model to a non-technical friend in two sentences. What would you say?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">15</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">If a colleague says "just add some padding to push the cards apart," what would you tell them is actually the right approach, and why?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill critique">Critical Thinking</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">16</div><div class="review-content"><span class="review-category">Critique</span><span class="review-question">Which specific design or spacing decision in the AI-generated code did you disagree with? Walk me through your reasoning.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">17</div><div class="review-content"><span class="review-category">Improvement</span><span class="review-question">Show me the improvement you made. How does the updated version better serve someone who just received your card at a networking event?</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       DAY 2 — FLEXBOX
+  ═══════════════════════════════════════════════════ -->
+  <div class="day-divider"><span class="day-divider-label">Day 2</span><span class="day-divider-line"></span></div>
+  <div id="q2" class="question-block" style="border-top:none;margin-top:24px;">
+    <div class="block-eyebrow">Day 2 — Responsive Layouts</div>
+    <div class="question-card">
+      <div class="question-number">2</div>
+      <h2>Objective</h2>
+      <p>To develop an understanding of responsive layouts using Flexbox by reverse-engineering an AI-generated profile card directory and experimenting with how layout properties behave across different screen sizes.</p>
+      <div class="scenario-box">
+        <div class="label">Input / Scenario</div>
+        <p>You're building a simple directory where you need to quickly scan multiple people at once. Show 4 profile cards in a single row on larger screens, but make sure it adapts neatly on smaller devices so everything stays readable. Build the simplest layout that does this.</p>
+      </div>
+      <h2 style="margin-top:24px;">Expectations</h2>
+      <div class="expectations-grid">
+        <div class="exp-item"><span class="exp-num">E1</span><p>Understand the AI-generated HTML and CSS code line by line and understand how the layout is structured.</p></div>
+        <div class="exp-item"><span class="exp-num">E2</span><p>Identify where Flexbox properties such as <code>display: flex</code>, <code>justify-content</code>, <code>align-items</code>, <code>gap</code>, <code>flex-wrap</code>, and responsive sizing are used.</p></div>
+        <div class="exp-item"><span class="exp-num">E3</span><p>Explain in plain words how each property affects spacing, alignment, and responsiveness.</p></div>
+        <div class="exp-item"><span class="exp-num">E4</span><p>Modify at least one Flexbox-related property, describe what changes visually, and observe how the layout changes when the browser width becomes smaller. Experiment with changing the number of cards per row.</p></div>
+        <div class="exp-item"><span class="exp-num">E5</span><p>Articulate the difference between fixed layouts and responsive layouts — without looking it up.</p></div>
+      </div>
+    </div>
+
+    <div class="review-section-title">Post-Completion Review</div>
+
+    <div class="cat-header"><span class="cat-header-pill comprehension">Comprehension</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">1</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Walk me through the HTML structure of the card directory. Where is the flex container, and what are its flex children?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">2</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Is there a media query in the code? What does it do and at what screen width does it trigger?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">3</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Is there anything in the code you didn't fully understand at first? How did you figure out what it was doing?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill identification">Flexbox Identification</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">4</div><div class="review-content"><span class="review-category">Display</span><span class="review-question">Where is <code>display: flex</code> set? What changes visually if you remove it entirely?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">5</div><div class="review-content"><span class="review-category">Wrapping</span><span class="review-question">Where is <code>flex-wrap</code> used? What happens to the cards at narrow widths if you remove it?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">6</div><div class="review-content"><span class="review-category">Alignment</span><span class="review-question">What values are used for <code>justify-content</code> and <code>align-items</code>? What would change if you switched each to a different value?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">7</div><div class="review-content"><span class="review-category">Sizing</span><span class="review-question">How is each card told to take up roughly one-quarter of the row? Is it using <code>flex-basis</code>, <code>width</code>, or something else?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill explanation">Explanation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">8</div><div class="review-content"><span class="review-category">Conceptual</span><span class="review-question">Without looking it up — what is the difference between a fixed layout and a responsive layout? Give an example of each from your code.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">9</div><div class="review-content"><span class="review-category">Visual Reasoning</span><span class="review-question">At what point do the 4 cards stop fitting in one row? What exactly causes them to stack or wrap?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">10</div><div class="review-content"><span class="review-category">Spacing</span><span class="review-question">What is <code>gap</code> doing in this layout? How is it different from adding <code>margin</code> to each card individually?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill modification">Modification &amp; Observation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">11</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">What Flexbox property did you change, and what happened? Did the cards reflow the way you expected?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">12</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">How did you change the number of cards per row? What property or value controlled that?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">13</div><div class="review-content"><span class="review-category">Exploration</span><span class="review-question">Did anything break or look wrong when you resized the browser? What caused it, and how did you fix it or investigate it?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill articulation">Articulation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">14</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">Explain what Flexbox does in one sentence — without using the words "flexible" or "container."</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">15</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">Why does responsive design matter for a directory page? What would happen if it only worked on one screen size?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill critique">Critical Thinking</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">16</div><div class="review-content"><span class="review-category">Critique</span><span class="review-question">The AI was asked for "the simplest layout." Do you think it achieved that? What would you remove or change?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">17</div><div class="review-content"><span class="review-category">Design</span><span class="review-question">At which breakpoint does the layout stop feeling like a useful directory and start becoming harder to scan? What would you do differently there?</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       DAY 3 — LANDING PAGE
+  ═══════════════════════════════════════════════════ -->
+  <div class="day-divider"><span class="day-divider-label">Day 3</span><span class="day-divider-line"></span></div>
+  <div id="q3" class="question-block" style="border-top:none;margin-top:24px;">
+    <div class="block-eyebrow">Day 3 — Webpage Structure</div>
+    <div class="question-card">
+      <div class="question-number">3</div>
+      <h2>Objective</h2>
+      <p>To develop an understanding of webpage structure and section-based layouts by reverse-engineering an AI-generated product landing page and experimenting with how different HTML and CSS properties affect presentation and usability.</p>
+      <div class="scenario-box">
+        <div class="label">Input / Scenario</div>
+        <p>You've just created a new product and need a simple webpage to introduce it to people. Visitors should immediately understand what it is, see its key benefits, and have an easy way to reach out if they're interested. Build the simplest page that includes a clear header, a section highlighting the main features, and a contact form at the bottom to collect their details.</p>
+      </div>
+      <h2 style="margin-top:24px;">Expectations</h2>
+      <div class="expectations-grid">
+        <div class="exp-item"><span class="exp-num">E1</span><p>Understand the AI-generated HTML and CSS code line by line and understand how the webpage is structured.</p></div>
+        <div class="exp-item"><span class="exp-num">E2</span><p>Identify where layout and styling properties such as spacing, typography, colors, section alignment, form styling, and button styling are used.</p></div>
+        <div class="exp-item"><span class="exp-num">E3</span><p>Explain in plain words how each section — header, features section, and contact form — contributes to the user experience.</p></div>
+        <div class="exp-item"><span class="exp-num">E4</span><p>Modify at least one property related to layout, colors, spacing, or typography and describe what changes visually while observing how the page structure affects readability.</p></div>
+        <div class="exp-item"><span class="exp-num">E5</span><p>Articulate the difference between content structure and visual styling — without looking it up.</p></div>
+      </div>
+    </div>
+
+    <div class="review-section-title">Post-Completion Review</div>
+
+    <div class="cat-header"><span class="cat-header-pill comprehension">Comprehension</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">1</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Walk me through the three main sections of the page. What HTML element or tag wraps each one, and how does the browser tell them apart visually?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">2</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">How is the contact form built in HTML? What form elements are used, and what would happen if the submit button had no action?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">3</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Is there anything in the CSS you didn't recognize immediately? How did you figure out what it was doing?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill identification">Structure Identification</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">4</div><div class="review-content"><span class="review-category">Typography</span><span class="review-question">Where are font styles defined in the code? How do the font choices in the header differ from those in the body text, and why might that be intentional?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">5</div><div class="review-content"><span class="review-category">Color</span><span class="review-question">Where are colors applied in the code? How does the color of the CTA button compare to the rest of the page, and what does that communicate to a visitor?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">6</div><div class="review-content"><span class="review-category">Spacing</span><span class="review-question">What spacing properties are used to separate the three sections from each other? How would the page feel if all spacing was removed?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill explanation">Explanation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">7</div><div class="review-content"><span class="review-category">UX Thinking</span><span class="review-question">How does the order of the three sections — header, features, form — guide a visitor through the page? Would you change the order? Why or why not?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">8</div><div class="review-content"><span class="review-category">Conceptual</span><span class="review-question">Without looking it up — what is the difference between content structure and visual styling? Can you point to one example of each in your code?</span></div></div></div>
+        <div class="review-item"><div class="review-item-inner"><div class="review-index warm">9</div><div class="review-content"><span class="review-category">Readability</span><span class="review-question">What properties in the features section make it easy to scan quickly? What would you change if someone said "it's hard to tell what's important"?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill modification">Modification &amp; Observation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">10</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">What property did you modify — layout, color, spacing, or typography? What changed visually, and was it what you expected?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">11</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">If you changed a color, how did it affect the overall mood or tone of the page? Was it a positive or negative change from a usability standpoint?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill articulation">Articulation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">12</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">Why does a landing page need a clear visual hierarchy? What happens to a visitor if everything looks equally important?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">13</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">If the form inputs had no visible labels, what problem would that create? Where in the code would you fix it?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill critique">Critical Thinking</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">14</div><div class="review-content"><span class="review-category">Critique</span><span class="review-question">Is there anything on this landing page that might confuse or lose a visitor within the first 5 seconds? What would you change, and why?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">15</div><div class="review-content"><span class="review-category">Reflection</span><span class="review-question">The AI was told to build "the simplest page." Do you think it succeeded, or did it include things that could be cut? Walk me through your reasoning.</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       DAY 4 — PASSENGER COUNTER
+  ═══════════════════════════════════════════════════ -->
+  <div class="day-divider"><span class="day-divider-label">Day 4</span><span class="day-divider-line"></span></div>
+  <div id="q4" class="question-block" style="border-top:none;margin-top:24px;">
+    <div class="block-eyebrow">Day 4 — JavaScript Interactions</div>
+    <div class="question-card">
+      <div class="question-number">4</div>
+      <h2>Objective</h2>
+      <p>To develop an understanding of basic state management, user interaction handling, and dynamic UI updates in JavaScript by reverse-engineering an AI-generated passenger counter tool and experimenting with how data changes are reflected on the screen in real time.</p>
+      <div class="scenario-box">
+        <div class="label">Input / Scenario</div>
+        <p>You are a conductor. Right now, passengers are boarding and alighting. You need to know if the bus is full. Build the simplest tool that helps you in that moment.</p>
+      </div>
+      <h2 style="margin-top:24px;">Expectations</h2>
+      <div class="expectations-grid">
+        <div class="exp-item"><span class="exp-num">E1</span><p>Understand the AI-generated HTML, CSS, and JavaScript code line by line and explain how the tool works internally.</p></div>
+        <div class="exp-item"><span class="exp-num">E2</span><p>Identify where variables, functions, event listeners, and DOM manipulation are used in the code.</p></div>
+        <div class="exp-item"><span class="exp-num">E3</span><p>Explain in plain words how passenger counts are updated when people board or leave the bus.</p></div>
+        <div class="exp-item"><span class="exp-num">E4</span><p>Modify at least one part of the logic — such as changing the bus capacity limit, adding a reset button, or preventing the count from going below zero — and describe what changes.</p></div>
+        <div class="exp-item"><span class="exp-num">E5</span><p>Articulate the difference between static webpages and interactive webpages — without looking it up.</p></div>
+      </div>
+    </div>
+
+    <div class="review-section-title">Post-Completion Review</div>
+
+    <div class="cat-header"><span class="cat-header-pill comprehension">Comprehension</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">1</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Walk me through what happens, step by step, when a user clicks the "board" button. Trace it from the button in HTML through to the number updating on screen.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">2</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Where is the passenger count stored in the JavaScript? Is it a variable, an object, or something else? What happens to it when the page refreshes?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">3</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">How does the JavaScript know which HTML element to update when the count changes? Show me the exact line that connects them.</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill identification">JS Mechanics Identification</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">4</div><div class="review-content"><span class="review-category">Variables</span><span class="review-question">Where is the count variable declared? What would happen if you declared it inside a function instead of outside?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">5</div><div class="review-content"><span class="review-category">Event Listeners</span><span class="review-question">Where are the event listeners attached? What event type are they listening for, and what function do they call?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">6</div><div class="review-content"><span class="review-category">DOM Manipulation</span><span class="review-question">What DOM method is used to update the number on screen? What property is being set — <code>innerHTML</code>, <code>textContent</code>, or something else?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill explanation">Explanation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">7</div><div class="review-content"><span class="review-category">Conceptual</span><span class="review-question">Without looking it up — what is the difference between a static and an interactive webpage? Which one is this, and how do you know?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">8</div><div class="review-content"><span class="review-category">State</span><span class="review-question">What does "state" mean in this context? What is the state of this application, and where does it live in the code?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill modification">Modification &amp; Observation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">9</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">What modification did you make to the logic? Describe what changed — in the code, and on the screen.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">10</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">How did you prevent the count from going below zero, if you added that? Walk me through the <code>if</code> condition you wrote or identified.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">11</div><div class="review-content"><span class="review-category">Exploration</span><span class="review-question">If you added a "Bus Full" indicator — how does the UI know when to show it? What condition triggers it?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill articulation">Articulation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">12</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">A friend asks: "Why do you need JavaScript for this? Couldn't you just write the number in HTML?" How would you answer?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">13</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">Why does the count reset to zero when you refresh the page? What would need to change for it to remember the last value?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill critique">Critical Thinking</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">14</div><div class="review-content"><span class="review-category">Critique</span><span class="review-question">Is this tool actually useful to a real conductor? What's missing, and what would make it more practical — without over-engineering it?</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       DAY 5 — RESTAURANT MENU BOARD
+  ═══════════════════════════════════════════════════ -->
+  <div class="day-divider"><span class="day-divider-label">Day 5</span><span class="day-divider-line"></span></div>
+  <div id="q5" class="question-block" style="border-top:none;margin-top:24px;">
+    <div class="block-eyebrow">Day 5 — Dynamic Content</div>
+    <div class="question-card">
+      <div class="question-number">5</div>
+      <h2>Objective</h2>
+      <p>To develop an understanding of basic user input handling, dynamic content rendering, and simple state updates in JavaScript by reverse-engineering an AI-generated digital restaurant board and experimenting with how information is displayed and updated on the screen.</p>
+      <div class="scenario-box">
+        <div class="label">Input / Scenario</div>
+        <p>You own a small restaurant. Every morning you write the day's items on a board. Build the simplest digital version of that board.</p>
+      </div>
+      <h2 style="margin-top:24px;">Expectations</h2>
+      <div class="expectations-grid">
+        <div class="exp-item"><span class="exp-num">E1</span><p>Understand the AI-generated HTML, CSS, and JavaScript code line by line and explain how the digital board is structured and updated.</p></div>
+        <div class="exp-item"><span class="exp-num">E2</span><p>Identify where elements such as input fields, buttons, arrays, event listeners, and DOM manipulation are used in the code.</p></div>
+        <div class="exp-item"><span class="exp-num">E3</span><p>Explain in plain words how menu items are added, displayed, updated, or removed from the board.</p></div>
+        <div class="exp-item"><span class="exp-num">E4</span><p>Modify at least one part of the functionality — such as adding prices, clearing all items, or highlighting specials — and describe what changes.</p></div>
+        <div class="exp-item"><span class="exp-num">E5</span><p>Articulate the difference between manually writing static content in HTML and dynamically generating content with JavaScript — without looking it up.</p></div>
+      </div>
+    </div>
+
+    <div class="review-section-title">Post-Completion Review</div>
+
+    <div class="cat-header"><span class="cat-header-pill comprehension">Comprehension</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">1</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Trace the path of a new menu item from when the user types it into the input field to when it appears on the board. What happens at each step?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">2</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Is the list of menu items stored anywhere in JavaScript (e.g., an array)? If yes, where? If no, where does the data live?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">3</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">How does the code remove a menu item? What event triggers it, and what DOM method is used?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill identification">Dynamic Content Identification</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">4</div><div class="review-content"><span class="review-category">Input Handling</span><span class="review-question">Where in the code is the value from the input field read? What property gives you access to what the user typed?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">5</div><div class="review-content"><span class="review-category">DOM Creation</span><span class="review-question">How is a new item element created and added to the DOM? What methods are used — <code>createElement</code>, <code>appendChild</code>, <code>innerHTML</code>?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">6</div><div class="review-content"><span class="review-category">Array / State</span><span class="review-question">If there's an array storing the items, when is it updated? Does the display update from the array, or directly from DOM manipulation?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill explanation">Explanation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">7</div><div class="review-content"><span class="review-category">Conceptual</span><span class="review-question">Without looking it up — what's the difference between writing items directly in HTML vs generating them with JavaScript? When would you choose one over the other?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">8</div><div class="review-content"><span class="review-category">Visual Reasoning</span><span class="review-question">What happens visually when the last item is deleted? Is the board empty, or does something else appear? How does the code handle that state?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill modification">Modification &amp; Observation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">9</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">What modification did you make — prices, specials, clear all? Walk me through the code change and what it looks like in the browser.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">10</div><div class="review-content"><span class="review-category">Exploration</span><span class="review-question">Did you test the board on a narrow screen? Did the layout hold up? What would you change to make it more readable on mobile?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill articulation">Articulation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">11</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">If you refreshed the page right now, would the menu items still be there? Why or why not? What would you need to change to make them persist?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">12</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">How is this "digital board" fundamentally different from just writing the items in an HTML file by hand? What new capability does JavaScript give you?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill critique">Critical Thinking</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">13</div><div class="review-content"><span class="review-category">Critique</span><span class="review-question">Would a real restaurant owner find this tool useful in its current form? What's the one thing that would most improve it, and how would you build it?</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       DAY 6 — BROWSER STORAGE
+  ═══════════════════════════════════════════════════ -->
+  <div class="day-divider"><span class="day-divider-label">Day 6</span><span class="day-divider-line"></span></div>
+  <div id="q6" class="question-block" style="border-top:none;margin-top:24px;">
+    <div class="block-eyebrow">Day 6 — Data Persistence</div>
+    <div class="question-card">
+      <div class="question-number">6</div>
+      <h2>Objective</h2>
+      <p>To develop an understanding of browser storage and data persistence by reverse-engineering an AI-generated restaurant menu management tool and experimenting with how saved data can remain available even after refreshing the page.</p>
+      <div class="scenario-box">
+        <div class="label">Input / Scenario</div>
+        <p>You are managing your restaurant menu tool. You accidentally refresh the page and everything you entered is gone. How do you make sure that never happens again?</p>
+      </div>
+      <h2 style="margin-top:24px;">Expectations</h2>
+      <div class="expectations-grid">
+        <div class="exp-item"><span class="exp-num">E1</span><p>Understand the AI-generated HTML, CSS, and JavaScript code line by line and understand how the menu tool works.</p></div>
+        <div class="exp-item"><span class="exp-num">E2</span><p>Identify where browser storage concepts such as <code>localStorage</code>, saving data, retrieving data, and updating stored values are used.</p></div>
+        <div class="exp-item"><span class="exp-num">E3</span><p>Explain in plain words how the application remembers information even after the page is refreshed.</p></div>
+        <div class="exp-item"><span class="exp-num">E4</span><p>Modify at least one part of the storage logic or interface behavior and describe what changes while observing how saved data behaves after reloading the browser.</p></div>
+        <div class="exp-item"><span class="exp-num">E5</span><p>Articulate the difference between temporary in-memory data and persistent browser storage — without looking it up.</p></div>
+      </div>
+    </div>
+
+    <div class="review-section-title">Post-Completion Review</div>
+
+    <div class="cat-header"><span class="cat-header-pill comprehension">Comprehension</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">1</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">When does the code save data to <code>localStorage</code>? Is it every keystroke, on button click, or at some other moment? Show me the exact line.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">2</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">When does the code read data back from <code>localStorage</code>? What happens if there's nothing stored yet — does the app crash, or does it handle that gracefully?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">3</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">How is the data formatted when it's stored — as plain text or as JSON? Where in the code is it converted, and why does that conversion need to happen?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill identification">Storage Identification</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">4</div><div class="review-content"><span class="review-category">localStorage API</span><span class="review-question">What key name is used to store the menu data in <code>localStorage</code>? What would happen if you changed that key name?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">5</div><div class="review-content"><span class="review-category">JSON</span><span class="review-question">Where are <code>JSON.stringify</code> and <code>JSON.parse</code> called? What would happen if you forgot to use them?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">6</div><div class="review-content"><span class="review-category">Deletion</span><span class="review-question">Can a user clear all saved data? If yes, how does the code do it? If no, how would you add that feature?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill explanation">Explanation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">7</div><div class="review-content"><span class="review-category">Conceptual</span><span class="review-question">Without looking it up — what's the difference between data stored in a JavaScript variable and data stored in <code>localStorage</code>? What survives a page refresh, and why?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">8</div><div class="review-content"><span class="review-category">Scope</span><span class="review-question">Is <code>localStorage</code> data shared across browser tabs for the same site? Is it shared across different browsers or devices? How does that affect this tool?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill modification">Modification &amp; Observation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">9</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">What did you change in the storage logic? Refresh the browser — does your change hold up? Walk me through what you see.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">10</div><div class="review-content"><span class="review-category">Exploration</span><span class="review-question">Open DevTools → Application → Local Storage. Can you see your stored data? What does it look like raw?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill articulation">Articulation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">11</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">Compare this version of the menu board to Day 5's version. What specific problem does <code>localStorage</code> solve that the Day 5 version had?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">12</div><div class="review-content"><span class="review-category">Limitations</span><span class="review-question">What are the limits of <code>localStorage</code>? When would you need a real database instead?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill critique">Critical Thinking</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">13</div><div class="review-content"><span class="review-category">Critique</span><span class="review-question">If a second employee tried to use this tool on a different computer, would they see the same menu? Why or why not, and what would a real solution look like?</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       DAY 7 — JAVA OOP BASICS
+  ═══════════════════════════════════════════════════ -->
+  <div class="day-divider"><span class="day-divider-label">Day 7</span><span class="day-divider-line"></span></div>
+  <div id="q7" class="question-block" style="border-top:none;margin-top:24px;">
+    <div class="block-eyebrow">Day 7 — Java OOP Basics</div>
+    <div class="question-card">
+      <div class="question-number">7</div>
+      <h2>Objective</h2>
+      <p>To develop Object-Oriented thinking by reverse-engineering an AI-generated Java solution and understanding how Classes and Objects give structure to data that was previously just an array.</p>
+      <div class="scenario-box">
+        <div class="label">Input / Scenario</div>
+        <p>You're browsing an online store, saving items you may want later — each with details like price, category, or notes. As your choices change, you update or remove them. Build the simplest tool to capture and manage these detailed entries.</p>
+      </div>
+      <h2 style="margin-top:24px;">Expectations</h2>
+      <div class="expectations-grid">
+        <div class="exp-item"><span class="exp-num">E1</span><p>Read the AI-generated code line by line and understand what each part does.</p></div>
+        <div class="exp-item"><span class="exp-num">E2</span><p>Identify where the Class, fields, Constructor, and methods appear in the code.</p></div>
+        <div class="exp-item"><span class="exp-num">E3</span><p>Explain in plain words what an object is compared to a plain variable.</p></div>
+        <div class="exp-item"><span class="exp-num">E4</span><p>Modify at least one field — like adding a category — and observe how it affects the whole class.</p></div>
+        <div class="exp-item"><span class="exp-num">E5</span><p>Articulate the difference between a Class and an Object — without looking it up.</p></div>
+      </div>
+    </div>
+
+    <div class="review-section-title">Post-Completion Review</div>
+
+    <div class="cat-header"><span class="cat-header-pill comprehension">Comprehension</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">1</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Walk me through the class definition line by line. What are the fields, what does the constructor do, and what do the methods do?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">2</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Where in the code is an actual object created from the class? What keyword is used, and what does it look like?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">3</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Is there any part of the Java syntax that confused you? How did you work through it?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill identification">OOP Structure Identification</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">4</div><div class="review-content"><span class="review-category">Fields</span><span class="review-question">What fields does the class have? What data type is each one, and what real-world detail does it represent?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">5</div><div class="review-content"><span class="review-category">Constructor</span><span class="review-question">What does the constructor do? What happens if you call <code>new Item()</code> without passing any arguments?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">6</div><div class="review-content"><span class="review-category">Methods</span><span class="review-question">What methods are defined in the class? Which ones read data, and which ones change data?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill explanation">Explanation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">7</div><div class="review-content"><span class="review-category">Conceptual</span><span class="review-question">Without looking it up — explain the difference between a Class and an Object. Use your wishlist item as a concrete example.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">8</div><div class="review-content"><span class="review-category">Comparison</span><span class="review-question">Before OOP, you might have stored item details in a plain array like <code>["Shoes", 49.99, "Footwear"]</code>. What problems does that cause, and how does a class solve them?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill modification">Modification &amp; Observation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">9</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">What field did you add to the class? Where did you have to update the code to make it work — constructor, methods, and main? What broke if you only changed one place?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">10</div><div class="review-content"><span class="review-category">Ripple Effect</span><span class="review-question">When you added a field, how many places in the code needed to change? What does that tell you about how classes bundle data and behavior together?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill articulation">Articulation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">11</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">Explain what a class is to someone who has never programmed before, using a real-world analogy. What's the class, and what's the object?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">12</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">Can two different objects created from the same class have different field values? Show me an example from your code or explain how you would write one.</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill critique">Critical Thinking</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">13</div><div class="review-content"><span class="review-category">Critique</span><span class="review-question">Does the AI-generated class do a good job of modeling a real wishlist item? What real details did it miss, and would adding them require a new field or a new method?</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       DAY 8 — INHERITANCE
+  ═══════════════════════════════════════════════════ -->
+  <div class="day-divider"><span class="day-divider-label">Day 8</span><span class="day-divider-line"></span></div>
+  <div id="q8" class="question-block" style="border-top:none;margin-top:24px;">
+    <div class="block-eyebrow">Day 8 — Inheritance</div>
+    <div class="question-card">
+      <div class="question-number">8</div>
+      <h2>Objective</h2>
+      <p>To develop code reuse thinking by reverse-engineering an AI-generated class hierarchy and understanding how Inheritance eliminates duplication when two things share common behaviour.</p>
+      <div class="scenario-box">
+        <div class="label">Input / Scenario</div>
+        <p>You already have a system to keep track of things you might want someday. Now you also need a list for things you've decided to buy — this new list behaves almost the same, but has one extra capability. As you build this, you don't want to duplicate your effort or maintain two separate systems. How would you design your solution so both lists share what's common, while still allowing their differences?</p>
+      </div>
+      <h2 style="margin-top:24px;">Expectations</h2>
+      <div class="expectations-grid">
+        <div class="exp-item"><span class="exp-num">E1</span><p>Identify which code lives in the parent and which lives in the child.</p></div>
+        <div class="exp-item"><span class="exp-num">E2</span><p>Explain in plain words why the child class can use parent methods without rewriting them.</p></div>
+        <div class="exp-item"><span class="exp-num">E3</span><p>Modify one method in the parent and observe how it affects the child.</p></div>
+        <div class="exp-item"><span class="exp-num">E4</span><p>Add one new method to the child and confirm the parent remains unchanged.</p></div>
+        <div class="exp-item"><span class="exp-num">E5</span><p>Articulate what problem Inheritance solved here in one sentence.</p></div>
+      </div>
+    </div>
+
+    <div class="review-section-title">Post-Completion Review</div>
+
+    <div class="cat-header"><span class="cat-header-pill comprehension">Comprehension</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">1</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Name the parent class and the child class in the code. What keyword shows that inheritance is happening?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">2</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">List the methods that exist only in the parent, only in the child, and in both. How do you know which is which?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">3</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Is <code>super()</code> used anywhere in the child class? If yes, what does it call, and why is it necessary?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill identification">Inheritance Identification</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">4</div><div class="review-content"><span class="review-category">Shared Code</span><span class="review-question">Pick one method in the parent. Does the child class call it directly? How — and show me the line in <code>main</code> where that happens.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">5</div><div class="review-content"><span class="review-category">Override</span><span class="review-question">Does the child class override any parent method? If yes, what changes in behavior? If no, can you think of a reason it might want to?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">6</div><div class="review-content"><span class="review-category">Child-Only</span><span class="review-question">What is the extra capability that only the child class has? Where is it defined, and can the parent class call it?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill explanation">Explanation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">7</div><div class="review-content"><span class="review-category">Conceptual</span><span class="review-question">In plain words — why can the child class use parent methods without rewriting them? What does Java actually do under the hood?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">8</div><div class="review-content"><span class="review-category">Problem Solved</span><span class="review-question">In one sentence — what specific problem did Inheritance solve in this codebase? What would the code look like without it?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill modification">Modification &amp; Observation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">9</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">What change did you make to the parent method? Did the child class behavior change too? Show me in the output.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">10</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">What new method did you add to the child? Confirm for me that calling it on a parent object causes a compile error. What does that error tell you?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill articulation">Articulation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">11</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">Give a real-world analogy for inheritance that isn't a "vehicle/car" example. What is the parent, what is the child, and what does the child inherit?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">12</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">Can a parent class inherit from another parent? What would a three-level chain look like in this project?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill critique">Critical Thinking</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">13</div><div class="review-content"><span class="review-category">Critique</span><span class="review-question">Is the current parent/child split well designed? Should anything currently in the parent be in the child instead, or vice versa?</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       DAY 9 — POLYMORPHISM + INTERFACE
+  ═══════════════════════════════════════════════════ -->
+  <div class="day-divider"><span class="day-divider-label">Day 9</span><span class="day-divider-line"></span></div>
+  <div id="q9" class="question-block" style="border-top:none;margin-top:24px;">
+    <div class="block-eyebrow">Day 9 — Polymorphism &amp; Interface</div>
+    <div class="question-card">
+      <div class="question-number">9</div>
+      <h2>Objective</h2>
+      <p>To develop abstraction thinking by reverse-engineering an AI-generated interface implementation and understanding how one method call can behave differently depending on which object receives it.</p>
+      <div class="scenario-box">
+        <div class="label">Input / Scenario</div>
+        <p>You now have two kinds of lists — one for things you're considering, and one for things you're ready to buy. Even though their purpose differs, the way you interact with them feels the same: you add items, remove them, and look through what's there. Build your solution so you can use either list in exactly the same way, without needing to worry about which one you're dealing with.</p>
+      </div>
+      <h2 style="margin-top:24px;">Expectations</h2>
+      <div class="expectations-grid">
+        <div class="exp-item"><span class="exp-num">E1</span><p>Identify where the Interface is declared and where it is implemented in the code.</p></div>
+        <div class="exp-item"><span class="exp-num">E2</span><p>Explain in plain words why both classes must have the same method names.</p></div>
+        <div class="exp-item"><span class="exp-num">E3</span><p>Call the same method on both objects and observe different outputs.</p></div>
+        <div class="exp-item"><span class="exp-num">E4</span><p>Add a third class that implements the same interface without touching existing code.</p></div>
+        <div class="exp-item"><span class="exp-num">E5</span><p>Articulate the difference between Interface and Inheritance in one sentence.</p></div>
+      </div>
+    </div>
+
+    <div class="review-section-title">Post-Completion Review</div>
+
+    <div class="cat-header"><span class="cat-header-pill comprehension">Comprehension</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">1</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Show me where the interface is declared. What keyword is used, and what does its declaration contain — method bodies, signatures, or both?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">2</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Show me where each class declares that it implements the interface. What keyword is used, and what happens at compile time if one method is missing?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">3</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">In <code>main</code>, is the variable typed as the interface or as the concrete class? What difference does that make?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill identification">Interface &amp; Polymorphism Identification</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">4</div><div class="review-content"><span class="review-category">Shared Contract</span><span class="review-question">What method names does the interface require? Are the implementations in both classes identical, or do they behave differently?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">5</div><div class="review-content"><span class="review-category">Polymorphism</span><span class="review-question">Call the same method on both objects and show me the two different outputs. What is the same, and what is different?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill explanation">Explanation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">6</div><div class="review-content"><span class="review-category">Conceptual</span><span class="review-question">Why do both classes need the same method names? What would break if one class used a slightly different name?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">7</div><div class="review-content"><span class="review-category">Conceptual</span><span class="review-question">In one sentence — what is the difference between an Interface and Inheritance? Which one says "you must have these methods" and which one says "you can use my methods"?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill modification">Modification &amp; Observation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">8</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">Walk me through the third class you added. How did you implement the interface, and what behavior did you give each method?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">9</div><div class="review-content"><span class="review-category">Open/Closed</span><span class="review-question">Did you need to change the existing two classes when you added the third one? What does that tell you about the design?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill articulation">Articulation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">10</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">If I gave you a variable declared as the interface type and asked you "which list is this?", could you tell? Does it matter, and why?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">11</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">Can a class implement more than one interface in Java? Can it extend more than one parent class? What's the practical difference?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill critique">Critical Thinking</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">12</div><div class="review-content"><span class="review-category">Critique</span><span class="review-question">Is the interface well designed — does it capture all the interactions a user would need, or is something missing? What would you add to the contract?</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       DAY 10 — FINAL PROJECT
+  ═══════════════════════════════════════════════════ -->
+  <div class="day-divider"><span class="day-divider-label">Day 10</span><span class="day-divider-line"></span></div>
+  <div id="q10" class="question-block" style="border-top:none;margin-top:24px;">
+    <div class="block-eyebrow">Day 10 — Final Project</div>
+    <div class="question-card">
+      <div class="question-number">10</div>
+      <h2>Objective</h2>
+      <p>To consolidate all OOP concepts by reverse-engineering a complete AI-generated console application and being able to trace every design decision back to a concept learned during the week.</p>
+      <div class="scenario-box">
+        <div class="label">Input / Scenario</div>
+        <p>You're trying to keep your life organized — things you want someday, things you need to buy now, and tasks you must get done. Instead of juggling multiple tools, you want one simple place to manage everything. Build a console-based tool that helps you track, update, and review all these lists together, using the ideas you've been learning to bring it all into one cohesive system.</p>
+      </div>
+      <h2 style="margin-top:24px;">Expectations</h2>
+      <div class="expectations-grid">
+        <div class="exp-item"><span class="exp-num">E1</span><p>Identify which class uses Encapsulation, which uses Inheritance, and which uses Interface.</p></div>
+        <div class="exp-item"><span class="exp-num">E2</span><p>Trace one complete user action from input to object to display.</p></div>
+        <div class="exp-item"><span class="exp-num">E3</span><p>Modify one part of the app without breaking the rest.</p></div>
+        <div class="exp-item"><span class="exp-num">E4</span><p>Articulate why all three lists can be handled through the same interface reference.</p></div>
+        <div class="exp-item"><span class="exp-num">E5</span><p>Explain what OOP gave this project that the JavaScript version from Day 5 did not.</p></div>
+      </div>
+    </div>
+
+    <div class="review-section-title">Post-Completion Review</div>
+
+    <div class="cat-header"><span class="cat-header-pill comprehension">Comprehension</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">1</div><div class="review-content"><span class="review-category">Architecture</span><span class="review-question">Give me a map of the classes in this project. Which class does what, and how do they relate to each other?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">2</div><div class="review-content"><span class="review-category">Full Trace</span><span class="review-question">Trace one complete user action — from the moment user input is received to the moment something is displayed. Walk me through every class and method it touches.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index">3</div><div class="review-content"><span class="review-category">Code Reading</span><span class="review-question">Is there a menu or loop that drives the app? Where is it? What keeps it running until the user decides to quit?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill identification">OOP Concepts Identification</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">4</div><div class="review-content"><span class="review-category">Encapsulation</span><span class="review-question">Which class demonstrates Encapsulation? How — are the fields private, and are there getters/setters? Why does that matter?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">5</div><div class="review-content"><span class="review-category">Inheritance</span><span class="review-question">Which classes are in an Inheritance relationship? What did the child class inherit, and what did it add?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index accent">6</div><div class="review-content"><span class="review-category">Interface</span><span class="review-question">Which classes implement the interface? Show me in <code>main</code> where all three are used through the same reference type.</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill explanation">Explanation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">7</div><div class="review-content"><span class="review-category">Conceptual</span><span class="review-question">Why can all three lists be handled through the same interface reference? What does the interface guarantee, and why does the calling code not need to care which list it is?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">8</div><div class="review-content"><span class="review-category">JS vs Java</span><span class="review-question">Compare this project to the Day 5 JavaScript menu board. What specific things can you do in this Java version that would be awkward or impossible in the JavaScript version?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index warm">9</div><div class="review-content"><span class="review-category">Design</span><span class="review-question">If someone added a fourth list type tomorrow, how much of the existing code would need to change? What does that tell you about the quality of the design?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill modification">Modification &amp; Observation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">10</div><div class="review-content"><span class="review-category">Hands-On</span><span class="review-question">What did you modify without breaking the rest of the app? How did you verify nothing else broke?</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index green">11</div><div class="review-content"><span class="review-category">Resilience</span><span class="review-question">Did anything break when you made your change? If yes, what was the cause, and how did you fix it? If no, why do you think the design was resilient enough?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill articulation">Articulation</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">12</div><div class="review-content"><span class="review-category">Week Synthesis</span><span class="review-question">Look back at Days 7, 8, and 9. In your own words, describe how each day's concept built on the previous one and came together in this final project.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index blue">13</div><div class="review-content"><span class="review-category">Concept Check</span><span class="review-question">Explain Encapsulation, Inheritance, and Polymorphism in three sentences — one for each — without using any code or jargon.</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill critique">Critical Thinking</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">14</div><div class="review-content"><span class="review-category">Critique</span><span class="review-question">Is the AI-generated application actually well-structured? Identify one design decision you would change, and explain how it would improve the codebase.</span></div></div></div>
+      <div class="review-item"><div class="review-item-inner"><div class="review-index purple">15</div><div class="review-content"><span class="review-category">Reflection</span><span class="review-question">What is the single most important thing you learned this week? How would you explain it to someone who just started learning to code?</span></div></div></div>
+    </div>
+
+    <div class="cat-header"><span class="cat-header-pill deepdive">Deep Dive</span><span class="cat-header-line"></span></div>
+    <div class="review-grid" style="margin-top:12px;">
+      <div class="review-item"><div class="review-item-inner"><div class="review-index teal">16</div><div class="review-content"><span class="review-category">Big Picture</span><span class="review-question">From Day 1 to Day 10, you moved from styling a card in HTML to designing a multi-class Java application. What changed in how you think about a problem — not just the tools, but the thinking process?</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <strong>Reviewer Note:</strong> This sheet covers 10 assignments across two tracks — frontend web (Days 1–6) and Java OOP (Days 7–10). When reviewing, probe for understanding at the boundary between concepts: Does the student know not just what a property does, but why it exists? Can they connect a Day 7 class to a Day 10 interface? Look for students who can articulate what problem each concept solves — not just describe the syntax. The most revealing questions are the "without looking it up" and "compare to the previous day" ones. Struggle or hesitation there is informative, not punitive.
+  </div>
+
+</div><!-- /page-body -->
+</body>
+</html>
