@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn JavaScript · Core Concepts</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════ DESIGN TOKENS ═══════════════════════ */
+:root {
+  --ink:      #0d0d0d;
+  --bg:       #f5f2ec;
+  --surface:  #ffffff;
+  --border:   #e0dbd0;
+  --border2:  #ece8e0;
+  --muted:    #888070;
+  --dim:      #bbb5aa;
+  --accent:   #1a56e8;
+  --accent-l: rgba(26,86,232,0.08);
+  --accent-m: rgba(26,86,232,0.16);
+  --amber:    #d97706;
+  --amber-l:  rgba(217,119,6,0.09);
+  --green:    #16a34a;
+  --green-l:  rgba(22,163,74,0.09);
+  --rose:     #dc2626;
+  --rose-l:   rgba(220,38,38,0.08);
+  --violet:   #7c3aed;
+  --violet-l: rgba(124,58,237,0.08);
+  --orange:   #ea580c;
+  --orange-l: rgba(234,88,12,0.09);
+  --sh:  0 1px 3px rgba(0,0,0,0.06), 0 4px 14px rgba(0,0,0,0.05);
+  --sh2: 0 4px 16px rgba(0,0,0,0.08), 0 12px 40px rgba(0,0,0,0.07);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; display: flex; }
+
+/* ═══════════════════════ SIDEBAR ═══════════════════════ */
+#sidebar {
+  width: 232px; flex-shrink: 0;
+  background: var(--ink);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 50;
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+}
+.sb-brand { padding: 26px 22px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.sb-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.sb-title { font-family: 'Instrument Serif', serif; font-size: 17px; color: #f5f2ec; line-height: 1.3; font-style: italic; }
+.sb-subtitle { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 4px; letter-spacing: .5px; }
+.sb-progress { padding: 14px 22px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sb-prog-row { display: flex; justify-content: space-between; font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+.prog-track { height: 2px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 99px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.sb-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
+.sb-section-label { font-size: 8.5px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,0.2); padding: 12px 22px 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 22px; cursor: pointer; border-left: 2px solid transparent; color: rgba(255,255,255,0.4); font-size: 12px; font-weight: 500; transition: all .18s; }
+.nav-item:hover { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.04); }
+.nav-item.active { color: #fff; border-left-color: var(--accent); background: rgba(26,86,232,0.12); }
+.nav-item.done { color: var(--green); }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.15); flex-shrink: 0; transition: all .2s; }
+.nav-item.active .nav-dot { background: var(--accent); box-shadow: 0 0 0 3px rgba(26,86,232,0.25); }
+.nav-item.done .nav-dot { background: var(--green); }
+.nav-num { font-family: 'DM Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.2); margin-left: auto; }
+.sb-footer { padding: 14px 22px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 10px; color: rgba(255,255,255,0.28); line-height: 1.6; }
+
+/* ═══════════════════════ MAIN ═══════════════════════ */
+#main { margin-left: 232px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+#topbar { position: sticky; top: 0; z-index: 40; background: rgba(245,242,236,0.93); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); height: 52px; display: flex; align-items: center; padding: 0 36px; gap: 12px; width: 100%; align-self: flex-start; }
+.tb-tag { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 3px 10px; border-radius: 4px; }
+.tb-sep { color: var(--dim); }
+.tb-lesson { font-size: 13px; font-weight: 600; color: var(--ink); }
+#hamburger { display: none; width: 36px; height: 36px; background: var(--ink); border: none; border-radius: 8px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; margin-right: 6px; flex-shrink: 0; }
+#hamburger span { display: block; width: 14px; height: 1.5px; background: #fff; border-radius: 2px; }
+#overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 49; }
+#overlay.on { display: block; }
+
+/* ═══════════════════════ LESSON SHELL ═══════════════════════ */
+.lesson { display: none; width: 100%; max-width: 820px; padding: 52px 48px 96px; animation: fadeUp .42s ease both; }
+.lesson.active { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+.l-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+.l-title { font-family: 'Instrument Serif', serif; font-size: clamp(30px,4.5vw,50px); line-height: 1.1; color: var(--ink); margin-bottom: 16px; }
+.l-title em { font-style: italic; color: var(--accent); }
+.l-subtitle { font-size: 15px; color: var(--muted); line-height: 1.75; max-width: 580px; }
+.l-divider { height: 1px; background: var(--border2); margin: 36px 0; }
+.s-label { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--dim); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.s-label::after { content:''; flex:1; height:1px; background: var(--border2); }
+
+.prose { font-size: 15px; line-height: 1.8; color: var(--ink); margin-bottom: 22px; }
+.prose strong { font-weight: 700; }
+.prose code { font-family: 'DM Mono', monospace; font-size: 13px; background: var(--border2); padding: 2px 7px; border-radius: 4px; color: var(--accent); }
+
+/* ═══════════════════════ CODE BLOCK ═══════════════════════ */
+.code-block { background: #0d0d0d; border-radius: 14px; overflow: hidden; margin-bottom: 24px; box-shadow: var(--sh); border: 1px solid rgba(255,255,255,0.04); }
+.code-bar { display: flex; align-items: center; gap: 8px; padding: 11px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.cd { width: 10px; height: 10px; border-radius: 50%; }
+.cd-r{background:#ff5f57;}.cd-y{background:#febc2e;}.cd-g{background:#28c840;}
+.code-lang { font-family: 'DM Mono', monospace; font-size: 9px; color: #555; margin-left: auto; letter-spacing: 1.5px; text-transform: uppercase; }
+.code-body { padding: 20px 22px; font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.9; color: #ccc8c0; overflow-x: auto; white-space: pre; }
+.ck{color:#9cdcfe;} .cs{color:#ce9178;} .cv{color:#98c379;} .cf{color:#dcdcaa;} .cm{color:#6a9955;font-style:italic;} .cn{color:#d19a66;} .cp{color:#c586c0;}
+
+/* ═══════════════════════ DEMO BOX ═══════════════════════ */
+.demo-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 24px; box-shadow: var(--sh); }
+.demo-bar { background: var(--bg); border-bottom: 1px solid var(--border); padding: 10px 18px; font-size: 10px; font-weight: 700; color: var(--dim); letter-spacing: 1.5px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+.demo-body { padding: 24px; }
+
+/* ═══════════════════════ CALLOUT ═══════════════════════ */
+.callout { border-radius: 12px; padding: 16px 18px; margin-bottom: 22px; font-size: 14px; line-height: 1.75; display: flex; gap: 13px; align-items: flex-start; }
+.callout code { font-family: 'DM Mono', monospace; font-size: 12px; background: rgba(0,0,0,0.07); padding: 1px 5px; border-radius: 3px; }
+.callout-blue   { background: var(--accent-l); border-left: 3px solid var(--accent); color: #1e3a8a; }
+.callout-amber  { background: var(--amber-l);  border-left: 3px solid var(--amber);  color: #92400e; }
+.callout-green  { background: var(--green-l);  border-left: 3px solid var(--green);  color: #14532d; }
+.callout-rose   { background: var(--rose-l);   border-left: 3px solid var(--rose);   color: #991b1b; }
+.callout-violet { background: var(--violet-l); border-left: 3px solid var(--violet); color: #4c1d95; }
+.callout-orange { background: var(--orange-l); border-left: 3px solid var(--orange); color: #7c2d12; }
+.callout-icon { font-size: 13px; flex-shrink: 0; margin-top: 2px; font-weight: 700; font-family: 'DM Mono', monospace; }
+
+/* ═══════════════════════ CARD GRID ═══════════════════════ */
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; transition: all .22s; }
+.card:hover { border-color: var(--accent); box-shadow: var(--sh2); transform: translateY(-2px); }
+.card-tag { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); margin-bottom: 6px; font-weight: 500; }
+.card-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.card-body { font-size: 12px; color: var(--muted); line-height: 1.55; }
+.card-body code { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--border2); padding: 1px 4px; border-radius: 3px; color: var(--amber); }
+
+/* buttons */
+.int-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.int-btn { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: all .17s; }
+.int-btn:hover { border-color: var(--accent); color: var(--accent); }
+.int-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* nav */
+.l-nav { display: flex; align-items: center; justify-content: space-between; padding-top: 40px; border-top: 1px solid var(--border2); margin-top: 12px; gap: 12px; }
+.nav-btn { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; padding: 11px 26px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: all .2s; }
+.nav-btn:hover { border-color: var(--ink); color: var(--ink); }
+.nav-btn.next { background: var(--ink); color: #fff; border-color: var(--ink); }
+.nav-btn.next:hover { background: #222; }
+.nav-btn.finish { background: var(--green); color: #fff; border-color: var(--green); }
+.nav-btn.pg-btn { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* ═══════════════════════ L0 — OVERVIEW ═══════════════════════ */
+.overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+.ov-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 18px; opacity: 0; transform: translateY(14px); transition: opacity .4s ease, transform .4s ease; }
+.ov-card.show { opacity: 1; transform: translateY(0); }
+.ov-card:hover { border-color: var(--accent); box-shadow: var(--sh2); }
+.ov-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); background: var(--accent-l); border: 1px solid rgba(26,86,232,0.15); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 7px; margin-bottom: 12px; font-weight: 600; }
+.ov-title { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
+.ov-body { font-size: 12px; color: var(--muted); line-height: 1.55; }
+.ov-tag { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); background: var(--border2); padding: 2px 7px; border-radius: 4px; display: inline-block; margin-top: 8px; }
+
+/* ═══════════════════════ L1 — VARIABLES ═══════════════════════ */
+.mem-viz { background: #0d0d0d; border-radius: 14px; padding: 22px; margin-bottom: 14px; display: flex; gap: 12px; flex-wrap: wrap; }
+.mem-box { border: 1.5px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px 16px; min-width: 110px; transition: all .35s; }
+.mem-box.lit { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,86,232,0.15); }
+.mem-name { font-family: 'DM Mono', monospace; font-size: 10px; color: #9cdcfe; margin-bottom: 6px; }
+.mem-val { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: #98c379; margin-bottom: 4px; transition: all .3s; }
+.mem-type { font-size: 9px; color: #555; }
+
+.var-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+.vc-box { border-radius: 12px; padding: 18px; border: 2px solid var(--border); }
+.vc-kw { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; color: var(--accent); margin-bottom: 8px; }
+.vc-rule { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 8px; }
+.vc-ex { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--border2); padding: 6px 10px; border-radius: 6px; color: var(--ink); }
+
+/* scoping visual */
+.scope-wrap { border: 2px dashed var(--border); border-radius: 12px; padding: 16px; margin-bottom: 8px; position: relative; }
+.scope-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+.scope-inner { border: 2px dashed var(--accent); border-radius: 8px; padding: 14px; margin-top: 8px; }
+.scope-inner .scope-label { color: var(--accent); }
+.scope-var { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink); padding: 4px 0; }
+.scope-var .visible { color: var(--green); font-weight: 600; }
+.scope-var .hidden  { color: var(--rose);  text-decoration: line-through; opacity: .5; }
+
+/* ═══════════════════════ L2 — FUNCTIONS ═══════════════════════ */
+.fn-anatomy-wrap { background: #0d0d0d; border-radius: 14px; padding: 26px 22px; margin-bottom: 14px; }
+.fn-line { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 2px; opacity: 0; transform: translateX(-12px); transition: opacity .35s ease, transform .35s ease; }
+.fn-line.show { opacity: 1; transform: translateX(0); }
+.fn-code { font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.9; color: #ccc8c0; white-space: pre; flex: 1; }
+.fn-ann { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 5px; white-space: nowrap; font-family: 'DM Mono', monospace; }
+.fn-ann.hi { color: var(--accent); font-weight: 600; }
+
+.fn-types { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+.fnt-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.fnt-head { background: var(--bg); padding: 10px 14px; font-size: 10px; font-weight: 700; color: var(--dim); letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.fnt-body { padding: 14px; font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.8; color: var(--ink); }
+
+/* return value visualiser */
+.ret-viz { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.ret-fn { background: #0d0d0d; border-radius: 10px; padding: 12px 16px; font-family: 'DM Mono', monospace; font-size: 12px; color: #dcdcaa; }
+.ret-arrow { font-size: 20px; color: var(--accent); font-weight: 700; }
+.ret-val { background: var(--accent-l); border: 1px solid rgba(26,86,232,0.2); border-radius: 10px; padding: 12px 16px; font-family: 'DM Mono', monospace; font-size: 14px; color: var(--accent); font-weight: 600; min-width: 80px; text-align: center; transition: all .3s; }
+
+/* ═══════════════════════ L3 — DOM SELECTION ═══════════════════════ */
+.dom-tree { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 14px; }
+.dt-node { display: flex; align-items: center; gap: 8px; cursor: pointer; border-radius: 8px; padding: 5px 10px; margin: 1px 0; transition: all .2s; font-family: 'DM Mono', monospace; font-size: 13px; }
+.dt-node:hover { background: var(--accent-l); }
+.dt-node.sel { background: var(--accent); }
+.dt-node.sel * { color: #fff !important; }
+.dt-tag { color: var(--accent); }
+.dt-id  { color: var(--amber); }
+.dt-cls { color: var(--green); }
+.dt-txt { color: var(--dim); font-style: italic; }
+
+.sel-output { background: #0d0d0d; border-radius: 12px; padding: 14px 18px; font-family: 'DM Mono', monospace; font-size: 13px; color: #ccc8c0; min-height: 52px; transition: all .3s; margin-top: 10px; white-space: pre-wrap; }
+
+/* method compare */
+.method-race { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+.mr-box { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+.mr-head { padding: 10px 14px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.mr-head.blue { background: var(--accent-l); color: var(--accent); border-color: rgba(26,86,232,0.15); }
+.mr-head.amber { background: var(--amber-l); color: var(--amber); border-color: rgba(217,119,6,0.15); }
+.mr-body { padding: 14px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+.mr-body code { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--border2); padding: 1px 4px; border-radius: 3px; color: var(--ink); }
+
+/* ═══════════════════════ L4 — DOM MANIPULATION ═══════════════════════ */
+.manip-live { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 14px; }
+.ml-target { background: var(--bg); border: 2px solid var(--border); border-radius: 10px; padding: 16px 18px; font-family: 'DM Mono', monospace; margin-bottom: 14px; transition: all .35s; min-height: 52px; }
+.ml-target-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+.ml-target-content { font-size: 20px; font-weight: 700; color: var(--ink); transition: all .35s; }
+.ml-target-style { font-size: 13px; transition: all .35s; }
+
+.prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px; }
+.prop-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; cursor: pointer; transition: all .2s; }
+.prop-card:hover, .prop-card.active-prop { border-color: var(--accent); background: var(--accent-l); }
+.prop-name { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); font-weight: 500; margin-bottom: 4px; }
+.prop-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* before/after flow */
+.ba-flow { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; margin-bottom: 22px; }
+.ba-box { border-radius: 10px; padding: 14px; }
+.ba-before { background: var(--border2); }
+.ba-after  { background: var(--accent-l); border: 1px solid rgba(26,86,232,0.2); }
+.ba-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+.ba-after .ba-label { color: var(--accent); }
+.ba-val { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--ink); transition: all .3s; }
+.ba-arrow-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ba-arrow { font-size: 20px; color: var(--accent); }
+.ba-arrow-code { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); white-space: nowrap; }
+
+/* ═══════════════════════ L5 — EVENT LISTENERS ═══════════════════════ */
+.event-pipeline { display: flex; flex-direction: column; gap: 3px; margin-bottom: 18px; }
+.ep-row { display: flex; align-items: stretch; gap: 10px; opacity: 0; transform: translateY(8px); transition: opacity .35s ease, transform .35s ease; }
+.ep-row.show { opacity: 1; transform: translateY(0); }
+.ep-box { border-radius: 10px; padding: 13px 16px; flex: 1; font-size: 13px; }
+.ep-blue   { background: var(--accent-l); border: 1px solid rgba(26,86,232,0.18); color: #1e3a8a; }
+.ep-amber  { background: var(--amber-l);  border: 1px solid rgba(217,119,6,0.18);  color: #92400e; }
+.ep-green  { background: var(--green-l);  border: 1px solid rgba(22,163,74,0.18);  color: #14532d; }
+.ep-violet { background: var(--violet-l); border: 1px solid rgba(124,58,237,0.18); color: #4c1d95; }
+.ep-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 4px; opacity: .65; }
+.ep-connector { width: 2px; background: var(--border2); border-radius: 2px; align-self: stretch; margin: 0 auto; opacity: 0; transition: opacity .3s; }
+.ep-connector.show { opacity: 1; }
+
+/* live sandbox */
+.ev-sandbox { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 14px; }
+.ev-target { padding: 16px; border: 2px dashed var(--border); border-radius: 10px; text-align: center; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all .2s; user-select: none; margin-bottom: 14px; }
+.ev-target:hover { border-color: var(--accent); color: var(--accent); background: var(--surface); }
+.ev-target.fired { background: var(--accent); color: #fff; border-color: var(--accent); border-style: solid; }
+.ev-log { background: #0d0d0d; border-radius: 10px; padding: 12px 16px; min-height: 60px; max-height: 130px; overflow-y: auto; font-family: 'DM Mono', monospace; font-size: 11.5px; line-height: 1.8; }
+.ev-entry { color: #98c379; animation: logIn .25s ease; }
+.ev-time  { color: #555; margin-right: 8px; }
+@keyframes logIn { from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);} }
+
+.ev-types { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 22px; }
+.evt-chip { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; transition: all .2s; }
+.evt-chip:hover { border-color: var(--accent); }
+.evt-chip.active-ev { border-color: var(--accent); background: var(--accent-l); }
+.evt-name { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); font-weight: 500; margin-bottom: 4px; }
+.evt-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+/* ═══════════════════════ L6 — CONDITIONALS ═══════════════════════ */
+.if-anatomy { background: #0d0d0d; border-radius: 14px; padding: 24px 22px; margin-bottom: 14px; }
+.if-line { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 2px; opacity: 0; transform: translateX(-12px); transition: opacity .35s ease, transform .35s ease; }
+.if-line.show { opacity: 1; transform: translateX(0); }
+.if-code { font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.9; color: #ccc8c0; white-space: pre; flex: 1; }
+.if-ann { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 5px; white-space: nowrap; }
+.if-ann.hi { color: var(--green); }
+
+/* decision flow */
+.dec-flow { display: flex; flex-direction: column; align-items: center; gap: 0; margin-bottom: 22px; }
+.dec-cond { background: var(--amber-l); border: 2px solid rgba(217,119,6,0.25); border-radius: 12px; padding: 14px 22px; font-family: 'DM Mono', monospace; font-size: 14px; color: #92400e; font-weight: 500; text-align: center; }
+.dec-branch-row { display: flex; gap: 0; width: 100%; }
+.dec-branch { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0; }
+.dec-line { width: 2px; height: 22px; background: var(--border2); }
+.dec-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; margin-bottom: 4px; }
+.dec-true  { background: var(--green-l); color: var(--green); }
+.dec-false { background: var(--rose-l);  color: var(--rose); }
+.dec-result { border-radius: 10px; padding: 12px 16px; font-size: 13px; font-weight: 600; text-align: center; width: 90%; }
+.dec-result-t { background: var(--green-l); color: var(--green); border: 1px solid rgba(22,163,74,0.2); }
+.dec-result-f { background: var(--rose-l);  color: var(--rose);  border: 1px solid rgba(220,38,38,0.2); }
+
+/* interactive slider */
+.slider-demo { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
+.sd-label { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.sd-slider { width: 100%; accent-color: var(--accent); cursor: pointer; margin-bottom: 14px; }
+.sd-num { font-family: 'DM Mono', monospace; font-size: 42px; font-weight: 500; color: var(--ink); text-align: center; margin-bottom: 8px; transition: color .3s; }
+.sd-result { font-size: 13px; font-weight: 600; text-align: center; padding: 8px 20px; border-radius: 99px; display: inline-block; transition: all .3s; }
+.sd-wrap { text-align: center; }
+
+/* ═══════════════════════ L7 — CHALLENGE LAB ═══════════════════════ */
+#l-7.active { max-width: 100%; width: 100%; padding: 0; align-self: stretch; }
+#lab-shell { display: flex; flex-direction: column; height: calc(100vh - 52px); background: var(--ink); overflow: hidden; }
+.lab-tabs { display: flex; gap: 0; overflow-x: auto; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; background: #161614; }
+.lab-tab { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; padding: 11px 16px; border-bottom: 2px solid transparent; color: rgba(255,255,255,0.3); cursor: pointer; white-space: nowrap; transition: all .18s; background: none; border-top: none; border-left: none; border-right: none; }
+.lab-tab:hover { color: rgba(255,255,255,0.65); }
+.lab-tab.active-tab { color: #fff; border-bottom-color: var(--accent); }
+.lab-tab.solved-tab { color: var(--green) !important; border-bottom-color: var(--green) !important; }
+.lab-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.ch-card { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.ch-card.active-ch { display: flex; }
+.ch-top { flex: 1; overflow-y: auto; padding: 22px 26px; background: var(--bg); display: flex; flex-direction: column; gap: 0; }
+.ch-badge { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; }
+.ch-title { font-family: 'Instrument Serif', serif; font-size: 22px; color: var(--ink); margin-bottom: 8px; }
+.ch-title em { font-style: italic; color: var(--accent); }
+.ch-brief { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+.ch-brief code { font-family: 'DM Mono', monospace; font-size: 12px; background: var(--border2); padding: 1px 5px; border-radius: 3px; color: var(--amber); }
+.ch-task { background: var(--ink); border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; }
+.ch-task-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 7px; }
+.ch-task-text { font-size: 13px; color: rgba(255,255,255,0.72); line-height: 1.65; }
+.ch-task-text code { font-family: 'DM Mono', monospace; font-size: 12px; color: #dcdcaa; background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 3px; }
+.ch-editor-wrap { background: #0d0d0d; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+.ch-editor-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.ch-ed-dot { width: 9px; height: 9px; border-radius: 50%; }
+.ch-editor-label { font-family: 'DM Mono', monospace; font-size: 9px; color: #555; margin-left: auto; letter-spacing: 1.5px; text-transform: uppercase; }
+.ch-editor { width: 100%; min-height: 100px; font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.85; color: #ccc8c0; background: transparent; border: none; resize: vertical; padding: 14px 18px; outline: none; tab-size: 2; }
+.ch-actions { display: flex; gap: 8px; align-items: stretch; margin-bottom: 0; }
+.ch-run-btn { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; padding: 9px 22px; border-radius: 8px; background: var(--accent); color: #fff; border: none; cursor: pointer; transition: all .18s; white-space: nowrap; }
+.ch-run-btn:hover { background: #1248d0; }
+.ch-hint-btn { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600; padding: 9px 16px; border-radius: 8px; background: transparent; color: var(--muted); border: 1px solid var(--border); cursor: pointer; transition: all .18s; white-space: nowrap; }
+.ch-hint-btn:hover { border-color: var(--amber); color: var(--amber); }
+.ch-reset-btn { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600; padding: 9px 14px; border-radius: 8px; background: transparent; color: var(--dim); border: 1px solid var(--border2); cursor: pointer; transition: all .18s; margin-left: auto; white-space: nowrap; }
+.ch-reset-btn:hover { color: var(--rose); border-color: var(--rose); }
+.ch-result { background: #0d0d0d; border-radius: 8px; padding: 11px 15px; font-family: 'DM Mono', monospace; font-size: 12px; min-height: 42px; line-height: 1.7; transition: all .3s; margin-top: 10px; }
+.ch-result.pass { border-left: 3px solid var(--green); color: #98c379; }
+.ch-result.fail { border-left: 3px solid var(--rose);  color: #f47878; }
+.ch-result.hint { border-left: 3px solid var(--amber); color: #dca853; }
+.ch-result.idle { color: #555; font-style: italic; border-left: 3px solid #2a2a28; }
+.lab-footer { display: flex; align-items: center; gap: 12px; padding: 10px 20px; background: #161614; border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+.lab-prog-dots { display: flex; gap: 6px; }
+.lab-prog-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: all .3s; }
+.lab-prog-dot.solved { background: var(--green); }
+.lab-prog-dot.current { background: var(--accent); box-shadow: 0 0 0 3px rgba(26,86,232,0.25); }
+.lab-prog-label { font-size: 11px; color: rgba(255,255,255,0.3); font-family: 'DM Mono', monospace; }
+.lab-finish-btn { margin-left: auto; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; padding: 8px 20px; border-radius: 99px; background: var(--green); color: #fff; border: none; cursor: pointer; transition: all .2s; opacity: 0; pointer-events: none; }
+.lab-finish-btn.visible { opacity: 1; pointer-events: auto; }
+.lab-finish-btn:hover { background: #15803d; }
+@media (max-width: 600px) {
+  .lab-tab { font-size: 10px; padding: 9px 10px; }
+  .ch-top { padding: 16px; }
+}
+
+/* ═══════════════════════ RESPONSIVE ═══════════════════════ */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-232px); }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  .lesson { padding: 28px 20px 84px; }
+  .card-grid, .overview-grid, .var-compare, .fn-types, .method-race, .prop-grid, .ev-types, .ba-flow { grid-template-columns: 1fr; }
+  .ba-flow { display: flex; flex-direction: column; }
+  #hamburger { display: flex !important; }
+  #topbar { padding: 0 16px; }
+  .l-nav { flex-direction: column; }
+  .l-nav .nav-btn { text-align: center; width: 100%; }
+}
+@media (max-width: 600px) {
+  .lesson { padding: 20px 14px 84px; }
+  .l-title { font-size: 28px; }
+  .demo-body { padding: 16px; }
+  #pg-wrap { flex-direction: column; }
+  #pg-panel { width: 100%; max-height: 220px; border-right: none; border-bottom: 1px solid var(--border); }
+  #pg-code-out { height: 130px; }
+  .pg-bottom-nav { left: 12px; right: 12px; transform: none; border-radius: 14px; justify-content: center; }
+  .ev-types { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 769px) and (max-width: 1100px) {
+  .lesson { padding: 40px 36px 84px; }
+}
+</style>
+</head>
+<body>
+
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<nav id="sidebar" aria-label="Course navigation">
+  <div class="sb-brand">
+    <div class="sb-eyebrow">JavaScript · Core</div>
+    <div class="sb-title">JS Fundamentals</div>
+    <div class="sb-subtitle">8 lessons · ~50 min</div>
+  </div>
+  <div class="sb-progress">
+    <div class="sb-prog-row"><span>Progress</span><span id="pct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="progfill"></div></div>
+  </div>
+  <div class="sb-nav" id="sb-nav"></div>
+  <div class="sb-footer">Master state, functions, the DOM, events, and logic — the building blocks of every interactive web page.</div>
+</nav>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<div id="main">
+  <div id="topbar">
+    <button id="hamburger" onclick="toggleSidebar()" aria-label="Open navigation">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="tb-tag" id="tb-tag">01</span>
+    <span class="tb-sep">&#8250;</span>
+    <span class="tb-lesson" id="tb-lesson">Overview</span>
+  </div>
+
+<!-- ══════════════════════════════════════════════════
+     LESSON 0 — OVERVIEW
+══════════════════════════════════════════════════ -->
+<div class="lesson active" id="l-0">
+  <div class="l-eyebrow">Lesson 01 of 08</div>
+  <h1 class="l-title">What You Will <em>Learn</em></h1>
+  <p class="l-subtitle">Six core JavaScript concepts that power every interactive web page. Learn them in order — each one builds directly on the last.</p>
+
+  <div class="l-divider"></div>
+  <div class="s-label">Course map</div>
+
+  <div class="overview-grid" id="ov-grid">
+    <div class="ov-card"><div class="ov-num">01</div><div class="ov-title">Variables &amp; State</div><div class="ov-body">How JavaScript stores and tracks values that change over time.</div><div class="ov-tag">let · const · scope</div></div>
+    <div class="ov-card"><div class="ov-num">02</div><div class="ov-title">Functions</div><div class="ov-body">Reusable named blocks of logic that run when called.</div><div class="ov-tag">declaration · return · scope</div></div>
+    <div class="ov-card"><div class="ov-num">03</div><div class="ov-title">DOM Selection</div><div class="ov-body">Finding and targeting HTML elements from JavaScript.</div><div class="ov-tag">getElementById · querySelector</div></div>
+    <div class="ov-card"><div class="ov-num">04</div><div class="ov-title">DOM Manipulation</div><div class="ov-body">Reading and writing element content, styles, and attributes.</div><div class="ov-tag">textContent · style · classList</div></div>
+    <div class="ov-card"><div class="ov-num">05</div><div class="ov-title">Event Listeners</div><div class="ov-body">Responding to user actions: clicks, keypresses, form input.</div><div class="ov-tag">addEventListener · event types</div></div>
+    <div class="ov-card"><div class="ov-num">06</div><div class="ov-title">Conditional Logic</div><div class="ov-body">Making decisions in code — branching based on values.</div><div class="ov-tag">if · else if · else · ternary</div></div>
+  </div>
+
+  <div class="callout callout-blue">
+    <span class="callout-icon">JS</span>
+    <span>These six concepts are not isolated facts — they combine to form a <strong>complete system</strong>: variables hold state, functions act on it, the DOM displays it, events trigger functions, and conditionals control the logic. Lesson 7 is a sandbox where you put all six together.</span>
+  </div>
+
+  <div class="l-nav">
+    <span></span>
+    <button class="nav-btn next" onclick="go(1)">Variables &amp; State &#8250;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     LESSON 1 — VARIABLES & STATE
+══════════════════════════════════════════════════ -->
+<div class="lesson" id="l-1">
+  <div class="l-eyebrow">Lesson 02 of 08</div>
+  <h1 class="l-title">Variables <em>&amp; State</em></h1>
+  <p class="l-subtitle">A variable is a named container for a value. State is a programmer's word for data that changes over time — and variables are how JavaScript tracks it.</p>
+
+  <div class="l-divider"></div>
+  <div class="s-label">How memory works — click to change values</div>
+
+  <div class="demo-box">
+    <div class="demo-bar">Simulated JS memory</div>
+    <div class="demo-body">
+      <div class="mem-viz">
+        <div class="mem-box" id="mb-score">
+          <div class="mem-name">score</div>
+          <div class="mem-val" id="mb-score-val">0</div>
+          <div class="mem-type">Number · let</div>
+        </div>
+        <div class="mem-box" id="mb-name">
+          <div class="mem-name">username</div>
+          <div class="mem-val" style="font-size:16px;padding-top:4px" id="mb-name-val">"Alex"</div>
+          <div class="mem-type">String · let</div>
+        </div>
+        <div class="mem-box" id="mb-active">
+          <div class="mem-name">isActive</div>
+          <div class="mem-val" id="mb-active-val">true</div>
+          <div class="mem-type">Boolean · const</div>
+        </div>
+      </div>
+      <div class="int-row" style="margin-top:14px">
+        <button class="int-btn" onclick="memAdd()">score + 10</button>
+        <button class="int-btn" onclick="memSub()">score - 5</button>
+        <button class="int-btn" onclick="memName()">Change name</button>
+        <button class="int-btn" onclick="memReset()">Reset</button>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);margin-top:8px;min-height:22px" id="mem-log"></div>
+    </div>
+  </div>
+
+  <div class="s-label">let vs const — when to use each</div>
+  <div class="var-compare">
+    <div class="vc-box">
+      <div class="vc-kw">let</div>
+      <div class="vc-rule">Value will change. Use for anything that gets updated: scores, toggle states, form fields, counters, positions.</div>
+      <div class="vc-ex">let score = 0;<br>score = score + 10; <span style="color:var(--green)">// ok</span></div>
+    </div>
+    <div class="vc-box" style="background:var(--bg)">
+      <div class="vc-kw">const</div>
+      <div class="vc-rule">Value will never change. Use for fixed config: max limits, API keys, element references, colour values.</div>
+      <div class="vc-ex">const MAX = 100;<br>MAX = 200; <span style="color:var(--rose)">// TypeError!</span></div>
+    </div>
+  </div>
+
+  <div class="s-label">Scope — where can a variable be seen?</div>
+  <div class="scope-wrap">
+    <div class="scope-label">Global scope</div>
+    <div class="scope-var"><span class="ck" style="font-family:'DM Mono',monospace">let</span> <span style="font-family:'DM Mono',monospace">total = 0;</span> &nbsp;<span style="color:var(--green);font-size:11px">visible everywhere</span></div>
+    <div class="scope-inner">
+      <div class="scope-label">Function scope (inside a function)</div>
+      <div class="scope-var"><span style="font-family:'DM Mono',monospace"><span class="ck" style="font-family:'DM Mono',monospace">let</span> tax = total * 0.1;</span> &nbsp;<span style="color:var(--green);font-size:11px">visible here</span></div>
+      <div class="scope-var" style="font-size:12px;color:var(--muted);margin-top:4px">total is visible here — it was declared outside</div>
+    </div>
+    <div class="scope-var" style="margin-top:8px;font-size:12px;color:var(--rose)">tax is NOT visible here — it was declared inside the function</div>
+  </div>
+
+  <div class="callout callout-amber">
+    <span class="callout-icon">!</span>
+    <span>Avoid <code>var</code> — it has confusing scope rules. In all modern JavaScript, use <code>let</code> for changeable values and <code>const</code> for everything else. Declare variables at the top of the block they belong to.</span>
+  </div>
+
+  <div class="l-nav">
+    <button class="nav-btn" onclick="go(0)">&#8249; Overview</button>
+    <button class="nav-btn next" onclick="go(2)">Functions &#8250;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     LESSON 2 — FUNCTIONS
+══════════════════════════════════════════════════ -->
+<div class="lesson" id="l-2">
+  <div class="l-eyebrow">Lesson 03 of 08</div>
+  <h1 class="l-title"><em>Functions</em></h1>
+  <p class="l-subtitle">A function is a named, reusable block of code. Write it once, call it as many times as needed. Functions keep your code organised and eliminate repetition.</p>
+
+  <div class="l-divider"></div>
+  <div class="s-label">Anatomy — reveal each part</div>
+
+  <div class="demo-box">
+    <div class="demo-bar">
+      Function anatomy
+      <button class="int-btn" style="margin-left:auto;padding:4px 12px;font-size:10px" onclick="revealFn()">Step through</button>
+    </div>
+    <div class="demo-body" style="padding:0">
+      <div class="fn-anatomy-wrap" id="fn-wrap">
+        <div class="fn-line" id="fnl-1"><span class="fn-code"><span class="ck">function</span> <span class="cf">greet</span>(<span class="cn">name</span>) {</span><span class="fn-ann hi">keyword · name · parameter</span></div>
+        <div class="fn-line" id="fnl-2"><span class="fn-code">  <span class="ck">const</span> message = <span class="cs">"Hello, "</span> + name;</span><span class="fn-ann">body — runs when called</span></div>
+        <div class="fn-line" id="fnl-3"><span class="fn-code">  <span class="ck">return</span> message;</span><span class="fn-ann hi">sends a value back</span></div>
+        <div class="fn-line" id="fnl-4"><span class="fn-code">}</span><span class="fn-ann">closing brace</span></div>
+        <div class="fn-line" id="fnl-5" style="margin-top:12px"><span class="fn-code"><span class="ck">const</span> result = <span class="cf">greet</span>(<span class="cs">"Alex"</span>);</span><span class="fn-ann hi">call with argument</span></div>
+        <div class="fn-line" id="fnl-6"><span class="fn-code">console.<span class="cf">log</span>(result);  <span class="cm">// "Hello, Alex"</span></span><span class="fn-ann">output</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-label">Return value visualiser</div>
+  <div class="demo-box">
+    <div class="demo-bar">
+      Watch the return value flow
+      <button class="int-btn" style="margin-left:auto;padding:4px 12px;font-size:10px" onclick="runReturn()">Run</button>
+    </div>
+    <div class="demo-body">
+      <div class="ret-viz" id="ret-viz">
+        <div class="ret-fn">add(3, 7)</div>
+        <div class="ret-arrow" id="ret-arrow" style="opacity:.2">&#8594;</div>
+        <div class="ret-val" id="ret-val" style="opacity:.3">?</div>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-height:22px" id="ret-log"></div>
+    </div>
+  </div>
+
+  <div class="s-label">Two common syntaxes</div>
+  <div class="fn-types">
+    <div class="fnt-box">
+      <div class="fnt-head">Function declaration</div>
+      <div class="fnt-body"><span class="ck">function</span> <span class="cf">add</span>(a, b) {<br>  <span class="ck">return</span> a + b;<br>}<br><span class="cm">// Hoisted — can call before declaration</span></div>
+    </div>
+    <div class="fnt-box">
+      <div class="fnt-head">Arrow function (modern)</div>
+      <div class="fnt-body"><span class="ck">const</span> add = (a, b) =&gt; {<br>  <span class="ck">return</span> a + b;<br>}<br><span class="cm">// Or short: const add = (a, b) =&gt; a + b;</span></div>
+    </div>
+  </div>
+
+  <div class="callout callout-green">
+    <span class="callout-icon">&#10003;</span>
+    <span><strong>Single responsibility:</strong> each function should do exactly <em>one thing</em> and do it well. If you find yourself putting two tasks in a function, split it into two functions. This makes testing and debugging dramatically easier.</span>
+  </div>
+
+  <div class="l-nav">
+    <button class="nav-btn" onclick="go(1)">&#8249; Variables</button>
+    <button class="nav-btn next" onclick="go(3)">DOM Selection &#8250;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     LESSON 3 — DOM SELECTION
+══════════════════════════════════════════════════ -->
+<div class="lesson" id="l-3">
+  <div class="l-eyebrow">Lesson 04 of 08</div>
+  <h1 class="l-title">DOM <em>Selection</em></h1>
+  <p class="l-subtitle">The DOM is the browser's live map of your HTML. Before JavaScript can read or change anything on screen, it must first <em>find</em> the right element.</p>
+
+  <div class="l-divider"></div>
+  <div class="s-label">Click any element in this page mock-up</div>
+
+  <div class="demo-box">
+    <div class="demo-bar">Interactive DOM tree</div>
+    <div class="demo-body">
+      <div class="dom-tree">
+        <div class="dt-node" onclick="selNode(this,'body')"><span class="dt-tag">&lt;body&gt;</span></div>
+        <div class="dt-node" style="margin-left:18px" onclick="selNode(this,'header')"><span class="dt-tag">&lt;header&gt;</span> <span class="dt-id">id="page-header"</span></div>
+        <div class="dt-node" style="margin-left:36px" onclick="selNode(this,'h1')"><span class="dt-tag">&lt;h1&gt;</span> <span class="dt-txt">"Page Title"</span></div>
+        <div class="dt-node" style="margin-left:18px" onclick="selNode(this,'main')"><span class="dt-tag">&lt;main&gt;</span></div>
+        <div class="dt-node" style="margin-left:36px" onclick="selNode(this,'p')"><span class="dt-tag">&lt;p</span> <span class="dt-id">id="output"</span><span class="dt-tag">&gt;</span> <span class="dt-txt">"Hello"</span><span class="dt-tag">&gt;</span></div>
+        <div class="dt-node" style="margin-left:36px" onclick="selNode(this,'btn')"><span class="dt-tag">&lt;button</span> <span class="dt-id">id="action-btn"</span> <span class="dt-cls">class="primary"</span><span class="dt-tag">&gt;</span><span class="dt-txt">Click me</span><span class="dt-tag">&lt;/button&gt;</span></div>
+        <div class="dt-node" style="margin-left:18px" onclick="selNode(this,'footer')"><span class="dt-tag">&lt;footer&gt;</span> <span class="dt-cls">class="site-footer"</span></div>
+      </div>
+      <div class="sel-output" id="sel-output"><span style="color:#555;font-style:italic">Click an element above to see how to select it</span></div>
+    </div>
+  </div>
+
+  <div class="s-label">getElementById vs querySelector</div>
+  <div class="method-race">
+    <div class="mr-box">
+      <div class="mr-head blue">getElementById</div>
+      <div class="mr-body">
+        Finds one element by its exact <code>id</code>. Fastest method — IDs are unique by definition.<br><br>
+        <code>document.getElementById("output")</code><br><br>
+        Returns the element, or <code>null</code> if not found.
+      </div>
+    </div>
+    <div class="mr-box">
+      <div class="mr-head amber">querySelector</div>
+      <div class="mr-body">
+        Accepts any CSS selector. More flexible but slightly slower.<br><br>
+        <code>document.querySelector("#output")</code><br>
+        <code>document.querySelector(".primary")</code><br>
+        <code>document.querySelector("button")</code>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-bar"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div><span class="code-lang">JavaScript</span></div>
+    <div class="code-body"><span class="cm">// Store references at the top of your script — once</span>
+<span class="ck">const</span> outputEl  = document.<span class="cf">getElementById</span>(<span class="cs">"output"</span>);
+<span class="ck">const</span> actionBtn  = document.<span class="cf">getElementById</span>(<span class="cs">"action-btn"</span>);
+
+<span class="cm">// querySelector: any CSS selector works</span>
+<span class="ck">const</span> footer = document.<span class="cf">querySelector</span>(<span class="cs">".site-footer"</span>);
+<span class="ck">const</span> allBtns = document.<span class="cf">querySelectorAll</span>(<span class="cs">"button"</span>); <span class="cm">// NodeList</span></div>
+  </div>
+
+  <div class="callout callout-rose">
+    <span class="callout-icon">!</span>
+    <span><strong>Timing matters:</strong> if your script runs before the HTML has rendered, <code>getElementById</code> returns <code>null</code>. Always place <code>&lt;script&gt;</code> tags at the <strong>bottom of <code>&lt;body&gt;</code></strong>, or listen for <code>DOMContentLoaded</code>.</span>
+  </div>
+
+  <div class="l-nav">
+    <button class="nav-btn" onclick="go(2)">&#8249; Functions</button>
+    <button class="nav-btn next" onclick="go(4)">DOM Manipulation &#8250;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     LESSON 4 — DOM MANIPULATION
+══════════════════════════════════════════════════ -->
+<div class="lesson" id="l-4">
+  <div class="l-eyebrow">Lesson 05 of 08</div>
+  <h1 class="l-title">DOM <em>Manipulation</em></h1>
+  <p class="l-subtitle">Once you have a reference to an element, you can read and write almost anything about it: its text, its style, its classes, its attributes.</p>
+
+  <div class="l-divider"></div>
+  <div class="s-label">Click a property to see it in action</div>
+
+  <div class="prop-grid">
+    <div class="prop-card" id="pc-text" onclick="doProp('text')"><div class="prop-name">.textContent</div><div class="prop-desc">Read or set the text inside an element. Safe — strips all HTML tags.</div></div>
+    <div class="prop-card" id="pc-style" onclick="doProp('style')"><div class="prop-name">.style.property</div><div class="prop-desc">Set inline CSS directly: color, background, fontSize, display.</div></div>
+    <div class="prop-card" id="pc-class" onclick="doProp('class')"><div class="prop-name">.classList.add/remove</div><div class="prop-desc">Toggle CSS classes instead of hardcoding styles in JS.</div></div>
+    <div class="prop-card" id="pc-attr" onclick="doProp('attr')"><div class="prop-name">.setAttribute</div><div class="prop-desc">Set any HTML attribute: disabled, href, src, placeholder.</div></div>
+  </div>
+
+  <div class="manip-live">
+    <div class="ml-target-label">Live element</div>
+    <div class="ml-target" id="ml-target">
+      <div class="ml-target-content" id="ml-content">Hello, world</div>
+      <div class="ml-target-style" id="ml-style" style="margin-top:6px;font-size:12px;color:var(--muted)">No style changes yet</div>
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);min-height:20px" id="ml-code"></div>
+  </div>
+
+  <div class="s-label">Before and after — textContent update</div>
+  <div class="ba-flow">
+    <div class="ba-box ba-before"><div class="ba-label">Before</div><div class="ba-val" id="ba-before">Hello, world</div></div>
+    <div class="ba-arrow-col">
+      <div class="ba-arrow">&#8594;</div>
+      <div class="ba-arrow-code">el.textContent = "..."</div>
+    </div>
+    <div class="ba-box ba-after"><div class="ba-label">After</div><div class="ba-val" id="ba-after">Hello, world</div></div>
+  </div>
+  <div class="int-row">
+    <button class="int-btn" onclick="baUpdate('Good morning!')">Good morning!</button>
+    <button class="int-btn" onclick="baUpdate('Score: 42')">Score: 42</button>
+    <button class="int-btn" onclick="baUpdate('Status: Active')">Status: Active</button>
+    <button class="int-btn" onclick="baUpdate('Hello, world')">Reset</button>
+  </div>
+
+  <div class="callout callout-violet">
+    <span class="callout-icon">&#9670;</span>
+    <span>Prefer <code>.classList.add()</code> and <code>.classList.remove()</code> over inline <code>.style</code> changes — it keeps styling in your CSS where it belongs, and makes toggling clean: <code>el.classList.toggle("active")</code>.</span>
+  </div>
+
+  <div class="l-nav">
+    <button class="nav-btn" onclick="go(3)">&#8249; DOM Selection</button>
+    <button class="nav-btn next" onclick="go(5)">Event Listeners &#8250;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     LESSON 5 — EVENT LISTENERS
+══════════════════════════════════════════════════ -->
+<div class="lesson" id="l-5">
+  <div class="l-eyebrow">Lesson 06 of 08</div>
+  <h1 class="l-title">Event <em>Listeners</em></h1>
+  <p class="l-subtitle">JavaScript is event-driven. Nothing happens until something triggers it — a click, a keypress, a scroll. Event listeners watch for those triggers and run code in response.</p>
+
+  <div class="l-divider"></div>
+  <div class="s-label">How an event flows — click to animate</div>
+
+  <div class="demo-box">
+    <div class="demo-bar">
+      Event pipeline
+      <button class="int-btn" style="margin-left:auto;padding:4px 12px;font-size:10px" onclick="runPipeline()">Animate</button>
+    </div>
+    <div class="demo-body">
+      <div class="event-pipeline">
+        <div class="ep-row" id="ep-1"><div class="ep-box ep-blue"><span class="ep-label">User action</span>Clicks a button on the page</div></div>
+        <div style="width:2px;height:20px;background:var(--border2);margin:0 20px;opacity:0;transition:.3s" id="epc-1"></div>
+        <div class="ep-row" id="ep-2"><div class="ep-box ep-amber"><span class="ep-label">Event created</span>Browser wraps the action in an <code style="font-size:11px;background:rgba(0,0,0,0.07);padding:1px 4px;border-radius:3px">Event</code> object containing target, timestamp, type</div></div>
+        <div style="width:2px;height:20px;background:var(--border2);margin:0 20px;opacity:0;transition:.3s" id="epc-2"></div>
+        <div class="ep-row" id="ep-3"><div class="ep-box ep-violet"><span class="ep-label">Listener checks</span>Is there an <code style="font-size:11px;background:rgba(0,0,0,0.07);padding:1px 4px;border-radius:3px">addEventListener("click", …)</code> registered on this element?</div></div>
+        <div style="width:2px;height:20px;background:var(--border2);margin:0 20px;opacity:0;transition:.3s" id="epc-3"></div>
+        <div class="ep-row" id="ep-4"><div class="ep-box ep-green"><span class="ep-label">Handler runs</span>Your callback function executes — state updates, UI refreshes</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-label">Common event types — click to see the syntax</div>
+  <div class="ev-types">
+    <div class="evt-chip" onclick="showEvType(this,'click')"><div class="evt-name">click</div><div class="evt-desc">Mouse press and release on element</div></div>
+    <div class="evt-chip" onclick="showEvType(this,'input')"><div class="evt-name">input</div><div class="evt-desc">Value changes in form field</div></div>
+    <div class="evt-chip" onclick="showEvType(this,'keydown')"><div class="evt-name">keydown</div><div class="evt-desc">Any key pressed on keyboard</div></div>
+    <div class="evt-chip" onclick="showEvType(this,'submit')"><div class="evt-name">submit</div><div class="evt-desc">Form submitted</div></div>
+    <div class="evt-chip" onclick="showEvType(this,'mouseover')"><div class="evt-name">mouseover</div><div class="evt-desc">Pointer enters element</div></div>
+    <div class="evt-chip" onclick="showEvType(this,'DOMContentLoaded')"><div class="evt-name">DOMContentLoaded</div><div class="evt-desc">Page HTML fully parsed</div></div>
+  </div>
+  <div class="code-block" id="evtype-code" style="display:none">
+    <div class="code-bar"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div><span class="code-lang" id="evtype-lang">JavaScript</span></div>
+    <div class="code-body" id="evtype-body"></div>
+  </div>
+
+  <div class="s-label">Live sandbox — click it</div>
+  <div class="ev-sandbox">
+    <div class="ev-target" id="ev-target" onclick="logEv()">Click me — I have an event listener attached</div>
+    <div class="ev-log" id="ev-log"><span style="color:#555;font-style:italic">Waiting for events…</span></div>
+  </div>
+
+  <div class="callout callout-orange">
+    <span class="callout-icon">&#9650;</span>
+    <span>Always use <code>&lt;button&gt;</code> for clickable actions, not <code>&lt;div&gt;</code>. Real buttons fire click events on spacebar and Enter automatically, are keyboard-focusable, and announce themselves correctly to screen readers — for free.</span>
+  </div>
+
+  <div class="l-nav">
+    <button class="nav-btn" onclick="go(4)">&#8249; DOM Manipulation</button>
+    <button class="nav-btn next" onclick="go(6)">Conditionals &#8250;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     LESSON 6 — CONDITIONALS
+══════════════════════════════════════════════════ -->
+<div class="lesson" id="l-6">
+  <div class="l-eyebrow">Lesson 07 of 08</div>
+  <h1 class="l-title">Conditional <em>Logic</em></h1>
+  <p class="l-subtitle">Conditionals let your code make decisions. Depending on the current state — a number, a boolean, a string — different paths execute.</p>
+
+  <div class="l-divider"></div>
+  <div class="s-label">Anatomy — reveal the structure</div>
+
+  <div class="demo-box">
+    <div class="demo-bar">
+      if / else if / else
+      <button class="int-btn" style="margin-left:auto;padding:4px 12px;font-size:10px" onclick="revealIf()">Step through</button>
+    </div>
+    <div class="demo-body" style="padding:0">
+      <div class="if-anatomy" id="if-wrap">
+        <div class="if-line" id="ifl-1"><span class="if-code"><span class="ck">if</span> (score >= <span class="cn">90</span>) {</span><span class="if-ann hi">condition evaluated first</span></div>
+        <div class="if-line" id="ifl-2"><span class="if-code">  grade = <span class="cs">"A"</span>;</span><span class="if-ann">runs if condition is true</span></div>
+        <div class="if-line" id="ifl-3"><span class="if-code">} <span class="ck">else if</span> (score >= <span class="cn">70</span>) {</span><span class="if-ann hi">checked only if first was false</span></div>
+        <div class="if-line" id="ifl-4"><span class="if-code">  grade = <span class="cs">"B"</span>;</span><span class="if-ann">runs if this condition is true</span></div>
+        <div class="if-line" id="ifl-5"><span class="if-code">} <span class="ck">else</span> {</span><span class="if-ann hi">catches everything else</span></div>
+        <div class="if-line" id="ifl-6"><span class="if-code">  grade = <span class="cs">"C"</span>;</span><span class="if-ann">default path</span></div>
+        <div class="if-line" id="ifl-7"><span class="if-code">}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-label">Decision diagram</div>
+  <div class="dec-flow">
+    <div class="dec-cond">score >= 90 ?</div>
+    <div class="dec-branch-row">
+      <div class="dec-branch">
+        <div class="dec-line"></div>
+        <div class="dec-label dec-true">true</div>
+        <div class="dec-result dec-result-t">grade = "A"</div>
+      </div>
+      <div class="dec-branch">
+        <div class="dec-line"></div>
+        <div class="dec-label dec-false">false</div>
+        <div class="dec-result dec-result-f">check next condition…</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-label">Interactive — drag to see which branch runs</div>
+  <div class="slider-demo">
+    <div class="sd-label">score (0 – 100)</div>
+    <input type="range" min="0" max="100" value="75" class="sd-slider" id="sd-slider" oninput="updateSlider(this.value)">
+    <div class="sd-num" id="sd-num">75</div>
+    <div class="sd-wrap"><span class="sd-result" id="sd-result">Grade: B</span></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-bar"><div class="cd cd-r"></div><div class="cd cd-y"></div><div class="cd cd-g"></div><span class="code-lang">JavaScript</span></div>
+    <div class="code-body"><span class="cm">// Ternary — compact single-line alternative</span>
+<span class="ck">const</span> label = score >= <span class="cn">90</span> ? <span class="cs">"Pass with distinction"</span> : <span class="cs">"Standard pass"</span>;
+
+<span class="cm">// Logical operators in conditions</span>
+<span class="ck">if</span> (score >= <span class="cn">50</span> &amp;&amp; attempts &lt; <span class="cn">3</span>) { … }  <span class="cm">// AND — both must be true</span>
+<span class="ck">if</span> (isAdmin || isModerator) { … }          <span class="cm">// OR — either is enough</span>
+<span class="ck">if</span> (!isLoggedIn) { … }                     <span class="cm">// NOT — inverts the value</span>
+
+<span class="cm">// Strict equality — always use === not ==</span>
+<span class="ck">if</span> (status === <span class="cs">"active"</span>) { … }            <span class="cm">// type + value must match</span></div>
+  </div>
+
+  <div class="callout callout-blue">
+    <span class="callout-icon">&#9670;</span>
+    <span>Always use <code>===</code> (strict equality) instead of <code>==</code>. The loose version does type coercion: <code>"5" == 5</code> is <code>true</code>, which is almost never what you want. Strict equality requires both value and type to match.</span>
+  </div>
+
+  <div class="l-nav">
+    <button class="nav-btn" onclick="go(5)">&#8249; Event Listeners</button>
+    <button class="nav-btn pg-btn" onclick="go(7)">Playground &#8250;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     LESSON 7 — CHALLENGE LAB
+══════════════════════════════════════════════════ -->
+<div class="lesson" id="l-7">
+  <div id="lab-shell">
+
+    <!-- Tab strip -->
+    <div class="lab-tabs" id="lab-tabs">
+      <button class="lab-tab active-tab" onclick="switchChallenge(0)">01 · Variables</button>
+      <button class="lab-tab" onclick="switchChallenge(1)">02 · Functions</button>
+      <button class="lab-tab" onclick="switchChallenge(2)">03 · DOM Selection</button>
+      <button class="lab-tab" onclick="switchChallenge(3)">04 · DOM Update</button>
+      <button class="lab-tab" onclick="switchChallenge(4)">05 · Events</button>
+      <button class="lab-tab" onclick="switchChallenge(5)">06 · Conditionals</button>
+    </div>
+
+    <!-- Challenge cards -->
+    <div class="lab-body">
+
+      <!-- CH 0 · Variables -->
+      <div class="ch-card active-ch" id="ch-0">
+        <div class="ch-top">
+          <div class="ch-badge" style="background:var(--accent-l);color:var(--accent)">Variables &amp; State</div>
+          <div class="ch-title">Fix the <em>declaration</em></div>
+          <div class="ch-brief">The code below tries to store a username and a fixed limit, then change the username. Two mistakes are hiding in the keywords — find and fix them both.</div>
+          <div class="ch-task">
+            <div class="ch-task-label">Your task</div>
+            <div class="ch-task-text">Use <code>let</code> for values that will change. Use <code>const</code> for values that never change. Then make sure the reassignment line is valid.</div>
+          </div>
+          <div class="ch-editor-wrap">
+            <div class="ch-editor-bar">
+              <div class="ch-ed-dot" style="background:#ff5f57"></div>
+              <div class="ch-ed-dot" style="background:#febc2e"></div>
+              <div class="ch-ed-dot" style="background:#28c840"></div>
+              <span class="ch-editor-label">script.js · edit &amp; run</span>
+            </div>
+            <textarea class="ch-editor" id="ed-0" spellcheck="false">const username = "Alex";
+const MAX_SCORE = 100;
+
+username = "Jordan";
+
+console.log(username);
+console.log(MAX_SCORE);</textarea>
+          </div>
+          <div class="ch-actions">
+            <button class="ch-run-btn" onclick="runChallenge(0)">Run</button>
+            <button class="ch-hint-btn" onclick="showHint(0)">Hint</button>
+            <button class="ch-reset-btn" onclick="resetChallenge(0)">Reset</button>
+          </div>
+          <div class="ch-result idle" id="res-0">Press Run to check your code…</div>
+        </div>
+      </div>
+
+      <!-- CH 1 · Functions -->
+      <div class="ch-card" id="ch-1">
+        <div class="ch-top">
+          <div class="ch-badge" style="background:var(--green-l);color:var(--green)">Functions</div>
+          <div class="ch-title">Complete the <em>function</em></div>
+          <div class="ch-brief">The function <code>greet</code> is supposed to accept a name and return a greeting string. Right now it returns nothing. Add the missing <code>return</code> statement.</div>
+          <div class="ch-task">
+            <div class="ch-task-label">Your task</div>
+            <div class="ch-task-text">Add a <code>return</code> statement inside <code>greet()</code> so it gives back the string <code>"Hello, " + name</code>. The last line should log <code>Hello, Sam</code>.</div>
+          </div>
+          <div class="ch-editor-wrap">
+            <div class="ch-editor-bar">
+              <div class="ch-ed-dot" style="background:#ff5f57"></div>
+              <div class="ch-ed-dot" style="background:#febc2e"></div>
+              <div class="ch-ed-dot" style="background:#28c840"></div>
+              <span class="ch-editor-label">script.js · edit &amp; run</span>
+            </div>
+            <textarea class="ch-editor" id="ed-1" spellcheck="false">function greet(name) {
+  const message = "Hello, " + name;
+  // something is missing here
+}
+
+const result = greet("Sam");
+console.log(result);</textarea>
+          </div>
+          <div class="ch-actions">
+            <button class="ch-run-btn" onclick="runChallenge(1)">Run</button>
+            <button class="ch-hint-btn" onclick="showHint(1)">Hint</button>
+            <button class="ch-reset-btn" onclick="resetChallenge(1)">Reset</button>
+          </div>
+          <div class="ch-result idle" id="res-1">Press Run to check your code…</div>
+        </div>
+      </div>
+
+      <!-- CH 2 · DOM Selection -->
+      <div class="ch-card" id="ch-2">
+        <div class="ch-top">
+          <div class="ch-badge" style="background:var(--amber-l);color:var(--amber)">DOM Selection</div>
+          <div class="ch-title">Select the right <em>element</em></div>
+          <div class="ch-brief">The HTML has a paragraph with <code>id="message"</code>. The JavaScript tries to select it, but the method name is spelled wrong. Fix the selection so the variable holds the real element.</div>
+          <div class="ch-task">
+            <div class="ch-task-label">Your task</div>
+            <div class="ch-task-text">Replace the broken method with the correct one. The variable <code>msgEl</code> should end up referencing the paragraph element, not <code>null</code>.</div>
+          </div>
+          <div class="ch-editor-wrap">
+            <div class="ch-editor-bar">
+              <div class="ch-ed-dot" style="background:#ff5f57"></div>
+              <div class="ch-ed-dot" style="background:#febc2e"></div>
+              <div class="ch-ed-dot" style="background:#28c840"></div>
+              <span class="ch-editor-label">script.js · edit &amp; run</span>
+            </div>
+            <textarea class="ch-editor" id="ed-2" spellcheck="false">// Imagine this HTML exists on the page:
+// &lt;p id="message"&gt;Hello&lt;/p&gt;
+
+const msgEl = document.getElementByID("message");
+
+console.log(msgEl !== null ? "Found it!" : "null — not found");</textarea>
+          </div>
+          <div class="ch-actions">
+            <button class="ch-run-btn" onclick="runChallenge(2)">Run</button>
+            <button class="ch-hint-btn" onclick="showHint(2)">Hint</button>
+            <button class="ch-reset-btn" onclick="resetChallenge(2)">Reset</button>
+          </div>
+          <div class="ch-result idle" id="res-2">Press Run to check your code…</div>
+        </div>
+      </div>
+
+      <!-- CH 3 · DOM Manipulation -->
+      <div class="ch-card" id="ch-3">
+        <div class="ch-top">
+          <div class="ch-badge" style="background:var(--violet-l);color:var(--violet)">DOM Manipulation</div>
+          <div class="ch-title">Update the <em>display</em></div>
+          <div class="ch-brief">The <code>updateLabel</code> function selects an element and is supposed to set its text. The property name used to set text is wrong. Fix it so the text actually changes.</div>
+          <div class="ch-task">
+            <div class="ch-task-label">Your task</div>
+            <div class="ch-task-text">The correct property for safely setting an element's text is <code>textContent</code>, not <code>innerText</code>… wait, is it? Check the property name carefully — something is misspelled.</div>
+          </div>
+          <div class="ch-editor-wrap">
+            <div class="ch-editor-bar">
+              <div class="ch-ed-dot" style="background:#ff5f57"></div>
+              <div class="ch-ed-dot" style="background:#febc2e"></div>
+              <div class="ch-ed-dot" style="background:#28c840"></div>
+              <span class="ch-editor-label">script.js · edit &amp; run</span>
+            </div>
+            <textarea class="ch-editor" id="ed-3" spellcheck="false">function updateLabel(el, newText) {
+  el.textContant = newText;
+}
+
+// simulate a DOM element object for this exercise
+const fakeEl = { textContent: "old text" };
+updateLabel(fakeEl, "new text");
+
+console.log(fakeEl.textContent);</textarea>
+          </div>
+          <div class="ch-actions">
+            <button class="ch-run-btn" onclick="runChallenge(3)">Run</button>
+            <button class="ch-hint-btn" onclick="showHint(3)">Hint</button>
+            <button class="ch-reset-btn" onclick="resetChallenge(3)">Reset</button>
+          </div>
+          <div class="ch-result idle" id="res-3">Press Run to check your code…</div>
+        </div>
+      </div>
+
+      <!-- CH 4 · Event Listeners -->
+      <div class="ch-card" id="ch-4">
+        <div class="ch-top">
+          <div class="ch-badge" style="background:var(--orange-l);color:var(--orange)">Event Listeners</div>
+          <div class="ch-title">Attach the <em>listener</em></div>
+          <div class="ch-brief">A button element and a handler function both exist. But the event listener is never attached — so the button does nothing. One line of code is missing entirely.</div>
+          <div class="ch-task">
+            <div class="ch-task-label">Your task</div>
+            <div class="ch-task-text">Write the missing line that connects <code>myButton</code> to <code>handleClick</code> using <code>addEventListener</code>. When done, calling <code>myButton.click()</code> should log <code>clicked!</code>.</div>
+          </div>
+          <div class="ch-editor-wrap">
+            <div class="ch-editor-bar">
+              <div class="ch-ed-dot" style="background:#ff5f57"></div>
+              <div class="ch-ed-dot" style="background:#febc2e"></div>
+              <div class="ch-ed-dot" style="background:#28c840"></div>
+              <span class="ch-editor-label">script.js · edit &amp; run</span>
+            </div>
+            <textarea class="ch-editor" id="ed-4" spellcheck="false">const myButton = document.createElement("button");
+
+function handleClick() {
+  console.log("clicked!");
+}
+
+// attach the listener here
+
+
+myButton.click(); // should trigger handleClick</textarea>
+          </div>
+          <div class="ch-actions">
+            <button class="ch-run-btn" onclick="runChallenge(4)">Run</button>
+            <button class="ch-hint-btn" onclick="showHint(4)">Hint</button>
+            <button class="ch-reset-btn" onclick="resetChallenge(4)">Reset</button>
+          </div>
+          <div class="ch-result idle" id="res-4">Press Run to check your code…</div>
+        </div>
+      </div>
+
+      <!-- CH 5 · Conditionals -->
+      <div class="ch-card" id="ch-5">
+        <div class="ch-top">
+          <div class="ch-badge" style="background:var(--rose-l);color:var(--rose)">Conditionals</div>
+          <div class="ch-title">Fix the <em>logic</em></div>
+          <div class="ch-brief">The function <code>classify</code> is supposed to return <code>"high"</code> for values above 75, <code>"medium"</code> for 40–75, and <code>"low"</code> for everything else. The conditions are in the wrong order — fix them.</div>
+          <div class="ch-task">
+            <div class="ch-task-label">Your task</div>
+            <div class="ch-task-text">Reorder (or rewrite) the <code>if / else if / else</code> branches so that <code>classify(80)</code> returns <code>"high"</code>, <code>classify(50)</code> returns <code>"medium"</code>, and <code>classify(20)</code> returns <code>"low"</code>.</div>
+          </div>
+          <div class="ch-editor-wrap">
+            <div class="ch-editor-bar">
+              <div class="ch-ed-dot" style="background:#ff5f57"></div>
+              <div class="ch-ed-dot" style="background:#febc2e"></div>
+              <div class="ch-ed-dot" style="background:#28c840"></div>
+              <span class="ch-editor-label">script.js · edit &amp; run</span>
+            </div>
+            <textarea class="ch-editor" id="ed-5" spellcheck="false">function classify(value) {
+  if (value >= 40) {
+    return "medium";
+  } else if (value >= 75) {
+    return "high";
+  } else {
+    return "low";
+  }
+}
+
+console.log(classify(80));  // should be "high"
+console.log(classify(50));  // should be "medium"
+console.log(classify(20));  // should be "low"</textarea>
+          </div>
+          <div class="ch-actions">
+            <button class="ch-run-btn" onclick="runChallenge(5)">Run</button>
+            <button class="ch-hint-btn" onclick="showHint(5)">Hint</button>
+            <button class="ch-reset-btn" onclick="resetChallenge(5)">Reset</button>
+          </div>
+          <div class="ch-result idle" id="res-5">Press Run to check your code…</div>
+        </div>
+      </div>
+
+    </div><!-- .lab-body -->
+
+    <!-- Footer progress -->
+    <div class="lab-footer">
+      <div class="lab-prog-dots" id="lab-dots">
+        <div class="lab-prog-dot current" id="dot-0"></div>
+        <div class="lab-prog-dot" id="dot-1"></div>
+        <div class="lab-prog-dot" id="dot-2"></div>
+        <div class="lab-prog-dot" id="dot-3"></div>
+        <div class="lab-prog-dot" id="dot-4"></div>
+        <div class="lab-prog-dot" id="dot-5"></div>
+      </div>
+      <span class="lab-prog-label" id="lab-prog-label">0 / 6 solved</span>
+      <button class="lab-finish-btn" id="lab-finish-btn" onclick="finish()">Complete Course</button>
+    </div>
+
+  </div><!-- #lab-shell -->
+</div>
+
+</div><!-- /#main -->
+
+<!-- ════════════════ JAVASCRIPT ════════════════ -->
+<script>
+/* ─── NAV SETUP ─────────────────────────────────── */
+const LESSONS = [
+  { title:'Overview',          short:'Overview'         },
+  { title:'Variables &amp; State', short:'Variables'    },
+  { title:'Functions',         short:'Functions'        },
+  { title:'DOM Selection',     short:'DOM Selection'    },
+  { title:'DOM Manipulation',  short:'DOM Manipulation' },
+  { title:'Event Listeners',   short:'Event Listeners'  },
+  { title:'Conditionals',      short:'Conditionals'     },
+  { title:'Playground',        short:'Playground'       },
+];
+const SEC_LABELS = { 0:'Start Here', 1:'Core Concepts', 7:'Practice' };
+
+let current = 0;
+const done = new Set();
+const navEl = document.getElementById('sb-nav');
+LESSONS.forEach((l, i) => {
+  if (SEC_LABELS[i]) { const d = document.createElement('div'); d.className = 'sb-section-label'; d.textContent = SEC_LABELS[i]; navEl.appendChild(d); }
+  const el = document.createElement('div');
+  el.className = 'nav-item' + (i === 0 ? ' active' : '');
+  el.id = 'ni-' + i;
+  el.innerHTML = `<div class="nav-dot"></div><span>${l.short}</span><span class="nav-num">0${i+1}</span>`;
+  el.onclick = () => go(i);
+  navEl.appendChild(el);
+});
+
+function go(idx) {
+  done.add(current);
+  document.getElementById('l-' + current).classList.remove('active');
+  document.getElementById('ni-' + current).classList.remove('active');
+  if (current !== idx) document.getElementById('ni-' + current).classList.add('done');
+  document.getElementById('l-' + idx).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((el, i) => { el.classList.remove('active'); if (done.has(i) && i !== idx) el.classList.add('done'); });
+  document.getElementById('ni-' + idx).classList.add('active');
+  document.getElementById('ni-' + idx).classList.remove('done');
+  current = idx;
+  document.getElementById('tb-tag').textContent = String(idx + 1).padStart(2, '0');
+  document.getElementById('tb-lesson').innerHTML = LESSONS[idx].title;
+  const pct = Math.round((done.size / LESSONS.length) * 100);
+  document.getElementById('progfill').style.width = pct + '%';
+  document.getElementById('pct').textContent = pct + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  closeSidebar();
+  if (idx === 0) setTimeout(initOv, 300);
+  if (idx === 2) { resetFnLines(); }
+  if (idx === 5) { resetPipeline(); }
+  if (idx === 6) { resetIfLines(); }
+  if (idx === 7) { pgRender(); pgUpdateDisplay(); }
+}
+
+function finish() {
+  done.add(current);
+  document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('active'); el.classList.add('done'); });
+  document.getElementById('progfill').style.width = '100%';
+  document.getElementById('pct').textContent = '100%';
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;top:64px;right:20px;z-index:99;background:#0d0d0d;border:1px solid var(--green);border-radius:14px;padding:18px 22px;box-shadow:var(--sh2);animation:fadeUp .4s ease both;max-width:280px;';
+  t.innerHTML = '<div style="font-size:14px;font-weight:700;color:#4ade80;margin-bottom:5px;font-family:Syne,sans-serif">All done!</div><div style="font-size:12px;color:rgba(255,255,255,0.45);line-height:1.6;font-family:Syne,sans-serif">You have covered all six core JavaScript concepts. Variables, functions, DOM selection, manipulation, events, and conditionals are now yours.</div>';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 7000);
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('on'); }
+function closeSidebar()  { document.getElementById('sidebar').classList.remove('open');  document.getElementById('overlay').classList.remove('on'); }
+
+/* ─── L0 — OVERVIEW CARDS ───────────────────────── */
+function initOv() {
+  document.querySelectorAll('.ov-card').forEach((el, i) => {
+    setTimeout(() => el.classList.add('show'), i * 110);
+  });
+}
+setTimeout(initOv, 400);
+
+/* ─── L1 — MEMORY VIZ ───────────────────────────── */
+let memScore = 0;
+const NAMES = ['"Alex"','"Jordan"','"Riley"','"Sam"','"Morgan"'];
+let nameIdx = 0;
+function memAdd()  { memScore = Math.min(memScore + 10, 999); updateMem('mb-score','mb-score-val', memScore); setLog(`score = score + 10  →  ${memScore}`); }
+function memSub()  { memScore = Math.max(memScore - 5,  0);   updateMem('mb-score','mb-score-val', memScore); setLog(`score = score - 5   →  ${memScore}`); }
+function memName() { nameIdx = (nameIdx + 1) % NAMES.length;  updateMem('mb-name', 'mb-name-val', NAMES[nameIdx]); setLog(`username = ${NAMES[nameIdx]}`); }
+function memReset(){ memScore = 0; nameIdx = 0; updateMem('mb-score','mb-score-val',0); updateMem('mb-name','mb-name-val','"Alex"'); setLog('Variables reset to initial values'); }
+function updateMem(boxId, valId, val) {
+  document.getElementById(valId).textContent = val;
+  const box = document.getElementById(boxId);
+  box.classList.add('lit');
+  setTimeout(() => box.classList.remove('lit'), 650);
+}
+function setLog(msg) { document.getElementById('mem-log').textContent = '> ' + msg; }
+
+/* ─── L2 — FUNCTIONS ────────────────────────────── */
+let fnStep = 0;
+const FN_LINES = ['fnl-1','fnl-2','fnl-3','fnl-4','fnl-5','fnl-6'];
+function revealFn() {
+  if (fnStep >= FN_LINES.length) { FN_LINES.forEach(id => document.getElementById(id).classList.remove('show')); fnStep = 0; return; }
+  document.getElementById(FN_LINES[fnStep]).classList.add('show');
+  fnStep++;
+}
+function resetFnLines() { FN_LINES.forEach(id => document.getElementById(id).classList.remove('show')); fnStep = 0; }
+
+let retRunning = false;
+function runReturn() {
+  if (retRunning) return;
+  retRunning = true;
+  const arrow = document.getElementById('ret-arrow');
+  const val = document.getElementById('ret-val');
+  const log = document.getElementById('ret-log');
+  arrow.style.opacity = '.2'; val.style.opacity = '.3'; val.textContent = '?'; log.textContent = '';
+  setTimeout(() => { log.textContent = '> Calling add(3, 7)…'; }, 200);
+  setTimeout(() => { arrow.style.opacity = '1'; log.textContent = '> Executing: return 3 + 7'; }, 700);
+  setTimeout(() => { val.style.opacity = '1'; val.textContent = '10'; log.textContent = '> Returned: 10'; retRunning = false; }, 1300);
+}
+
+/* ─── L3 — DOM SELECTION ────────────────────────── */
+const SEL_MAP = {
+  body:   { code: `<span class="ck">const</span> body = document.<span class="cf">querySelector</span>(<span class="cs">"body"</span>);\n<span class="cm">// The root body — rarely selected directly</span>` },
+  header: { code: `<span class="ck">const</span> header = document.<span class="cf">getElementById</span>(<span class="cs">"page-header"</span>);\n<span class="cm">// getElementById is fastest when you have an id</span>` },
+  h1:     { code: `<span class="ck">const</span> title = document.<span class="cf">querySelector</span>(<span class="cs">"h1"</span>);\n<span class="cm">// querySelector with a tag name — returns first match</span>` },
+  main:   { code: `<span class="ck">const</span> main = document.<span class="cf">querySelector</span>(<span class="cs">"main"</span>);\n<span class="cm">// Semantic element — no id needed</span>` },
+  p:      { code: `<span class="ck">const</span> output = document.<span class="cf">getElementById</span>(<span class="cs">"output"</span>);\n<span class="cm">// This is the element you will write values into</span>` },
+  btn:    { code: `<span class="ck">const</span> btn = document.<span class="cf">getElementById</span>(<span class="cs">"action-btn"</span>);\nbtn.<span class="cf">addEventListener</span>(<span class="cs">"click"</span>, handleClick);\n<span class="cm">// Select then attach event listener</span>` },
+  footer: { code: `<span class="ck">const</span> footer = document.<span class="cf">querySelector</span>(<span class="cs">".site-footer"</span>);\n<span class="cm">// querySelector with a class — note the dot prefix</span>` },
+};
+function selNode(el, key) {
+  document.querySelectorAll('.dt-node').forEach(n => n.classList.remove('sel'));
+  el.classList.add('sel');
+  const d = SEL_MAP[key];
+  document.getElementById('sel-output').innerHTML = d ? d.code : '';
+}
+
+/* ─── L4 — DOM MANIPULATION ─────────────────────── */
+const PROP_DEMOS = {
+  text:  { code: `el.textContent = "New value";`, action: () => { document.getElementById('ml-content').textContent = 'Updated with textContent'; document.getElementById('ml-style').textContent = ''; } },
+  style: { code: `el.style.color = "#1a56e8";\nel.style.fontSize = "22px";`, action: () => { const c = document.getElementById('ml-content'); c.textContent = 'Styled with .style'; c.style.color = '#1a56e8'; c.style.fontSize = '22px'; document.getElementById('ml-style').textContent = 'color: #1a56e8  |  fontSize: 22px'; } },
+  class: { code: `el.classList.add("highlighted");\nel.classList.toggle("active");`, action: () => { document.getElementById('ml-content').textContent = 'Class toggled'; document.getElementById('ml-target').style.borderColor = 'var(--accent)'; document.getElementById('ml-target').style.background = 'var(--accent-l)'; document.getElementById('ml-style').textContent = '.highlighted class added'; } },
+  attr:  { code: `btn.setAttribute("disabled", true);\nimg.setAttribute("alt", "A sunset photo");`, action: () => { document.getElementById('ml-content').textContent = 'Attribute set'; document.getElementById('ml-style').textContent = 'disabled attribute added'; } },
+};
+function doProp(key) {
+  document.querySelectorAll('.prop-card').forEach(c => c.classList.remove('active-prop'));
+  document.getElementById('pc-' + key).classList.add('active-prop');
+  resetManip();
+  const d = PROP_DEMOS[key];
+  document.getElementById('ml-code').textContent = '> ' + d.code.split('\n')[0];
+  setTimeout(d.action, 200);
+}
+function resetManip() {
+  const c = document.getElementById('ml-content');
+  c.textContent = 'Hello, world'; c.style.color = ''; c.style.fontSize = '';
+  document.getElementById('ml-target').style.borderColor = '';
+  document.getElementById('ml-target').style.background = '';
+  document.getElementById('ml-style').textContent = 'No style changes yet';
+}
+function baUpdate(val) {
+  document.getElementById('ba-after').textContent = val;
+  const el = document.getElementById('ba-after');
+  el.style.transform = 'scale(1.06)';
+  setTimeout(() => el.style.transform = '', 250);
+}
+
+/* ─── L5 — EVENT LISTENERS ──────────────────────── */
+const EV_CODES = {
+  click:            `btn.<span class="cf">addEventListener</span>(<span class="cs">"click"</span>, () => {\n  <span class="cm">// runs on every mouse click</span>\n  <span class="cf">handleClick</span>();\n});`,
+  input:            `inputEl.<span class="cf">addEventListener</span>(<span class="cs">"input"</span>, (e) => {\n  <span class="cm">// e.target.value has the current text</span>\n  console.<span class="cf">log</span>(e.target.value);\n});`,
+  keydown:          `document.<span class="cf">addEventListener</span>(<span class="cs">"keydown"</span>, (e) => {\n  <span class="cm">// e.key is the pressed key: "Enter", "Escape", etc.</span>\n  <span class="ck">if</span> (e.key === <span class="cs">"Enter"</span>) <span class="cf">submit</span>();\n});`,
+  submit:           `form.<span class="cf">addEventListener</span>(<span class="cs">"submit"</span>, (e) => {\n  e.<span class="cf">preventDefault</span>(); <span class="cm">// stop page reload</span>\n  <span class="cf">processForm</span>();\n});`,
+  mouseover:        `card.<span class="cf">addEventListener</span>(<span class="cs">"mouseover"</span>, () => {\n  card.<span class="cp">style</span>.<span class="cp">boxShadow</span> = <span class="cs">"0 8px 24px rgba(0,0,0,.12)"</span>;\n});`,
+  DOMContentLoaded: `document.<span class="cf">addEventListener</span>(<span class="cs">"DOMContentLoaded"</span>, () => {\n  <span class="cm">// Safe to access DOM now</span>\n  <span class="cf">init</span>();\n});`,
+};
+function showEvType(el, key) {
+  document.querySelectorAll('.evt-chip').forEach(c => c.classList.remove('active-ev'));
+  el.classList.add('active-ev');
+  const box = document.getElementById('evtype-code');
+  const body = document.getElementById('evtype-body');
+  box.style.display = '';
+  body.innerHTML = EV_CODES[key] || '';
+  document.getElementById('evtype-lang').textContent = '"' + key + '" event';
+}
+
+let pipeRunning = false;
+function runPipeline() {
+  if (pipeRunning) return; pipeRunning = true;
+  const rows = ['ep-1','ep-2','ep-3','ep-4'];
+  const cons = ['epc-1','epc-2','epc-3'];
+  rows.forEach(id => document.getElementById(id).classList.remove('show'));
+  cons.forEach(id => { document.getElementById(id).style.opacity = '0'; });
+  setTimeout(() => {
+    rows.forEach((id, i) => { setTimeout(() => document.getElementById(id).classList.add('show'), i * 320); });
+    cons.forEach((id, i) => { setTimeout(() => { document.getElementById(id).style.opacity = '1'; }, (i + 1) * 320 - 80); });
+    setTimeout(() => { pipeRunning = false; }, rows.length * 320 + 300);
+  }, 50);
+}
+function resetPipeline() {
+  ['ep-1','ep-2','ep-3','ep-4'].forEach(id => document.getElementById(id).classList.remove('show'));
+  ['epc-1','epc-2','epc-3'].forEach(id => { document.getElementById(id).style.opacity = '0'; });
+  pipeRunning = false;
+}
+
+let evClickCount = 0;
+function logEv() {
+  evClickCount++;
+  const tgt = document.getElementById('ev-target');
+  tgt.classList.add('fired');
+  setTimeout(() => tgt.classList.remove('fired'), 280);
+  const log = document.getElementById('ev-log');
+  const now = new Date();
+  const t = [now.getHours(), now.getMinutes(), now.getSeconds()].map(n => String(n).padStart(2,'0')).join(':');
+  if (evClickCount === 1) log.innerHTML = '';
+  const e = document.createElement('div');
+  e.className = 'ev-entry';
+  e.innerHTML = `<span class="ev-time">${t}</span>click #${evClickCount} — callback executed`;
+  log.appendChild(e);
+  log.scrollTop = log.scrollHeight;
+}
+
+/* ─── L6 — CONDITIONALS ─────────────────────────── */
+let ifStep = 0;
+const IF_LINES = ['ifl-1','ifl-2','ifl-3','ifl-4','ifl-5','ifl-6','ifl-7'];
+function revealIf() {
+  if (ifStep >= IF_LINES.length) { IF_LINES.forEach(id => document.getElementById(id).classList.remove('show')); ifStep = 0; return; }
+  document.getElementById(IF_LINES[ifStep]).classList.add('show');
+  ifStep++;
+}
+function resetIfLines() { IF_LINES.forEach(id => document.getElementById(id).classList.remove('show')); ifStep = 0; }
+
+function updateSlider(val) {
+  val = parseInt(val);
+  const numEl  = document.getElementById('sd-num');
+  const resEl  = document.getElementById('sd-result');
+  numEl.textContent = val;
+  let grade, bg, color;
+  if      (val >= 90) { grade = 'Grade: A'; bg = 'var(--green-l)'; color = 'var(--green)'; numEl.style.color = 'var(--green)'; }
+  else if (val >= 70) { grade = 'Grade: B'; bg = 'var(--accent-l)'; color = 'var(--accent)'; numEl.style.color = 'var(--accent)'; }
+  else if (val >= 50) { grade = 'Grade: C'; bg = 'var(--amber-l)'; color = 'var(--amber)'; numEl.style.color = 'var(--amber)'; }
+  else                { grade = 'Grade: F'; bg = 'var(--rose-l)'; color = 'var(--rose)'; numEl.style.color = 'var(--rose)'; }
+  resEl.textContent = grade;
+  resEl.style.background = bg;
+  resEl.style.color = color;
+}
+
+/* ─── L7 — CHALLENGE LAB ────────────────────────── */
+const DEFAULTS = [
+  `const username = "Alex";\nconst MAX_SCORE = 100;\n\nusername = "Jordan";\n\nconsole.log(username);\nconsole.log(MAX_SCORE);`,
+  `function greet(name) {\n  const message = "Hello, " + name;\n  // something is missing here\n}\n\nconst result = greet("Sam");\nconsole.log(result);`,
+  `// Imagine this HTML exists on the page:\n// <p id="message">Hello</p>\n\nconst msgEl = document.getElementByID("message");\n\nconsole.log(msgEl !== null ? "Found it!" : "null — not found");`,
+  `function updateLabel(el, newText) {\n  el.textContant = newText;\n}\n\n// simulate a DOM element object for this exercise\nconst fakeEl = { textContent: "old text" };\nupdateLabel(fakeEl, "new text");\n\nconsole.log(fakeEl.textContent);`,
+  `const myButton = document.createElement("button");\n\nfunction handleClick() {\n  console.log("clicked!");\n}\n\n// attach the listener here\n\n\nmyButton.click(); // should trigger handleClick`,
+  `function classify(value) {\n  if (value >= 40) {\n    return "medium";\n  } else if (value >= 75) {\n    return "high";\n  } else {\n    return "low";\n  }\n}\n\nconsole.log(classify(80));  // should be "high"\nconsole.log(classify(50));  // should be "medium"\nconsole.log(classify(20));  // should be "low"`,
+];
+
+const HINTS = [
+  'One variable changes later — it needs let, not const. The other never changes — const is correct for that one.',
+  'A function without a return statement gives back undefined. Add return message; before the closing brace.',
+  'JavaScript method names are case-sensitive. The D in getElementById is lowercase.',
+  'Look very carefully at the property name: textContant — count the letters. One character is wrong.',
+  'Use myButton.addEventListener("click", handleClick); — notice: no parentheses after handleClick.',
+  'JavaScript evaluates if conditions top to bottom and stops at the first match. Put the most specific (highest) threshold first.',
+];
+
+const CHECKS = [
+  (logs) => {
+    if (logs.some(l => l.includes('TypeError') || l.includes('Assignment to constant'))) return { pass: false, msg: 'TypeError: username is declared as const — it cannot be reassigned. Change it to let.' };
+    if (logs.includes('Jordan') && logs.includes('100')) return { pass: true, msg: 'Correct! let username can be reassigned. const MAX_SCORE stays fixed.' };
+    return { pass: false, msg: `Got: [${logs.join(', ')}]. Expected: Jordan and 100.` };
+  },
+  (logs) => {
+    if (logs.includes('Hello, Sam')) return { pass: true, msg: 'Correct! The function now returns the greeting string.' };
+    if (logs.includes('undefined') || logs.length === 0) return { pass: false, msg: 'The function returns undefined. Add: return message; inside the function body.' };
+    return { pass: false, msg: `Got: "${logs[0]}". Expected: "Hello, Sam".` };
+  },
+  (logs) => {
+    if (logs.some(l => l.includes('TypeError') || l.includes('not a function'))) return { pass: false, msg: 'TypeError: getElementByID does not exist. The correct method is getElementById (lowercase d).' };
+    if (logs.includes('Found it!')) return { pass: true, msg: 'Correct! getElementById (lowercase d) is the right method name.' };
+    return { pass: false, msg: `Got: "${logs[0]}". Fix the method name spelling.` };
+  },
+  (logs) => {
+    if (logs.includes('new text')) return { pass: true, msg: 'Correct! textContent (not textContant) is the right property name.' };
+    if (logs.includes('old text') || logs.includes('undefined')) return { pass: false, msg: 'The text did not update. The property name has a typo — look at "textContant" carefully.' };
+    return { pass: false, msg: `Got: "${logs[0]}". Expected: "new text".` };
+  },
+  (logs) => {
+    if (logs.includes('clicked!')) return { pass: true, msg: 'Correct! addEventListener("click", handleClick) connects the button to its handler.' };
+    if (logs.length === 0) return { pass: false, msg: 'Nothing logged — the listener was never attached. Add: myButton.addEventListener("click", handleClick);' };
+    return { pass: false, msg: `Got: "${logs[0]}". Expected: "clicked!".` };
+  },
+  (logs) => {
+    if (logs[0] === 'high' && logs[1] === 'medium' && logs[2] === 'low') return { pass: true, msg: 'Correct! Put the most specific condition (>= 75) before the broader one (>= 40).' };
+    return { pass: false, msg: `Got: [${logs.join(', ')}]. Expected: high, medium, low. Check the order of your conditions.` };
+  },
+];
+
+const solved = new Array(6).fill(false);
+let activeCh = 0;
+
+function switchChallenge(idx) {
+  document.querySelectorAll('.ch-card').forEach(c => c.classList.remove('active-ch'));
+  document.getElementById('ch-' + idx).classList.add('active-ch');
+  document.querySelectorAll('.lab-tab').forEach((t, i) => {
+    t.classList.remove('active-tab');
+    if (solved[i]) t.classList.add('solved-tab');
+  });
+  document.querySelectorAll('.lab-tab')[idx].classList.add('active-tab');
+  document.querySelectorAll('.lab-prog-dot').forEach((d, i) => {
+    d.classList.remove('current');
+    d.classList.toggle('solved', solved[i]);
+  });
+  document.getElementById('dot-' + idx).classList.add('current');
+  activeCh = idx;
+}
+
+function runChallenge(idx) {
+  const code = document.getElementById('ed-' + idx).value;
+  const logs = [];
+  const resEl = document.getElementById('res-' + idx);
+  try {
+    const sandboxedLog = (...args) => logs.push(args.map(a => String(a)).join(' '));
+    const fn = new Function('console', code.replace(/document\.getElementByID/g, 'document.getElementById'));
+    fn({ log: sandboxedLog, warn: sandboxedLog, error: sandboxedLog });
+  } catch(e) {
+    logs.push(e.message);
+  }
+  const { pass, msg } = CHECKS[idx](logs);
+  resEl.className = 'ch-result ' + (pass ? 'pass' : 'fail');
+  resEl.textContent = (pass ? '✓ ' : '✗ ') + msg;
+  if (pass && !solved[idx]) {
+    solved[idx] = true;
+    document.querySelectorAll('.lab-tab')[idx].classList.add('solved-tab');
+    document.getElementById('dot-' + idx).classList.add('solved');
+    updateLabProgress();
+  }
+}
+
+function showHint(idx) {
+  const resEl = document.getElementById('res-' + idx);
+  resEl.className = 'ch-result hint';
+  resEl.textContent = 'Hint: ' + HINTS[idx];
+}
+
+function resetChallenge(idx) {
+  document.getElementById('ed-' + idx).value = DEFAULTS[idx];
+  const resEl = document.getElementById('res-' + idx);
+  resEl.className = 'ch-result idle';
+  resEl.textContent = 'Press Run to check your code…';
+}
+
+function updateLabProgress() {
+  const n = solved.filter(Boolean).length;
+  document.getElementById('lab-prog-label').textContent = n + ' / 6 solved';
+  if (n === 6) document.getElementById('lab-finish-btn').classList.add('visible');
+}
+</script>
+</body>
+</html>
